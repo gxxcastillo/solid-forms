@@ -1,0 +1,33 @@
+{
+  "extends": "./tsconfig.base.json",
+  "include": [],
+  "references": [
+    {
+      "path": "apps/basic-demo"
+    },
+    {
+      "path": "packages/elements"
+    },
+    {
+      "path": "packages/examples"
+    },
+    {
+      "path": "packages/fields"
+    },
+    {
+      "path": "packages/form"
+    },
+    {
+      "path": "packages/solid-forms"
+    },
+    {
+      "path": "packages/state"
+    },
+    {
+      "path": "packages/validation"
+    }
+  ],
+  "compilerOptions": {
+    "outDir": ".moon/cache/types"
+  }
+}

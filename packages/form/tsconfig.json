@@ -1,0 +1,22 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["es2020", "dom", "dom.iterable"],
+    "declaration": true,
+    "resolveJsonModule": true,
+    "jsx": "preserve",
+    "jsxImportSource": "solid-js",
+    "outDir": "../../.moon/cache/types/packages/form",
+    "paths": {
+      "@gxxc/solid-forms-state": ["../state/src/index.ts"],
+      "@gxxc/solid-forms-state/*": ["../state/src/*"]
+    }
+  },
+
+  "include": ["**/*.js", "**/*.jsx", "**/*.ts", "**/*.tsx"],
+  "references": [
+    {
+      "path": "../state"
+    }
+  ]
+}

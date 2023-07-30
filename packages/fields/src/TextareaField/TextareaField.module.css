@@ -1,0 +1,46 @@
+.title {
+  margin-bottom: 15px;
+
+  &::first-letter {
+    text-transform: capitalize;
+  }
+}
+
+.textAreaContainer {
+  position: relative;
+}
+
+.label {
+  color: #ccc;
+  position: absolute;
+  text-transform: lowercase;
+  pointer-events: none;
+  transform: translate(0, 4px) scale(1);
+  transition: 300ms cubic-bezier(0, 0, 0.2, 1) 0ms;
+  transform-origin: top left;
+  left: 24px;
+}
+
+.textAreaEl {
+  border: 2px solid #444;
+  border-radius: 4px;
+  height: 8.6rem;
+  padding: 24px 16px 12px 22px;
+  width: 100%;
+
+  &[type='password'] {
+    font-family: Verdana, sans-serif;
+    letter-spacing: 0.125em;
+  }
+
+  &::placeholder {
+    color: #bbb;
+    text-transform: capitalize;
+  }
+
+  &:focus {
+    border: 2px solid #444;
+    box-shadow: 0 0 4px #444;
+    outline: 0;
+  }
+}
