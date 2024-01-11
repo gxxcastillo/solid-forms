@@ -1,0 +1,23 @@
+{
+  "extends": "../../tsconfig.options.json",
+  "compilerOptions": {
+    "outDir": "../../.moon/cache/types/packages/solid-forms",
+    "jsx": "preserve",
+    "jsxImportSource": "solid-js",
+    "paths": {
+      "@gxxc/solid-forms-fields": ["../fields/src/index.ts"],
+      "@gxxc/solid-forms-fields/*": ["../fields/src/*"],
+      "@gxxc/solid-forms-form": ["../form/src/index.ts"],
+      "@gxxc/solid-forms-form/*": ["../form/src/*"]
+    }
+  },
+  "include": ["vite.config.ts", "src/**/*.js", "src/**/*.jsx", "src/**/*.ts", "src/**/*.tsx"],
+  "references": [
+    {
+      "path": "../fields"
+    },
+    {
+      "path": "../form"
+    }
+  ]
+}

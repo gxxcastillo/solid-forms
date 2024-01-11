@@ -1,0 +1,8 @@
+node_modules
+dist
+
+.solid
+
+# moon
+.moon/cache
+.moon/docker

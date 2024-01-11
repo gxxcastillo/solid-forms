@@ -1,0 +1,24 @@
+{
+  "name": "@gxxc/solid-forms-fields",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc && vite build"
+  },
+  "dependencies": {
+    "@gxxc/solid-forms-elements": "workspace:^",
+    "@gxxc/solid-forms-state": "workspace:^",
+    "@gxxc/solid-forms-validation": "workspace:^",
+    "solid-js": "^1.8.0"
+  },
+  "devDependencies": {
+    "type-fest": "^4.8.3",
+    "typescript": "^5.3.3",
+    "vite": "^5.0.8",
+    "vite-plugin-solid": "^2.8.0"
+  }
+}

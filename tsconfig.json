@@ -1,0 +1,30 @@
+{
+  "extends": "./tsconfig.options.json",
+  "files": [],
+  "references": [
+    {
+      "path": "apps/basic-demo"
+    },
+    {
+      "path": "packages/elements"
+    },
+    {
+      "path": "packages/examples"
+    },
+    {
+      "path": "packages/fields"
+    },
+    {
+      "path": "packages/form"
+    },
+    {
+      "path": "packages/solid-forms"
+    },
+    {
+      "path": "packages/state"
+    },
+    {
+      "path": "packages/validation"
+    }
+  ]
+}

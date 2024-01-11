@@ -1,0 +1,1 @@
+import{n as a,D as i,t as l,h as o,x as s,T as m}from"./index-18d5ebb8.js";const c=s("<main><!$><!/><h1>About");function x(){return(()=>{const t=a(c),n=t.firstChild,[e,r]=i(n.nextSibling);return e.nextSibling,l(t,o(m,{children:"About"}),e,r),t})()}export{x as default};

@@ -1,0 +1,23 @@
+{
+  "extends": "../../tsconfig.options.json",
+  "compilerOptions": {
+    "outDir": "../../.moon/cache/types/packages/form",
+    "types": ["vite/client"],
+    "jsx": "preserve",
+    "jsxImportSource": "solid-js",
+    "paths": {
+      "@gxxc/solid-forms-elements": ["../elements/src/index.ts"],
+      "@gxxc/solid-forms-elements/*": ["../elements/src/*"],
+      "@gxxc/solid-forms-state": ["../state/src/index.ts"],
+      "@gxxc/solid-forms-state/*": ["../state/src/*"],
+      "@gxxc/solid-forms-validation": ["../validation/src/index.ts"],
+      "@gxxc/solid-forms-validation/*": ["../validation/src/*"]
+    }
+  },
+  "include": ["vite.config.ts", "src/**/*.js", "src/**/*.jsx", "src/**/*.ts", "src/**/*.tsx"],
+  "references": [
+    {
+      "path": "../state"
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "extends": "../../tsconfig.options.json",
+  "compilerOptions": {
+    "outDir": "../../.moon/cache/types/packages/examples",
+    "jsx": "preserve",
+    "jsxImportSource": "solid-js",
+    "paths": {
+      "@gxxc/solid-forms": ["../solid-forms/src/index.ts"],
+      "@gxxc/solid-forms/*": ["../solid-forms/src/*"]
+    }
+  },
+  "include": ["**/*.js", "**/*.jsx", "**/*.ts", "**/*.tsx"],
+  "references": [
+    {
+      "path": "../solid-forms"
+    }
+  ]
+}

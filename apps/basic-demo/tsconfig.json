@@ -1,0 +1,10 @@
+{
+  "extends": "../../tsconfig.options.json",
+  "compilerOptions": {
+    "types": ["vinxi/client"],
+    "jsx": "preserve",
+    "jsxImportSource": "solid-js",
+    "outDir": "../../.moon/cache/types/apps/basic-demo"
+  },
+  "include": ["vite.config.ts", "src/**/*.js", "src/**/*.jsx", "src/**/*.ts", "src/**/*.tsx"]
+}

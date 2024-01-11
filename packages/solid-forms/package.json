@@ -1,0 +1,22 @@
+{
+  "name": "@gxxc/solid-forms",
+  "version": "0.0.1",
+  "type": "module",
+  "description": "Solid.js forms",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc && vite build"
+  },
+  "dependencies": {
+    "@gxxc/solid-forms-fields": "workspace:^",
+    "@gxxc/solid-forms-form": "workspace:^",
+    "solid-js": "^1.8.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "vite": "^5.0.8",
+    "vite-plugin-solid": "^2.8.0"
+  }
+}

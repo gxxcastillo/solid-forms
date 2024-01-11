@@ -1,0 +1,13 @@
+$schema: 'https://moonrepo.dev/schemas/project.json'
+
+language: 'typescript'
+
+tasks:
+  dev:
+    command: 'pnpm dev'
+
+  start:
+    command: 'pnpm start'
+
+  build:
+    command: 'pnpm build'
