@@ -1,35 +1,38 @@
 import { type JSX } from 'solid-js';
+import { StringKeyOf } from 'type-fest';
 
 import {
   type ErrorMessages,
   type FieldName,
   type FieldValue,
-  type FormState
+  type FieldValueMapping,
+  type FormState,
 } from '@gxxc/solid-forms-state/types';
+import { type ValidationConstraints } from '@gxxc/solid-forms-validation';
 
 export type RawFieldValue = boolean | string | undefined;
 
 export type SelectableFieldType = 'checkbox' | 'radio' | 'select';
 
-export type FormErrors = Record<FieldName, ErrorMessages | undefined>;
+export type FormErrors = Record<FieldName, ErrorMessages>;
 
 export type ElementProps<T> = Omit<JSX.InputHTMLAttributes<T>, 'value' | 'name'>;
 
-export type CustomValidator<V> = (
-  fieldName: FieldName,
-  fieldValue: V,
+export type CustomValidator<M extends FieldValueMapping, N extends StringKeyOf<M>> = (
+  fieldName: N,
+  fieldValue: M[N],
   formState: FormState,
   setFieldErrors: (e: ErrorMessages) => void
 ) => void;
 
-export interface FormFieldComponentBaseProps<V> {
-  value?: V;
-  defaultValue?: V;
-  defaultChecked?: boolean;
-  isControlled?: boolean;
-  match?: FieldName;
-  validator?: CustomValidator<V>;
-}
+// export interface FormFieldComponentBaseProps<V> {
+//   value?: V;
+//   defaultValue?: V;
+//   defaultChecked?: boolean;
+//   isControlled?: boolean;
+//   match?: FieldName;
+//   validator?: CustomValidator<V>;
+// }
 
 export type FormElementRef = HTMLDivElement | HTMLFormElement;
 
@@ -40,7 +43,6 @@ export interface ConstraintConfig {
   message: (n: string, c: Constraint) => string;
 }
 
-export type FieldSetter<V> = (fieldName: FieldName, fieldValue: V) => void;
 export type FormOnChangeHandler = (fieldName: FieldName, fieldValue: FieldValue) => void;
 export type FieldOnChangeHandler<T = JSX.Element> = JSX.EventHandler<T, InputEvent>;
 export type FieldOnBlurHandler<T = JSX.Element> = JSX.EventHandler<T, UIEvent>;
@@ -48,22 +50,24 @@ export type FieldOnBlurHandler<T = JSX.Element> = JSX.EventHandler<T, UIEvent>;
 export type FormElementTag = Extract<keyof JSX.HTMLElementTags, 'button' | 'input' | 'select' | 'textarea'>;
 export type FormElement<G extends FormElementTag> = HTMLElementTagNameMap[G];
 
-export type FormFieldProps<G extends FormElementTag, V extends FieldValue> = Omit<
-  JSX.HTMLElementTags[G],
-  'value' | 'name' | 'label' | 'defaultValue'
-> &
-  FieldInternalProps<V> & {
-    value?: V;
-    name: FieldName;
+export type FormFieldProps<
+  G extends FormElementTag,
+  M extends FieldValueMapping,
+  N extends StringKeyOf<M>
+> = Omit<JSX.HTMLElementTags[G], 'name' | 'label' | 'defaultValue'> &
+  FieldInternalProps<M[N]> &
+  ValidationConstraints & {
+    name: N;
     label?: string;
     errors?: ErrorMessages;
-    defaultValue?: V;
+    defaultValue?: M[N];
     defaultChecked?: boolean;
-    match?: FieldName;
+    match?: Omit<StringKeyOf<M>, N>;
     readonly?: boolean;
     disabled?: boolean;
-    validator?: CustomValidator<V>;
-    mask?: MaskFunction<V>;
+    validator?: CustomValidator<M, N>;
+    parse: ParseFunction<M[N]>;
+    format: FormatFunction<M[N]>;
   };
 
 export interface FieldInternalProps<V> {
@@ -88,12 +92,8 @@ export type FormFieldElement = HTMLButtonElement | HTMLInputElement | HTMLTextAr
 export type FormFieldInputEvent<E extends FormFieldElement> = Parameters<JSX.EventHandler<E, InputEvent>>[0];
 export type FormFieldBlurEvent<E extends FormFieldElement> = Parameters<JSX.EventHandler<E, FocusEvent>>[0];
 
-export interface Mask<V extends FieldValue> {
-  maskedValue?: string;
-  value?: V;
-}
-
-export type MaskFunction<V extends FieldValue> = (val?: string) => Mask<V>;
+export type ParseFunction<V extends FieldValue> = (val: string | number | string[] | undefined) => V;
+export type FormatFunction<V extends FieldValue> = (val: V |  undefined) => string;
 
 export type ComponentName = 'Field' | 'Button' | 'Link';
 export type FormFieldComponent = JSX.Element & { componentName: ComponentName };

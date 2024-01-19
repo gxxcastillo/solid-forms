@@ -3,23 +3,26 @@ import { StringKeyOf } from 'type-fest';
 export type DefaultFieldValue = string;
 export type FieldName = string;
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type FieldValue = any;
+export type FieldValue = unknown;
 
 export type ErrorMessage = string;
-export type ErrorMessages = ErrorMessage[];
+export type ErrorMessages = ErrorMessage[] | [];
 
-export interface FormField<V = string> {
-  name: string;
-  value: V;
+export interface FormField<M extends FieldValueMapping, N extends StringKeyOf<M>> {
+  name: N;
+  value: M[N] | undefined;
   errors: ErrorMessages;
+  hasBeenInitialized: boolean;
   hasBeenBlurred: boolean;
   hasChanged: boolean;
   hasBeenValid: boolean;
 }
 
-export type FormFields<M extends FieldValueMapping> = FormField<M[keyof M]>[];
-export type FieldValueMapping = Record<string, unknown>;
+export type FormFields<M extends FieldValueMapping> = FormField<M, StringKeyOf<M>>[];
+
+export type FieldValueMapping = Record<string, FieldValue | undefined>;
+
+export type FormStore<M extends FieldValueMapping> = readonly [FormState<M>, FormStateMutations<M>];
 
 export interface BaseFormState<M extends FieldValueMapping = FieldValueMapping> {
   fields: FormFields<M>;
@@ -29,9 +32,9 @@ export interface BaseFormState<M extends FieldValueMapping = FieldValueMapping> 
   isProcessing: boolean;
 }
 
-export type InferFieldValueMapping<S extends FormState> = S extends FormState<infer M> ? M : never;
-
-export type InferBaseFormState<S extends FormState> = S extends FormState<infer M> ? BaseFormState<M> : never;
+// @TODO Do I still need these?
+// export type InferFieldValueMapping<S extends FormState> = S extends FormState<infer M> ? M : never;
+// export type InferBaseFormState<S extends FormState> = S extends FormState<infer M> ? BaseFormState<M> : never;
 
 export type FormState<M extends FieldValueMapping = FieldValueMapping> = BaseFormState<M> &
   FormStateGetters<M>;
@@ -39,28 +42,23 @@ export type FormState<M extends FieldValueMapping = FieldValueMapping> = BaseFor
 export interface FormStateGetters<M extends FieldValueMapping = FieldValueMapping> {
   haveValuesChanged: boolean;
   isFormValid: boolean;
-  isFieldValid: (n: keyof M) => boolean | undefined;
-  getField: (n: keyof M) => FormField<M[keyof M]> | undefined;
-  getFieldValue: (n: keyof M) => M[keyof M];
-  getFieldErrors: (n: keyof M) => ErrorMessages | undefined;
-  hasFieldBeenInitialized: (n: keyof M) => boolean;
-  hasFieldBeenValid: (n: keyof M) => boolean | undefined;
-  hasFieldChanged: (n: keyof M) => boolean | undefined;
-  hasFieldBlurred: (n: keyof M) => boolean | undefined;
+  isFieldValid: <N extends StringKeyOf<M>>(n: N) => boolean | undefined;
+  getField: <N extends StringKeyOf<M>>(n: N) => FormField<M, N> | undefined;
+  getFieldValue: <N extends StringKeyOf<M>>(n: N) => M[N] | undefined;
+  getFieldErrors: <N extends StringKeyOf<M>>(n: N) => ErrorMessages | undefined;
+  hasFieldBeenInitialized: <N extends StringKeyOf<M>>(n: N) => boolean;
+  hasFieldBeenValid: <N extends StringKeyOf<M>>(n: N) => boolean | undefined;
+  hasFieldChanged: <N extends StringKeyOf<M>>(n: N) => boolean | undefined;
+  hasFieldBlurred: <N extends StringKeyOf<M>>(n: N) => boolean | undefined;
 }
 
 export interface FormStateMutations<M extends FieldValueMapping = FieldValueMapping> {
-  initializeField: <K extends StringKeyOf<M>, V extends M[K]>(
-    name: K,
-    value?: V,
-    errors?: ErrorMessages
-  ) => void;
-  setFieldValue: <K extends StringKeyOf<M>, V extends M[K]>(
-    name: K,
-    value?: V,
-    errors?: ErrorMessages
-  ) => void;
-  setChangedField: <K extends StringKeyOf<M>>(name: K) => void;
-  setBlurredField: <K extends StringKeyOf<M>>(name: K) => void;
+  initializeField: <N extends StringKeyOf<M>>(name: N, value?: M[N], errors?: ErrorMessages) => void;
+  setFieldValue: <N extends StringKeyOf<M>>(name: N, value?: M[N], errors?: ErrorMessages) => void;
+  setFieldErrors: <N extends StringKeyOf<M>>(name: N, errors?: ErrorMessages) => void;
+  setChangedField: <N extends StringKeyOf<M>>(name: N) => void;
+  setBlurredField: <N extends StringKeyOf<M>>(name: N) => void;
+  setIsReady: (isReady: boolean) => void;
+  setIsLoading: (isLoading: boolean) => void;
   setIsProcessing: (isProcessing: boolean) => void;
 }

@@ -2,17 +2,23 @@ import { For, JSX, children, mergeProps } from 'solid-js';
 
 import { useFormContext } from '@gxxc/solid-forms-state';
 
-import { BaseFormOnSubmit, FormErrors } from '../types';
+import {
+  type BaseFormOnSubmit,
+  type FormErrors,
+  RequestProps,
+  type Response,
+  type ResponseMapping
+} from '../types';
 import { createBaseFormOnSubmitHandler } from './helpers';
 
-export interface BaseFormProps {
+export interface BaseFormProps<P extends RequestProps, R extends Response | ResponseMapping<P>> {
   className?: string;
   fullWidthButtons?: boolean;
   align?: 'center' | 'left';
   isLoading?: boolean;
   isProcessing?: boolean;
   errors?: FormErrors;
-  onSubmit?: BaseFormOnSubmit;
+  onSubmit?: BaseFormOnSubmit<P, R>;
   children: JSX.Element;
 }
 
@@ -21,7 +27,9 @@ export const baseFormDefaultProps = {
   fullWidthButtons: false
 } as const;
 
-export function BaseForm(initialProps: BaseFormProps) {
+export function BaseForm<P extends RequestProps, R extends Response | ResponseMapping<P>>(
+  initialProps: BaseFormProps<P, R>
+) {
   const props = mergeProps(baseFormDefaultProps, initialProps);
   const [formState, formStateMutations] = useFormContext();
 
@@ -29,7 +37,7 @@ export function BaseForm(initialProps: BaseFormProps) {
   const formButtons: JSX.Element[] = [];
   const classList = {};
   const childrenArray = children(() => props.children).toArray();
-  const onSubmitHandler = createBaseFormOnSubmitHandler(props, formState, formStateMutations);
+  const onSubmitHandler = createBaseFormOnSubmitHandler<P, R>(props, formState, formStateMutations);
 
   return (
     <form classList={classList} onSubmit={onSubmitHandler}>

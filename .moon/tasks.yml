@@ -24,9 +24,9 @@ tasks:
     command: vite
     args:
       - build
-    deps:
-      - '~:lint'
-      - '~:format'
+    # deps:
+    #   - '~:lint'
+    #   - '~:format'
 
   type:
     command:
@@ -36,21 +36,21 @@ tasks:
       # Always use pretty output
       - '--pretty'
       # Use verbose logging to see affected projects
-      # - '--verbose'
+      - '--verbose'
     inputs:
       # Source and test files
-      # - 'src/**/*'
-      # - 'tests/**/*'
+      - 'src/**/*'
+      - 'tests/**/*'
       # Type declarations
-      # - 'types/**/*'
+      - 'types/**/*'
       # Project configs
-      # - 'tsconfig.json'
-      # - 'tsconfig.*.json'
+      - 'tsconfig.json'
+      - 'tsconfig.*.json'
       # Root configs (extended from only)
-      # - '/tsconfig.options.json'
-    # outputs:
-    #   # Matches `compilerOptions.outDir`
-    #   - 'lib'      
+      - '/tsconfig.options.json'
+    outputs:
+      # Matches `compilerOptions.outDir`
+      - 'lib'
 
   lint:
     command:
@@ -84,7 +84,7 @@ tasks:
       - 'types/**/*'
       - 'tsconfig.json'
       - '/tsconfig.eslint.json'
-      - '/tsconfig.options.json' 
+      - '/tsconfig.options.json'
 
   format:
     command:

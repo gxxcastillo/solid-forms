@@ -1,12 +1,21 @@
 import { FieldValue, type FormState } from '@gxxc/solid-forms-state/types';
 
-export type ConstraintName = 'match' | 'max' | 'maxLength' | 'min' | 'minLength' | 'pattern' | 'required';
+export interface ValidationConstraints {
+  match: string;
+  max: number;
+  maxLength: number;
+  min: number;
+  minLength: number;
+  pattern: string;
+  required: boolean;
+}
 
-export type Constraint = boolean | number | string;
+export type ConstraintName = keyof ValidationConstraints;
+export type Constraint = ValidationConstraints[ConstraintName];
 
-export type ValidationConstraints = {
-  [constraintName in ConstraintName]?: Constraint;
-};
+// export type ValidationConstraints = {
+//   [K in ConstraintName]?: ConstraintTypeMap[K];
+// };
 
 export interface ConstraintConfig {
   validate: (v: FieldValue, c: Constraint | undefined, s: FormState) => boolean;

@@ -1,19 +1,48 @@
-import { FieldName, type FieldValue, type FormState } from '@gxxc/solid-forms-state/types';
+import { StringKeyOf } from 'type-fest';
+
+import { ErrorMessages, FieldValueMapping, type FormState } from '@gxxc/solid-forms-state/types';
 
 import { constraintConfigs } from './constraintConfigs';
 import { ConstraintName, ValidationConstraints } from './types';
 
-export function validate<V extends FieldValue = FieldValue, S extends FormState = FormState>(
-  fieldName: FieldName,
-  value: V,
+export interface ValidateFieldArgs<
+  M extends FieldValueMapping,
+  N extends StringKeyOf<M>,
+  C extends ConstraintName
+> {
+  fieldName: N;
+  fieldValue: M[N];
+  formState: FormState<M>;
+  constraintName: C;
+  constraint: ValidationConstraints[C];
+}
+
+export function validateAgainstConstraint<
+  M extends FieldValueMapping,
+  N extends StringKeyOf<M>,
+  C extends ConstraintName
+>({ fieldName, fieldValue, formState, constraintName, constraint }: ValidateFieldArgs<M, N, C>) {
+  const validator = constraintConfigs[constraintName];
+  const isValid = validator.validate(fieldValue, constraint, formState);
+  return isValid ? '' : validator.message(fieldName, constraint);
+}
+
+export function validate<M extends FieldValueMapping, N extends StringKeyOf<M>>(
+  fieldName: N,
+  fieldValue: M[N] | undefined,
   constraints: ValidationConstraints,
-  formState: S
-): string[] {
+  formState: FormState<M>
+): ErrorMessages {
   return Object.entries(constraints)
-    .map(([constraintName, constraint]) => {
-      const constraintConfig = constraintConfigs[constraintName as ConstraintName];
-      const isValid = constraintConfig.validate(value, constraint, formState);
-      return isValid ? '' : constraintConfig.message(fieldName, constraint);
+    .map(([name, constraint]) => {
+      const constraintName = name as ConstraintName;
+      return validateAgainstConstraint({
+        fieldName,
+        fieldValue,
+        formState,
+        constraintName,
+        constraint
+      });
     })
     .filter(Boolean);
 }

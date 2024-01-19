@@ -1,25 +1,38 @@
 import { type JSX, splitProps } from 'solid-js';
+import { type StringKeyOf } from 'type-fest';
 
 import { Input } from '@gxxc/solid-forms-elements';
-import { FieldValue, FormState, useFormContext } from '@gxxc/solid-forms-state';
+import { FieldValueMapping, FormState, useFormContext } from '@gxxc/solid-forms-state';
 
 import { useFormField, useFormFieldLabel } from '../hooks';
 import { type FormFieldProps } from '../types';
 import styles from './InputField.module.css';
 
-export type ShowIconFn<V extends FieldValue> = (value: V | undefined, formState: FormState) => boolean;
-export type ShowLabelFn<V extends FieldValue> = (value: V | undefined, formState: FormState) => boolean;
+export type ShowIconFn<M extends FieldValueMapping, N extends StringKeyOf<M>> = (
+  value: M[N] | undefined,
+  formState?: FormState<M>
+) => boolean;
+export type ShowLabelFn<M extends FieldValueMapping, N extends StringKeyOf<M>> = (
+  value: M[N] | undefined,
+  formState?: FormState<M>
+) => boolean;
 
-export type InputFieldProps<V extends FieldValue = FieldValue> = FormFieldProps<'input', V> & {
+export type InputFieldProps<M extends FieldValueMapping, N extends StringKeyOf<M>> = FormFieldProps<
+  'input',
+  M,
+  N
+> & {
   leadingIcon?: JSX.Element;
-  showLabel?: ShowLabelFn<V>;
-  showIcon?: ShowIconFn<V>;
+  showLabel?: ShowLabelFn<M, N>;
+  showIcon?: ShowIconFn<M, N>;
   icon?: JSX.Element;
   context?: JSX.Element;
 };
 
-export function InputField<V extends FieldValue>(initialProps: InputFieldProps<V>) {
-  const [formState] = useFormContext();
+export function InputField<M extends FieldValueMapping, N extends StringKeyOf<M>>(
+  initialProps: InputFieldProps<M, N>
+) {
+  const [formState] = useFormContext<M>();
   const [{ showLabel, leadingIcon, showIcon, icon, context }, parsedProps] = splitProps(initialProps, [
     'showLabel',
     'leadingIcon',
@@ -35,8 +48,9 @@ export function InputField<V extends FieldValue>(initialProps: InputFieldProps<V
   });
 
   const hasValue = !!props.value;
-  const withIcon = typeof showIcon === 'function' && showIcon(props.value, formState);
-  const withLabel = typeof showLabel === 'function' && showLabel(props.value, formState);
+  const withIcon = typeof showIcon === 'function' && showIcon(props.value as M[N], formState as FormState<M>);
+  const withLabel =
+    typeof showLabel === 'function' && showLabel(props.value as M[N], formState as FormState<M>);
   const classList = {
     [styles.InputFieldSet]: true,
     [styles.hasValue]: hasValue,

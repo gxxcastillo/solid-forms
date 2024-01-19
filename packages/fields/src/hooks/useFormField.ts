@@ -1,9 +1,8 @@
-import { type JSX, mergeProps } from 'solid-js';
+import { type JSX, mergeProps, splitProps } from 'solid-js';
 import { type StringKeyOf } from 'type-fest';
 
 import {
   type FieldName,
-  type FieldValue,
   FieldValueMapping,
   FormState,
   FormStateMutations,
@@ -24,7 +23,8 @@ import type {
 } from '../types';
 
 export const useFormFieldDefaultProps = {
-  mask,
+  parse,
+  format,
   isControlled: true,
   disabled: false
 };
@@ -48,17 +48,14 @@ export function deepEqual(x: unknown, y: unknown) {
   return false;
 }
 
-export function pick<V = unknown>(obj: Record<string, V>, keys: string[]) {
-  const entries = keys.flatMap<[string, V]>((key) => (key in obj ? [key, obj[key]] : []));
-  return Object.fromEntries(entries);
+// @TODO This is an example of a parsing function. Something similar would need to be implemented per input when / if needed
+export function parse<V>(val: string | undefined) {
+  return val as V;
 }
 
-// @TODO This is an example of a masking function. Something similar would need to be implemented per input when / if needed
-export function mask(val: FieldValue) {
-  return {
-    maskedValue: val?.toString() ?? '',
-    value: val
-  };
+// @TODO This is an example of a formatting function. Something similar would need to be implemented per input when / if needed
+export function format<V>(val: V | undefined) {
+  return val?.toString() ?? '';
 }
 
 export function getDisplayableErrors<K extends FieldName>(
@@ -76,66 +73,59 @@ export function isSelectableEvent(
 }
 
 export function createValueSetter<
-  F extends FormState,
-  U extends FormStateMutations<M>,
-  C extends ValidationConstraints,
-  M extends FieldValueMapping,
   G extends FormElementTag,
-  V extends M[StringKeyOf<M>]
+  M extends FieldValueMapping,
+  N extends StringKeyOf<M>,
+  C extends ValidationConstraints
 >(
-  currentValue: V,
+  currentValue: M[N] | undefined,
   currentChecked: boolean | undefined,
-  formState: F,
-  formStateMutations: U,
+  formState: FormState<M>,
+  formStateMutations: FormStateMutations<M>,
   validationConstraints: C,
-  props: FormFieldProps<G, V>
+  props: FormFieldProps<G, M, N>
 ) {
   return function setValue(val?: string, isInitialization = false) {
-    type FName = StringKeyOf<M>;
-
-    let valueForValidation: V;
-    let valueForDisplay;
+    let value: M[N];
 
     if ((props.disabled ?? props.readonly) && !isInitialization) {
       return;
     }
 
     if (props.isSelectable) {
-      valueForValidation = val as V;
-      valueForDisplay = val;
-
       if (currentChecked === val) {
         return;
       }
-    } else if (typeof props.mask === 'function') {
-      const masked = props.mask(val);
-      valueForValidation = masked.value!;
-      valueForDisplay = masked.maskedValue;
 
-      if (currentValue === valueForDisplay) {
+      value = val as M[N];
+    } else if (typeof props.parse === 'function') {
+      value = props.parse(val);
+
+      if (currentValue === value) {
         return;
       }
     } else {
-      // There should always be a mask
+      // There should always be a parser
       return;
     }
 
-    const name = props.name as FName;
-    const newErrors = validate(props.name, valueForValidation, validationConstraints, formState);
+    const name = props.name as N;
+    const newErrors = validate(name, value, validationConstraints, formState);
 
     const errorsForDisplay = newErrors.length > 0 ? newErrors : undefined;
     if (isInitialization) {
-      formStateMutations.initializeField(name, valueForValidation, errorsForDisplay);
+      formStateMutations.initializeField(name, value, errorsForDisplay);
     } else {
-      formStateMutations.setFieldValue(name, valueForValidation, errorsForDisplay);
+      formStateMutations.setFieldValue(name, value, errorsForDisplay);
     }
   };
 }
 
-export function createOnInput<G extends FormElementTag, V extends FieldValue>(
-  setField: SetField,
-  props: FormFieldProps<G, V>
-) {
+export function createOnInput<
+  G extends FormElementTag,
+  M extends FieldValueMapping,
+  N extends StringKeyOf<M>
+>(setField: SetField, props: FormFieldProps<G, M, N>) {
   return function onInput(event: FormFieldInputEvent<HTMLElementTagNameMap[G]>) {
     if (isSelectableEvent(event, !!props.isSelectable)) {
       setField(event.currentTarget?.checked ? event.currentTarget.value || 'true' : 'false');
@@ -145,10 +135,10 @@ export function createOnInput<G extends FormElementTag, V extends FieldValue>(
   };
 }
 
-export function createOnBlur<G extends FormElementTag, V extends FieldValue>(
+export function createOnBlur<G extends FormElementTag, M extends FieldValueMapping, N extends StringKeyOf<M>>(
   setField: SetField,
-  props: FormFieldProps<G, V>,
-  setBlurredField: (name: string) => void
+  props: FormFieldProps<G, M, N>,
+  setBlurredField: (name: N) => void
 ) {
   return function onBlur(event: FormFieldBlurEvent<HTMLElementTagNameMap[G]>) {
     setBlurredField(props.name);
@@ -160,43 +150,36 @@ export function createOnBlur<G extends FormElementTag, V extends FieldValue>(
   };
 }
 
-export function useFormField<G extends FormElementTag, V extends FieldValue>(
-  initialProps: FormFieldProps<G, V>
+export function useFormField<G extends FormElementTag, M extends FieldValueMapping, N extends StringKeyOf<M>>(
+  initialProps: FormFieldProps<G, M, N>
 ) {
   const { checked } = initialProps as JSX.InputHTMLAttributes<HTMLInputElement>;
   const { disabled, name } = initialProps;
 
   const props = mergeProps(useFormFieldDefaultProps, initialProps);
-  const [formState, formStateMutations] = useFormContext();
+  const [formState, formStateMutations] = useFormContext<M>();
 
   const { isLoading } = formState;
 
   const isSelectable = checked !== undefined;
   const isInitialized = formState.hasFieldBeenInitialized(name);
-  const storeValue = formState.getFieldValue(name) as V;
-  const displayValue = props.mask?.(storeValue).maskedValue;
-  const currentChecked = isSelectable ? checked ?? !!displayValue : undefined;
-  const validationConstraints: ValidationConstraints = pick(props, constraintNames);
+  const value = formState.getFieldValue(name);
+  const currentChecked = isSelectable ? checked ?? !!value : undefined;
+  const [validationConstraints] = splitProps(props, constraintNames);
 
-  type FState = typeof formState;
-  type FValueMapping = Record<FState['fields'][number]['name'], FState['fields'][number]['value']>;
-  const setValue = createValueSetter<
-    FState,
-    typeof formStateMutations,
-    typeof validationConstraints,
-    FValueMapping,
-    G,
-    V
-  >(storeValue, currentChecked, formState, formStateMutations, validationConstraints, props);
-  const onInput = createOnInput<G, V>(setValue, props);
-  const onBlur = createOnBlur<G, V>(setValue, props, formStateMutations.setBlurredField);
+  const setValue = createValueSetter<G, M, N, typeof validationConstraints>(
+    value,
+    currentChecked,
+    formState,
+    formStateMutations,
+    validationConstraints,
+    props
+  );
+  const onInput = createOnInput<G, M, N>(setValue, props);
+  const onBlur = createOnBlur<G, M, N>(setValue, props, formStateMutations.setBlurredField);
 
   if (props.isControlled && !isInitialized) {
-    if (isSelectable) {
-      formStateMutations.setFieldValue(name, props.defaultValue ?? props.defaultChecked);
-    } else {
-      formStateMutations.setFieldValue(name, props.defaultValue);
-    }
+    formStateMutations.setFieldValue(name, props.defaultValue);
   } else if (props.disabled && isInitialized) {
     if (isSelectable) {
       formStateMutations.setFieldValue(name, props.defaultValue);
@@ -216,7 +199,7 @@ export function useFormField<G extends FormElementTag, V extends FieldValue>(
     {
       ...props,
       id: name,
-      value: displayValue,
+      value: props.format(value),
       disabled: !!(disabled ?? isLoading),
       errors: getDisplayableErrors(name, formState),
       checked: currentChecked,

@@ -1,24 +1,25 @@
-import { JSX, children, createContext, useContext } from 'solid-js';
+import { type Context, JSX, children, createContext, useContext } from 'solid-js';
 
-import { BaseFormState, FieldValueMapping, FormState, FormStateMutations } from '.';
+import { FieldValueMapping, FormStore } from './types';
 import { createFormStore } from './FormState';
 
 export const FormContext = createFormContext();
 
 export interface FormContextProviderProps<M extends FieldValueMapping> {
-  state?: BaseFormState<M>;
+  store?: FormStore<M>;
   children: JSX.Element;
 }
 
-export function createFormContext<M extends FieldValueMapping>() {
-  return createContext([] as unknown as readonly [FormState<M>, FormStateMutations<M>]);
+export function createFormContext() {
+  return createContext([]);
 }
 
-export function useFormContext() {
-  return useContext(FormContext);
+export function useFormContext<M extends FieldValueMapping>() {
+  return useContext(FormContext) as unknown as FormStore<M>;
 }
 
 export function FormContextProvider<M extends FieldValueMapping>(props: FormContextProviderProps<M>) {
-  const store = createFormStore<M>(props.state) as unknown as readonly [FormState<M>, FormStateMutations<M>];
-  return <FormContext.Provider value={store}>{children(() => props.children)()}</FormContext.Provider>;
+  const Context = FormContext as unknown as Context<FormStore<M>>;
+  const store: FormStore<M> = props.store ? props.store : createFormStore<M>();
+  return <Context.Provider value={store}>{children(() => props.children)()}</Context.Provider>;
 }

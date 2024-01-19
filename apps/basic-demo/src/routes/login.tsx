@@ -1,22 +1,24 @@
 import { InputField, PasswordField, useForm } from '@gxxc/solid-forms';
 
-// @TODO
-// Index signature for type 'string' is missing in type
-// interface LoginFormState {
-//   email: string;
-//   password: string
-// };
+interface LoginFormProps {
+  [x: string]: unknown;
+  key: 'name' | 'age';
+  email: string;
+  password: number;
+}
 
 function Login() {
-  const form = useForm();
-
-  window.formState = form.state;
+  const form = useForm<LoginFormProps, LoginFormProps>();
 
   return (
     <div>
+      <div>
+        email: {form.state.getFieldValue('email')}
+        password: {form.state.getFieldValue('password')}
+      </div>
       <form.Form>
         <InputField name='email' label='tester input' />
-        <PasswordField name='password' label='tersksjs lslkk' />
+        <PasswordField name='password' label='tester password' />
       </form.Form>
     </div>
   );

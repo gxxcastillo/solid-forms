@@ -30,7 +30,9 @@ module.exports = {
     '@typescript-eslint/no-unsafe-assignment': 0,
     '@typescript-eslint/no-unsafe-member-access': 0,
     '@typescript-eslint/no-unsafe-return': 0,
-    '@typescript-eslint/sort-type-constituents': 0
+    '@typescript-eslint/sort-type-constituents': 0,
+    '@typescript-eslint/no-redundant-type-constituents': 0,
+    '@typescript-eslint/no-unsafe-argument': 0
   },
   parser: '@typescript-eslint/parser',
   parserOptions: {

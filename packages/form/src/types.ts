@@ -1,21 +1,13 @@
 import { type JSX } from 'solid-js';
 
-import { type ErrorMessages, type FieldValue } from '@gxxc/solid-forms-state';
+import { type ErrorMessages, type FieldValue, FieldValueMapping } from '@gxxc/solid-forms-state';
 
 export type DefaultFieldValue = string;
 export type FieldName = string;
 
-export type CustomValidator<V> = (
-  fieldName: FieldName,
-  fieldValue: V,
-  getFields: () => FormField[],
-  getFieldErrors: (n: FieldName) => string[] | undefined,
-  setFieldErrors: (e: ErrorMessages) => void
-) => void;
-
 export type SelectableFieldType = 'checkbox' | 'radio' | 'select';
 
-export type FormErrors = Record<FieldName, ErrorMessages | undefined>;
+export type FormErrors = Record<FieldName, ErrorMessages>;
 
 export interface FieldSetBaseProps {
   name: string;
@@ -38,17 +30,6 @@ export interface FieldSetInternalProps<V> {
 
 export type FormElementRef = HTMLDivElement | HTMLFormElement;
 
-export interface FormField<V = DefaultFieldValue> {
-  name: string;
-  value: V;
-  errors: ErrorMessages;
-  hasBeenBlurred: boolean;
-  hasChanged: boolean;
-  hasBeenValid: boolean;
-}
-
-export type FieldSetter<V> = (fieldName: FieldName, fieldValue: V) => void;
-
 export type FormOnChangeHandler = (fieldName: FieldName, fieldValue: FieldValue) => void;
 
 export type FieldOnChangeHandler<T = JSX.Element> = JSX.EventHandler<T, InputEvent>;
@@ -59,45 +40,25 @@ export interface ErrorResult {
   code: string;
 }
 
+export type RequestProps = FieldValueMapping;
 export type ErrorResults = ErrorResult[];
 export type FormErrorResult = Record<string, ErrorResult>;
 
 export type Response = object | string | [] | null | void;
-export type RequestProps = Record<string, string | null | undefined>;
-export type OnSubmitHandler<R extends Response = void> = (
-  props: RequestProps,
+export type ResponseMapping<P extends RequestProps> = Record<string, OnSubmitHandler<P, Response>>;
+export type OnSubmitHandler<P extends RequestProps, R extends Response = void> = (
+  props: P,
   buttonName: string
 ) => Promise<R> | void;
 
-export type OnSubmitHandlers = Record<string, OnSubmitHandler>;
+export type OnSubmitHandlers<P extends RequestProps, M extends ResponseMapping<P>> = {
+  [K in keyof M]: M[K];
+};
 
-export type BaseFormOnSubmit = OnSubmitHandler | OnSubmitHandlers;
+export type BaseFormOnSubmit<
+  P extends RequestProps,
+  R extends Response | ResponseMapping<P>
+> = R extends ResponseMapping<P> ? OnSubmitHandlers<P, R> : OnSubmitHandler<P, R>;
 
 export type BaseFormElementSubmitEvent = Event & { submitter: HTMLElement };
 export type BaseFormElementOnSubmitHandler = JSX.EventHandler<HTMLFormElement, BaseFormElementSubmitEvent>;
-
-/// //////////// The new stuff ////////////
-
-// export type FormStateSelector<S extends FormFields = FormFields> = (
-//   state: NewFormState<S>,
-//   ...args: unknown[]
-// ) => unknown;
-
-// export type FormStateFields<S extends FormFields = FormFields> = NewFormState<S>['fields'];
-// export type FormStateFieldNames<S extends FormFields = FormFields> = keyof FormStateFields<S>;
-
-// export type ImmutableFieldState = {
-//   isInitialized: boolean;
-//   hasChanged: boolean;
-//   hasBeenBlurred: boolean;
-// };
-
-// export type ImmutableFormState<S extends FormFields = FormFields> = {
-//   fields: Record<keyof S, ImmutableFieldState>;
-// };
-
-// export type ImmutableFormStateFields<S extends FormFields = FormFields> =
-//   ImmutableFormState<S>['fields'];
-
-// export type ImmutableFormStateFieldNames<S extends FormFields = FormFields> =
-//   keyof ImmutableFormStateFields<S>;

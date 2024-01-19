@@ -1,32 +1,43 @@
-import { FormFields, FormState, FormStateMutations } from '@gxxc/solid-forms-state';
+import { FieldValueMapping, FormFields, FormState, FormStateMutations } from '@gxxc/solid-forms-state';
 
-import { BaseFormElementSubmitEvent, OnSubmitHandler, OnSubmitHandlers, RequestProps } from '../types';
+import {
+  BaseFormElementSubmitEvent,
+  BaseFormOnSubmit,
+  OnSubmitHandler,
+  OnSubmitHandlers,
+  RequestProps,
+  type Response,
+  type ResponseMapping
+} from '../types';
 import { BaseFormProps } from './BaseForm';
 
 export function isObject(o: unknown) {
   return o != null && typeof o === 'object';
 }
 
-export function isSubmitHandlerFn(onSubmit: unknown): onSubmit is OnSubmitHandler {
+export function isSubmitHandlerFn<P extends RequestProps, R extends Response>(
+  onSubmit: unknown
+): onSubmit is OnSubmitHandler<P, R> {
   return typeof onSubmit === 'function';
 }
 
-export function isSubmitHandlersObject(onSubmit: unknown): onSubmit is OnSubmitHandlers {
+export function isSubmitHandlersObject<P extends RequestProps, R extends Response | ResponseMapping<P>>(
+  onSubmit: BaseFormOnSubmit<P, R>
+): onSubmit is R extends ResponseMapping<P> ? OnSubmitHandlers<P, R> : never {
   return isObject(onSubmit);
 }
 
-export function fieldsToProps<M extends Record<string, unknown>>(formFields: FormFields<M>) {
-  return formFields.reduce<RequestProps>((obj, field) => {
-    obj[field.name] = field.value as string | null | undefined;
+export function fieldsToProps<M extends FieldValueMapping>(formFields: FormFields<M>) {
+  return formFields.reduce<Record<string, unknown>>((obj, field) => {
+    obj[field.name] = field.value;
     return obj;
-  }, {});
+  }, {}) as M;
 }
 
-export function createBaseFormOnSubmitHandler(
-  props: BaseFormProps,
-  formState: FormState,
-  formStateMutations: FormStateMutations
-) {
+export function createBaseFormOnSubmitHandler<
+  P extends RequestProps,
+  R extends Response | ResponseMapping<P>
+>(props: BaseFormProps<P, R>, formState: FormState, formStateMutations: FormStateMutations) {
   return (event: BaseFormElementSubmitEvent) => {
     event.preventDefault();
     const buttonName = (event.submitter as HTMLFormElement)?.name;
@@ -35,14 +46,14 @@ export function createBaseFormOnSubmitHandler(
       return;
     }
 
-    const submitProps = fieldsToProps(formState.fields);
-    const result = isSubmitHandlerFn(props.onSubmit)
+    const submitProps = fieldsToProps<P>(formState.fields);
+    const result = isSubmitHandlerFn<P, R>(props.onSubmit)
       ? props.onSubmit(submitProps, buttonName)
-      : isSubmitHandlersObject(props.onSubmit)
+      : props.onSubmit && isSubmitHandlersObject<P, R>(props.onSubmit)
         ? props.onSubmit[buttonName](submitProps, buttonName)
         : undefined;
 
-    if (result && result.then) {
+    if (result?.then) {
       formStateMutations.setIsProcessing(true);
       result
         .then(() => {

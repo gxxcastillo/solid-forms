@@ -1,4 +1,4 @@
-import { ConstraintConfigs } from './types';
+import { ConstraintConfigs, ConstraintName } from './types';
 
 export const constraintConfigs: ConstraintConfigs = {
   match: {
@@ -39,6 +39,6 @@ export const constraintConfigs: ConstraintConfigs = {
     validate: (val, max) => typeof val === 'number' && typeof max === 'number' && val <= max,
     message: (fieldName: string) => `"${fieldName}" is too large`
   }
-};
+} as const;
 
-export const constraintNames = Object.keys(constraintConfigs);
+export const constraintNames = Object.keys(constraintConfigs) as ConstraintName[];

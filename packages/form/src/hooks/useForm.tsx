@@ -1,36 +1,42 @@
 import {
-  BaseFormState,
   FieldValueMapping,
   FormContextProvider,
-  FormState,
-  createFormState,
+  createFormStore,
   useFormContext
 } from '@gxxc/solid-forms-state';
 
 import { BaseForm, BaseFormProps } from '../BaseForm/BaseForm';
+import { RequestProps, Response, ResponseMapping } from '../types';
 
-export type FormComponentProps = BaseFormProps;
+export type FormComponentProps<
+  P extends RequestProps,
+  R extends Response | ResponseMapping<P>
+> = BaseFormProps<P, R>;
 
-export function useForm<M extends FieldValueMapping>() {
-  const existingContext = useFormContext() as [FormState<M>, unknown];
+export function useForm<M extends FieldValueMapping, R extends Response | ResponseMapping<M>>() {
+  const existingContext = useFormContext<M>();
   const existingState = existingContext[0];
-  const [formState] = existingState ? existingContext : createFormState();
+  const formStore = existingState ? existingContext : createFormStore<M>();
 
   return {
-    Form: (props: FormComponentProps) => {
+    Form: (props: FormComponentProps<M, R>) => {
       if (existingState) {
         return <BaseForm {...props} />;
       }
 
       return (
-        <FormContextProvider state={formState as unknown as BaseFormState<M>}>
+        <FormContextProvider store={formStore}>
           <BaseForm {...props} />
         </FormContextProvider>
       );
     },
 
+    get store() {
+      return formStore;
+    },
+
     get state() {
-      return formState;
+      return formStore[0];
     }
   };
 }
