@@ -1,3 +1,4 @@
+import { mergeProps } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import type { StringKeyOf } from 'type-fest';
 
@@ -56,7 +57,7 @@ export function createFormStore<M extends FieldValueMapping>(state?: BaseFormSta
   type FErrors = (typeof formState)['fields'][number]['errors'];
 
   return [
-    { ...formState, ...getters },
+    mergeProps(formState, getters),
     {
       initializeField: <N extends StringKeyOf<M>>(name: N, value?: M[N], errors: FErrors = []) => {
         if (getters.hasFieldBeenInitialized(name) || !name) {

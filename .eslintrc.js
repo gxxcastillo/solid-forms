@@ -24,6 +24,7 @@ module.exports = {
     'no-nested-ternary': 0,
     'promise/prefer-await-to-then': 0,
     'promise/prefer-await-to-callbacks': 0,
+    'unicorn/explicit-length-check': 0,
     '@typescript-eslint/no-confusing-void-expression': 0,
     '@typescript-eslint/no-unsafe-call': 0,
     '@typescript-eslint/no-use-before-define': 0,

@@ -2,11 +2,12 @@ import { type JSX } from 'solid-js';
 import { StringKeyOf } from 'type-fest';
 
 import {
+  type DisplayValue,
   type ErrorMessages,
   type FieldName,
   type FieldValue,
   type FieldValueMapping,
-  type FormState,
+  type FormState
 } from '@gxxc/solid-forms-state/types';
 import { type ValidationConstraints } from '@gxxc/solid-forms-validation';
 
@@ -65,6 +66,7 @@ export type FormFieldProps<
     match?: Omit<StringKeyOf<M>, N>;
     readonly?: boolean;
     disabled?: boolean;
+    checked?: boolean;
     validator?: CustomValidator<M, N>;
     parse: ParseFunction<M[N]>;
     format: FormatFunction<M[N]>;
@@ -84,7 +86,7 @@ export interface FieldInternalProps<V> {
   'data-tip'?: string;
 }
 
-export type SetField = (value: string | undefined, isInitialization?: boolean) => void;
+export type SetValue = (value: DisplayValue, isInitialization?: boolean) => void;
 export type FormFieldEvent<E extends FormFieldElement> = FormFieldBlurEvent<E> | FormFieldInputEvent<E>;
 export type AnyFormFieldEvent = FormFieldEvent<FormFieldElement>;
 export type SelectableFormFieldEvent = FormFieldEvent<HTMLInputElement>;
@@ -92,34 +94,8 @@ export type FormFieldElement = HTMLButtonElement | HTMLInputElement | HTMLTextAr
 export type FormFieldInputEvent<E extends FormFieldElement> = Parameters<JSX.EventHandler<E, InputEvent>>[0];
 export type FormFieldBlurEvent<E extends FormFieldElement> = Parameters<JSX.EventHandler<E, FocusEvent>>[0];
 
-export type ParseFunction<V extends FieldValue> = (val: string | number | string[] | undefined) => V;
-export type FormatFunction<V extends FieldValue> = (val: V |  undefined) => string;
+export type ParseFunction<V extends FieldValue> = (val: DisplayValue) => V;
+export type FormatFunction<V extends FieldValue> = (val: V | undefined) => string;
 
 export type ComponentName = 'Field' | 'Button' | 'Link';
 export type FormFieldComponent = JSX.Element & { componentName: ComponentName };
-
-/// //////////// The new stuff ////////////
-
-// export type FormStateSelector<S extends FormFields = FormFields> = (
-//   state: NewFormState<S>,
-//   ...args: unknown[]
-// ) => unknown;
-
-// export type FormStateFields<S extends FormFields = FormFields> = NewFormState<S>['fields'];
-// export type FormStateFieldNames<S extends FormFields = FormFields> = keyof FormStateFields<S>;
-
-// export type ImmutableFieldState = {
-//   isInitialized: boolean;
-//   hasChanged: boolean;
-//   hasBeenBlurred: boolean;
-// };
-
-// export type ImmutableFormState<S extends FormFields = FormFields> = {
-//   fields: Record<keyof S, ImmutableFieldState>;
-// };
-
-// export type ImmutableFormStateFields<S extends FormFields = FormFields> =
-//   ImmutableFormState<S>['fields'];
-
-// export type ImmutableFormStateFieldNames<S extends FormFields = FormFields> =
-//   keyof ImmutableFormStateFields<S>;

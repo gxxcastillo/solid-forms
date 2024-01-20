@@ -3,6 +3,7 @@ import { StringKeyOf } from 'type-fest';
 export type DefaultFieldValue = string;
 export type FieldName = string;
 
+export type DisplayValue = string | number | string[] | undefined;
 export type FieldValue = unknown;
 
 export type ErrorMessage = string;

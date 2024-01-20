@@ -1,4 +1,4 @@
-import { type JSX, splitProps } from 'solid-js';
+import { type JSX, createMemo, splitProps } from 'solid-js';
 import { type StringKeyOf } from 'type-fest';
 
 import { Input } from '@gxxc/solid-forms-elements';
@@ -33,7 +33,7 @@ export function InputField<M extends FieldValueMapping, N extends StringKeyOf<M>
   initialProps: InputFieldProps<M, N>
 ) {
   const [formState] = useFormContext<M>();
-  const [{ showLabel, leadingIcon, showIcon, icon, context }, parsedProps] = splitProps(initialProps, [
+  const [localProps, parsedProps] = splitProps(initialProps, [
     'showLabel',
     'leadingIcon',
     'showIcon',
@@ -41,22 +41,39 @@ export function InputField<M extends FieldValueMapping, N extends StringKeyOf<M>
     'context'
   ]);
 
-  const [createField, props] = useFormField(parsedProps);
-  const { label, placeholder } = useFormFieldLabel({
-    value: props.value,
-    label: props.label
-  });
+  const formField = createMemo(() => useFormField(parsedProps));
+  const [props, createField] = formField();
 
-  const hasValue = !!props.value;
-  const withIcon = typeof showIcon === 'function' && showIcon(props.value as M[N], formState as FormState<M>);
-  const withLabel =
-    typeof showLabel === 'function' && showLabel(props.value as M[N], formState as FormState<M>);
+  // const showLabel = createMemo(() => localProps.showLabel);
+  const leadingIcon = createMemo(() => localProps.leadingIcon);
+  const withLabel = createMemo(
+    () =>
+      typeof localProps.showLabel === 'function' &&
+      localProps.showLabel(value() as M[N], formState as FormState<M>)
+  );
+  const withIcon = createMemo(
+    () =>
+      typeof localProps.showIcon === 'function' &&
+      localProps.showIcon(value() as M[N], formState as FormState<M>)
+  );
+  const icon = createMemo(() => localProps.icon);
+  const context = createMemo(() => localProps.context);
+  const value = createMemo(() => formState.getFieldValue(props.name));
+  const initialLabel = createMemo(() => props.label);
+  const hasValue = createMemo(() => !!value());
+  const label = createMemo(() =>
+    useFormFieldLabel({
+      value: value(),
+      label: initialLabel()
+    })
+  );
+
   const classList = {
     [styles.InputFieldSet]: true,
-    [styles.hasValue]: hasValue,
-    [styles.withLeadingIcon]: !!leadingIcon,
-    [styles.withIcon]: withIcon,
-    [styles.withLabel]: withLabel
+    [styles.hasValue]: hasValue(),
+    [styles.withLeadingIcon]: !!leadingIcon(),
+    [styles.withIcon]: withIcon(),
+    [styles.withLabel]: withLabel()
   };
 
   return createField(
@@ -64,13 +81,19 @@ export function InputField<M extends FieldValueMapping, N extends StringKeyOf<M>
     <div classList={classList}>
       {props.title && <div class={styles.title}>{props.title}</div>}
       <div class={styles.inputContainer}>
-        <div class={styles.leadingIcon}>{leadingIcon}</div>
-        <Input {...props} class={styles.input} id={props.id} placeholder={placeholder} value={props.value} />
-        {withIcon && <div class={styles.icon}>{icon}</div>}
-        {context && <div class={styles.context}>{context}</div>}
-        {withLabel && (
+        <div class={styles.leadingIcon}>{leadingIcon()}</div>
+        <Input
+          {...props}
+          class={styles.input}
+          id={props.id}
+          placeholder={label().placeholder}
+          value={props.format(value())}
+        />
+        {withIcon() && <div class={styles.icon}>{icon()}</div>}
+        {context && <div class={styles.context}>{context()}</div>}
+        {withLabel() && (
           <label for={props.id} class={styles.label}>
-            {label}
+            {label().label}
           </label>
         )}
       </div>
