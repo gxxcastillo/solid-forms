@@ -11,11 +11,11 @@
   },
   "dependencies": {
     "@gxxc/solid-forms": "workspace:^",
-    "solid-js": "^1.8.0"
+    "solid-js": "^1.8.11"
   },
   "devDependencies": {
     "typescript": "^5.3.3",
     "vite": "^5.0.8",
-    "vite-plugin-solid": "^2.8.0"
+    "vite-plugin-solid": "^2.9.1"
   }
 }

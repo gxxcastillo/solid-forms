@@ -42,11 +42,11 @@ export function createBaseFormOnSubmitHandler<
     event.preventDefault();
     const buttonName = (event.submitter as HTMLFormElement)?.name;
 
-    if (formState.isProcessing || !formState.haveValuesChanged) {
+    if (formState.isProcessing ?? !formState.haveValuesChanged) {
       return;
     }
 
-    const submitProps = fieldsToProps<P>(formState.fields);
+    const submitProps = fieldsToProps(formState.fields) as P;
     const result = isSubmitHandlerFn<P, R>(props.onSubmit)
       ? props.onSubmit(submitProps, buttonName)
       : props.onSubmit && isSubmitHandlersObject<P, R>(props.onSubmit)

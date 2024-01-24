@@ -27,6 +27,7 @@ module.exports = {
     'promise/prefer-await-to-callbacks': 0,
     'unicorn/explicit-length-check': 0,
     '@typescript-eslint/no-confusing-void-expression': 0,
+    '@typescript-eslint/no-unnecessary-type-assertion': 0,
     '@typescript-eslint/no-unsafe-call': 0,
     '@typescript-eslint/no-use-before-define': 0,
     '@typescript-eslint/no-unsafe-assignment': 0,
