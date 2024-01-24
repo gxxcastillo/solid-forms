@@ -87,9 +87,9 @@ export interface FieldInternalProps<V> {
 }
 
 export type SetValue = (value: DisplayValue, isInitialization?: boolean) => void;
-export type FormFieldEvent<E extends FormFieldElement> = FormFieldBlurEvent<E> | FormFieldInputEvent<E>;
 export type AnyFormFieldEvent = FormFieldEvent<FormFieldElement>;
 export type SelectableFormFieldEvent = FormFieldEvent<HTMLInputElement>;
+export type FormFieldEvent<E extends FormFieldElement> = FormFieldBlurEvent<E> | FormFieldInputEvent<E>;
 export type FormFieldElement = HTMLButtonElement | HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
 export type FormFieldInputEvent<E extends FormFieldElement> = Parameters<JSX.EventHandler<E, InputEvent>>[0];
 export type FormFieldBlurEvent<E extends FormFieldElement> = Parameters<JSX.EventHandler<E, FocusEvent>>[0];
@@ -97,5 +97,5 @@ export type FormFieldBlurEvent<E extends FormFieldElement> = Parameters<JSX.Even
 export type ParseFunction<V extends FieldValue> = (val: DisplayValue) => V;
 export type FormatFunction<V extends FieldValue> = (val: V | undefined) => string;
 
-export type ComponentName = 'Field' | 'Button' | 'Link';
+export type ComponentName = `${string}${'Field' | 'Button' | 'Link'}`;
 export type FormFieldComponent = JSX.Element & { componentName: ComponentName };

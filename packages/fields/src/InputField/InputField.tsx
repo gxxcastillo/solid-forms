@@ -42,9 +42,8 @@ export function InputField<M extends FieldValueMapping, N extends StringKeyOf<M>
   ]);
 
   const formField = createMemo(() => useFormField(parsedProps));
-  const [props, createField] = formField();
-
-  // const showLabel = createMemo(() => localProps.showLabel);
+  const props = createMemo(() => formField()[0]);
+  const createField = formField()[1];
   const leadingIcon = createMemo(() => localProps.leadingIcon);
   const withLabel = createMemo(
     () =>
@@ -58,8 +57,8 @@ export function InputField<M extends FieldValueMapping, N extends StringKeyOf<M>
   );
   const icon = createMemo(() => localProps.icon);
   const context = createMemo(() => localProps.context);
-  const value = createMemo(() => formState.getFieldValue(props.name));
-  const initialLabel = createMemo(() => props.label);
+  const value = createMemo(() => formState.getFieldValue(props().name));
+  const initialLabel = createMemo(() => props().label);
   const hasValue = createMemo(() => !!value());
   const label = createMemo(() =>
     useFormFieldLabel({
@@ -77,22 +76,22 @@ export function InputField<M extends FieldValueMapping, N extends StringKeyOf<M>
   };
 
   return createField(
-    'Field',
+    'InputField',
     <div classList={classList}>
-      {props.title && <div class={styles.title}>{props.title}</div>}
+      {props().title && <div class={styles.title}>{props().title}</div>}
       <div class={styles.inputContainer}>
         <div class={styles.leadingIcon}>{leadingIcon()}</div>
         <Input
           {...props}
           class={styles.input}
-          id={props.id}
+          id={props().id}
           placeholder={label().placeholder}
-          value={props.format(value())}
+          value={props().format(value())}
         />
         {withIcon() && <div class={styles.icon}>{icon()}</div>}
         {context && <div class={styles.context}>{context()}</div>}
         {withLabel() && (
-          <label for={props.id} class={styles.label}>
+          <label for={props().id} class={styles.label}>
             {label().label}
           </label>
         )}

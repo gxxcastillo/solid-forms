@@ -15,6 +15,7 @@ module.exports = {
     'import/no-extraneous-dependencies': 0,
     'import/no-default-export': 0,
     'consistent-return': 0,
+    'prefer-destructuring': 0,
     'import/extensions': 0,
     'sort-keys': 0,
     'simple-import-sort/imports': 0,
