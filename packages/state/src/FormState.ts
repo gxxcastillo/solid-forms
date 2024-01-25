@@ -19,7 +19,7 @@ export function createFormState<M extends FieldValueMapping>(state?: BaseFormSta
       return !!formState.fields.some((f) => f.hasChanged);
     },
     get isFormValid() {
-      return !!formState.fields.some((f) => !!f.errors?.length);
+      return !formState.fields.some((f) => !!f.errors?.length);
     },
     getField<N extends StringKeyOf<M>>(name: N) {
       return formState.fields?.find((f): f is FormField<M, N> => f.name === name);

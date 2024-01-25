@@ -68,8 +68,8 @@ export type FormFieldProps<
     disabled?: boolean;
     checked?: boolean;
     validator?: CustomValidator<M, N>;
-    parse: ParseFunction<M[N]>;
-    format: FormatFunction<M[N]>;
+    parse?: ParseFunction<M[N]>;
+    format?: FormatFunction<M[N]>;
   };
 
 export interface FieldInternalProps<V> {

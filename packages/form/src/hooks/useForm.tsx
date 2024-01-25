@@ -13,7 +13,7 @@ export type FormComponentProps<
   R extends Response | ResponseMapping<P>
 > = BaseFormProps<P, R>;
 
-export function useForm<M extends FieldValueMapping, R extends Response | ResponseMapping<M>>() {
+export function useForm<M extends FieldValueMapping, R extends Response | ResponseMapping<M> = M>() {
   const existingStore = useFormContext<M>();
   const hasExistingStore = !!existingStore.length;
   const formStore = hasExistingStore ? existingStore : createFormStore<M>();

@@ -4,6 +4,7 @@ import { type StringKeyOf } from 'type-fest';
 import {
   DisplayValue,
   type FieldName,
+  FieldValue,
   FieldValueMapping,
   FormState,
   FormStateMutations,
@@ -53,7 +54,7 @@ export function parse<V>(val: DisplayValue) {
   return val as V;
 }
 
-export function format<V>(val: V | undefined) {
+export function format<V extends FieldValue>(val: V | undefined) {
   return val?.toString() ?? '';
 }
 
@@ -149,15 +150,15 @@ export function createOnBlur<G extends FormElementTag, M extends FieldValueMappi
   };
 }
 
+export function createField(componentName: ComponentName, el: JSX.Element) {
+  const fieldElement = el as FormFieldComponent;
+  fieldElement.componentName = componentName;
+  return fieldElement;
+}
+
 export function useFormField<G extends FormElementTag, M extends FieldValueMapping, N extends StringKeyOf<M>>(
   initialProps: FormFieldProps<G, M, N>
 ) {
-  function createField(componentName: ComponentName, el: JSX.Element) {
-    const fieldElement = el as FormFieldComponent;
-    fieldElement.componentName = componentName;
-    return fieldElement;
-  }
-
   const props = mergeProps(useFormFieldDefaultProps, initialProps);
   const [formState, formStateMutations] = useFormContext<M>();
 

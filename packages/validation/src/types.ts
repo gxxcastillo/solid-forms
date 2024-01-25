@@ -1,13 +1,13 @@
 import { FieldValue, type FormState } from '@gxxc/solid-forms-state/types';
 
 export interface ValidationConstraints {
-  match: string;
-  max: number;
-  maxLength: number;
-  min: number;
-  minLength: number;
-  pattern: string;
-  required: boolean;
+  match?: string;
+  max?: number;
+  maxLength?: number;
+  min?: number;
+  minLength?: number;
+  pattern?: string;
+  required?: boolean;
 }
 
 export type ConstraintName = keyof ValidationConstraints;
