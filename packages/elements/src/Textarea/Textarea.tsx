@@ -9,7 +9,7 @@ declare module 'solid-js' {
 }
 
 export type TextareaElementProps = JSX.TextareaHTMLAttributes<HTMLTextAreaElement>;
-export type DirectiveProps = Pick<TextareaElementProps, 'value' | 'onInput' | 'onBlur'>;
+type DirectiveProps = Pick<TextareaElementProps, 'value' | 'onInput' | 'onBlur'>;
 
 function textareaField(element: HTMLTextAreaElement, props: Accessor<DirectiveProps>) {
   createRenderEffect(() => {

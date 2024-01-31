@@ -11,7 +11,7 @@ export interface ValidateFieldArgs<
   C extends ConstraintName
 > {
   fieldName: N;
-  fieldValue: M[N];
+  fieldValue: M[N] | undefined;
   formState: FormState<M>;
   constraintName: C;
   constraint: ValidationConstraints[C];

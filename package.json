@@ -1,6 +1,6 @@
 {
   "name": "@gxxc/solid-forms-repo",
-  "version": "0.0.1",
+  "version": "0.0.0",
   "description": "Solid.js forms",
   "repository": "https://github.com/gxxcastillo/solid-forms",
   "scripts": {
@@ -8,12 +8,15 @@
     "lint": "pnpm moon :lint",
     "test": "pnpm moon :test"
   },
-  "keywords": [],
+  "keywords": [
+    "solid-js",
+    "forms"
+  ],
   "author": "gxxcastillo",
   "license": "ISC",
   "devDependencies": {
     "@changesets/cli": "^2.27.1",
-    "@moonrepo/cli": "^1.19.3",
+    "@moonrepo/cli": "^1.20.1",
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",
     "@typescript-eslint/eslint-plugin": "^6.19.1",
     "@typescript-eslint/parser": "^6.19.1",

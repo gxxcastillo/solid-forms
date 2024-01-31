@@ -9,7 +9,7 @@ declare module 'solid-js' {
 }
 
 export type InputProps = JSX.InputHTMLAttributes<HTMLInputElement>;
-export type DirectiveProps = Pick<InputProps, 'value' | 'onInput' | 'onBlur'>;
+type DirectiveProps = Pick<InputProps, 'value' | 'onInput' | 'onBlur'>;
 
 function field(element: HTMLInputElement, props: Accessor<DirectiveProps>) {
   createRenderEffect(() => {
@@ -19,7 +19,10 @@ function field(element: HTMLInputElement, props: Accessor<DirectiveProps>) {
   createEffect(() => {
     const onInput = props().onInput;
     if (onInput) {
-      element.addEventListener<'beforeinput'>('beforeinput', onInput as (this: HTMLInputElement, ev: InputEvent) => unknown);
+      element.addEventListener<'beforeinput'>(
+        'beforeinput',
+        onInput as (this: HTMLInputElement, ev: InputEvent) => unknown
+      );
     }
   });
 
