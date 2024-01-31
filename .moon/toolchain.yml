@@ -5,6 +5,7 @@ node:
   packageManager: 'pnpm'
   pnpm:
     version: '8.13.1'
+  inferTasksFromScripts: true
   addEnginesConstraint: true
   dedupeOnLockfileChange: true
   dependencyVersionFormat: 'workspace'

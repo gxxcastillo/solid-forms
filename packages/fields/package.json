@@ -6,9 +6,7 @@
   "exports": {
     ".": "./src/index.ts"
   },
-  "scripts": {
-    "build": "tsc && vite build"
-  },
+  "scripts": {},
   "dependencies": {
     "@gxxc/solid-forms-elements": "workspace:^",
     "@gxxc/solid-forms-state": "workspace:^",

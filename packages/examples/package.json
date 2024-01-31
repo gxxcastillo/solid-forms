@@ -6,9 +6,7 @@
   "exports": {
     ".": "./src/index.ts"
   },
-  "scripts": {
-    "build": "tsc && vite build"
-  },
+  "scripts": {},
   "dependencies": {
     "@gxxc/solid-forms": "workspace:^",
     "solid-js": "^1.8.11"

@@ -8,7 +8,6 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "build": "tsc && vite build",
     "bump": "pnpm changeset version",
     "publish": "pnpm changeset publish"
   },
