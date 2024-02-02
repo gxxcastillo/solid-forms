@@ -1,14 +1,12 @@
 {
   "name": "@gxxc/solid-forms-fields",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.0.1",
   "type": "module",
   "exports": {
     ".": "./src/index.ts"
   },
-  "scripts": {
-    "build": "tsc && vite build"
-  },
+  "scripts": {},
   "dependencies": {
     "@gxxc/solid-forms-elements": "workspace:^",
     "@gxxc/solid-forms-state": "workspace:^",

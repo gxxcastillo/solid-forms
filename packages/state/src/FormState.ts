@@ -2,7 +2,7 @@ import { mergeProps } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import type { StringKeyOf } from 'type-fest';
 
-import { BaseFormState, FieldValueMapping, FormField, FormStore } from './types';
+import { type BaseFormState, type FieldValueMapping, type FormField, type FormStore } from './types';
 
 export const initialFormState = {
   fields: [],

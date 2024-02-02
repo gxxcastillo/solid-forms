@@ -1,9 +1,9 @@
-import { StringKeyOf } from 'type-fest';
+import { type StringKeyOf } from 'type-fest';
 
-import { ErrorMessages, FieldValueMapping, type FormState } from '@gxxc/solid-forms-state/types';
+import { type ErrorMessages, type FieldValueMapping, type FormState } from '@gxxc/solid-forms-state/types';
 
 import { constraintConfigs } from './constraintConfigs';
-import { ConstraintName, ValidationConstraints } from './types';
+import { type ConstraintName, type ValidationConstraints } from './types';
 
 export interface ValidateFieldArgs<
   M extends FieldValueMapping,
@@ -11,7 +11,7 @@ export interface ValidateFieldArgs<
   C extends ConstraintName
 > {
   fieldName: N;
-  fieldValue: M[N];
+  fieldValue: M[N] | undefined;
   formState: FormState<M>;
   constraintName: C;
   constraint: ValidationConstraints[C];

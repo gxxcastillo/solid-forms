@@ -2,15 +2,15 @@ import { type JSX, createMemo, mergeProps, splitProps } from 'solid-js';
 import { type StringKeyOf } from 'type-fest';
 
 import {
-  DisplayValue,
+  type DisplayValue,
   type FieldName,
-  FieldValue,
-  FieldValueMapping,
-  FormState,
-  FormStateMutations,
+  type FieldValue,
+  type FieldValueMapping,
+  type FormState,
+  type FormStateMutations,
   useFormContext
 } from '@gxxc/solid-forms-state';
-import { ValidationConstraints, constraintNames, validate } from '@gxxc/solid-forms-validation';
+import { type ValidationConstraints, constraintNames, validate } from '@gxxc/solid-forms-validation';
 
 import type {
   AnyFormFieldEvent,

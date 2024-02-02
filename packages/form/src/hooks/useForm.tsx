@@ -1,12 +1,12 @@
 import {
-  FieldValueMapping,
+  type FieldValueMapping,
   FormContextProvider,
   createFormStore,
   useFormContext
 } from '@gxxc/solid-forms-state';
 
-import { BaseForm, BaseFormProps } from '../BaseForm/BaseForm';
-import { RequestProps, Response, ResponseMapping } from '../types';
+import { BaseForm, type BaseFormProps } from '../BaseForm/BaseForm';
+import { type RequestProps, type Response, type ResponseMapping } from '../types';
 
 export type FormComponentProps<
   P extends RequestProps,

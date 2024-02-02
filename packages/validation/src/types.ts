@@ -1,4 +1,4 @@
-import { FieldValue, type FormState } from '@gxxc/solid-forms-state/types';
+import { type FieldValue, type FormState } from '@gxxc/solid-forms-state/types';
 
 export interface ValidationConstraints {
   match?: string;

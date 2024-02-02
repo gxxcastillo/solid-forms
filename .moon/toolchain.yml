@@ -4,14 +4,17 @@ node:
   version: '20.10.0'
   packageManager: 'pnpm'
   pnpm:
-    version: '8.13.1'
+    version: '8.15.1'
+  inferTasksFromScripts: true
   addEnginesConstraint: true
   dedupeOnLockfileChange: true
   dependencyVersionFormat: 'workspace'
   syncProjectWorkspaceDependencies: true
+  rootPackageOnly: false
   syncVersionManagerConfig: 'nvm'
 
 typescript:
+  createMissingConfig: true
   projectConfigFileName: 'tsconfig.json'
   rootConfigFileName: 'tsconfig.json'
   routeOutDirToCache: true

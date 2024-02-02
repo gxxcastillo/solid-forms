@@ -1,5 +1,5 @@
 import { type JSX } from 'solid-js';
-import { StringKeyOf } from 'type-fest';
+import { type StringKeyOf } from 'type-fest';
 
 import {
   type DisplayValue,

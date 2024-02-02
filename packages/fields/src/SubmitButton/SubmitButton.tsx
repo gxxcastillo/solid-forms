@@ -1,11 +1,11 @@
 import { createMemo, children as prepareChildren, splitProps } from 'solid-js';
-import { StringKeyOf } from 'type-fest';
+import { type StringKeyOf } from 'type-fest';
 
 import { Button } from '@gxxc/solid-forms-elements';
-import { FieldValueMapping, useFormContext } from '@gxxc/solid-forms-state';
+import { type FieldValueMapping, useFormContext } from '@gxxc/solid-forms-state';
 
 import { createField } from '../hooks';
-import { FormFieldProps } from '../types';
+import { type FormFieldProps } from '../types';
 
 export type SubmitButtonProps<M extends FieldValueMapping, N extends StringKeyOf<M>> = Omit<
   FormFieldProps<'input', M, N>,
@@ -35,7 +35,7 @@ export function SubmitButton<M extends FieldValueMapping, N extends StringKeyOf<
       : parsedProps.name
         ? () => parsedProps.setValue?.(parsedProps.parse?.(parsedProps.value))
         : undefined,
-    isDisabled: localProps.isDisabled || (!localProps.isDisabled && !formState.isFormValid),
+    isDisabled: localProps.isDisabled ?? (!localProps.isDisabled && !formState.isFormValid),
     children: prepareChildren(() => parsedProps.children)
   }));
 

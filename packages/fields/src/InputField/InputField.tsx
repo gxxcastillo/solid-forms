@@ -2,10 +2,10 @@ import { type JSX, createMemo, splitProps } from 'solid-js';
 import { type StringKeyOf } from 'type-fest';
 
 import { Input } from '@gxxc/solid-forms-elements';
-import { FieldValueMapping, FormState, useFormContext } from '@gxxc/solid-forms-state';
+import { type FieldValueMapping, type FormState, useFormContext } from '@gxxc/solid-forms-state';
 
 import { useFormField, useFormFieldLabel } from '../hooks';
-import { FormatFunction, type FormFieldProps } from '../types';
+import { type FormatFunction, type FormFieldProps } from '../types';
 import styles from './InputField.module.css';
 
 export type ShowIconFn<M extends FieldValueMapping, N extends StringKeyOf<M>> = (
@@ -49,12 +49,12 @@ export function InputField<M extends FieldValueMapping, N extends StringKeyOf<M>
   const withLabel = createMemo(
     () =>
       typeof localProps.showLabel === 'function' &&
-      localProps.showLabel(value() as M[N], formState as FormState<M>)
+      localProps.showLabel(value()!, formState as FormState<M>)
   );
   const withIcon = createMemo(
     () =>
       typeof localProps.showIcon === 'function' &&
-      localProps.showIcon(value() as M[N], formState as FormState<M>)
+      localProps.showIcon(value()!, formState as FormState<M>)
   );
   const icon = createMemo(() => localProps.icon);
   const context = createMemo(() => localProps.context);

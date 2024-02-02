@@ -1,15 +1,15 @@
-import { FieldValueMapping, FormFields, FormState, FormStateMutations } from '@gxxc/solid-forms-state';
+import { type FieldValueMapping, type FormFields, type FormState, type FormStateMutations } from '@gxxc/solid-forms-state';
 
 import {
-  BaseFormElementSubmitEvent,
-  BaseFormOnSubmit,
-  OnSubmitHandler,
-  OnSubmitHandlers,
-  RequestProps,
+  type BaseFormElementSubmitEvent,
+  type BaseFormOnSubmit,
+  type OnSubmitHandler,
+  type OnSubmitHandlers,
+  type RequestProps,
   type Response,
   type ResponseMapping
 } from '../types';
-import { BaseFormProps } from './BaseForm';
+import { type BaseFormProps } from './BaseForm';
 
 export function isObject(o: unknown) {
   return o != null && typeof o === 'object';

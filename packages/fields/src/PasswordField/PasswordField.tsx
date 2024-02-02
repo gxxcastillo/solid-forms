@@ -1,8 +1,14 @@
-import { InputField, InputFieldProps } from '../InputField/InputField';
+import { type StringKeyOf } from 'type-fest';
 
-export type PasswordFieldProps = InputFieldProps<string>;
+import { type FieldValueMapping } from '@gxxc/solid-forms-state';
 
-export function PasswordField(props: PasswordFieldProps) {
+import { InputField, type InputFieldProps } from '../InputField/InputField';
+
+export type PasswordFieldProps<M extends FieldValueMapping, N extends StringKeyOf<M>> = InputFieldProps<M, N>;
+
+export function PasswordField<M extends FieldValueMapping, N extends StringKeyOf<M>>(
+  props: PasswordFieldProps<M, N>
+) {
   return <InputField {...props} />;
 }
 

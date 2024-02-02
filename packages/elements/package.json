@@ -1,14 +1,12 @@
 {
   "name": "@gxxc/solid-forms-elements",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.0.1",
   "type": "module",
   "exports": {
     ".": "./src/index.ts"
   },
-  "scripts": {
-    "build": "vite build"
-  },
+  "scripts": {},
   "dependencies": {
     "solid-js": "^1.8.11"
   },
