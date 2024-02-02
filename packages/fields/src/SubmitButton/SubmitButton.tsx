@@ -1,49 +1,54 @@
-import { splitProps } from 'solid-js';
+import { createMemo, children as prepareChildren, splitProps } from 'solid-js';
+import { type StringKeyOf } from 'type-fest';
 
 import { Button } from '@gxxc/solid-forms-elements';
-import { FieldName, FieldValue } from '@gxxc/solid-forms-state';
+import { type FieldValueMapping, useFormContext } from '@gxxc/solid-forms-state';
 
-import { useFormField } from '../hooks';
-import { FormFieldProps } from '../types';
+import { createField } from '../hooks';
+import { type FormFieldProps } from '../types';
 
-// export interface SubmitButtonProps {
-//   name?: string;
-//
-//   value?: string;
-
-//   isDisabled?: boolean;
-//   children?: JSX.Element;
-// }
-
-export type SubmitButtonProps<V = FieldValue> = FormFieldProps<'input', V> & {
-  name: FieldName;
+export type SubmitButtonProps<M extends FieldValueMapping, N extends StringKeyOf<M>> = Omit<
+  FormFieldProps<'input', M, N>,
+  'name'
+> & {
+  name?: string;
   type?: 'approve' | 'primary';
   isFullWidth?: boolean;
 };
 
-export function SubmitButton(initialProps: SubmitButtonProps) {
-  const [{ type, isFullWidth, labels, label }, parsedProps] = splitProps(initialProps, [
+export function SubmitButton<M extends FieldValueMapping, N extends StringKeyOf<M>>(
+  initialProps: SubmitButtonProps<M, N>
+) {
+  const [formState] = useFormContext();
+  const [localProps, parsedProps] = splitProps(initialProps, [
     'type',
-    'isFullWidth'
+    'isDisabled',
+    'isValid',
+    'isFullWidth',
+    'onClick'
   ]);
 
-  const [createField, props] = useFormField(parsedProps);
+  const props = createMemo(() => ({
+    type: localProps.type === 'approve' ? 'button' : 'submit',
+    onClick: localProps.onClick
+      ? localProps.onClick
+      : parsedProps.name
+        ? () => parsedProps.setValue?.(parsedProps.parse?.(parsedProps.value))
+        : undefined,
+    isDisabled: localProps.isDisabled ?? (!localProps.isDisabled && !formState.isFormValid),
+    children: prepareChildren(() => parsedProps.children)
+  }));
 
-  if (!props.isDisabled && !props.isValid) {
-    props.isDisabled = true;
-  }
-
-  if (props.name && !props.onClick) {
-    props.onClick = () => props.setValue(props.value);
-  }
-
-  const inputType = type === 'primary' ? 'submit' : 'button';
   return createField(
-    'Button',
-    <Button type={inputType} {...props}>
-      {props.children ?? 'submit'}
-    </Button>
+    'SubmitButton',
+    <div>
+      <Button
+        type={props().type}
+        {...props}
+        disabled={props().isDisabled}
+        onClick={props().onClick}
+        value={props().children()?.toString() ?? 'submit'}
+      />
+    </div>
   );
 }
-
-export default SubmitButton;

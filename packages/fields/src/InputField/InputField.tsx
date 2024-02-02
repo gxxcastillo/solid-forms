@@ -2,16 +2,17 @@ import { type JSX, createMemo, splitProps } from 'solid-js';
 import { type StringKeyOf } from 'type-fest';
 
 import { Input } from '@gxxc/solid-forms-elements';
-import { FieldValueMapping, FormState, useFormContext } from '@gxxc/solid-forms-state';
+import { type FieldValueMapping, type FormState, useFormContext } from '@gxxc/solid-forms-state';
 
 import { useFormField, useFormFieldLabel } from '../hooks';
-import { type FormFieldProps } from '../types';
+import { type FormatFunction, type FormFieldProps } from '../types';
 import styles from './InputField.module.css';
 
 export type ShowIconFn<M extends FieldValueMapping, N extends StringKeyOf<M>> = (
   value: M[N] | undefined,
   formState?: FormState<M>
 ) => boolean;
+
 export type ShowLabelFn<M extends FieldValueMapping, N extends StringKeyOf<M>> = (
   value: M[N] | undefined,
   formState?: FormState<M>
@@ -48,18 +49,19 @@ export function InputField<M extends FieldValueMapping, N extends StringKeyOf<M>
   const withLabel = createMemo(
     () =>
       typeof localProps.showLabel === 'function' &&
-      localProps.showLabel(value() as M[N], formState as FormState<M>)
+      localProps.showLabel(value()!, formState as FormState<M>)
   );
   const withIcon = createMemo(
     () =>
       typeof localProps.showIcon === 'function' &&
-      localProps.showIcon(value() as M[N], formState as FormState<M>)
+      localProps.showIcon(value()!, formState as FormState<M>)
   );
   const icon = createMemo(() => localProps.icon);
   const context = createMemo(() => localProps.context);
   const value = createMemo(() => formState.getFieldValue(props().name));
   const initialLabel = createMemo(() => props().label);
   const hasValue = createMemo(() => !!value());
+  const format = createMemo(() => props().format as FormatFunction<M[N]>);
   const label = createMemo(() =>
     useFormFieldLabel({
       value: value(),
@@ -86,7 +88,7 @@ export function InputField<M extends FieldValueMapping, N extends StringKeyOf<M>
           class={styles.input}
           id={props().id}
           placeholder={label().placeholder}
-          value={props().format(value())}
+          value={format()(value())}
         />
         {withIcon() && <div class={styles.icon}>{icon()}</div>}
         {context && <div class={styles.context}>{context()}</div>}

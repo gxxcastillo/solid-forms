@@ -1,60 +1,46 @@
-import { type JSX, createSignal, splitProps } from 'solid-js';
+import { createMemo, splitProps } from 'solid-js';
+import { type StringKeyOf } from 'type-fest';
 
 import { Textarea } from '@gxxc/solid-forms-elements';
+import { type FieldValueMapping, useFormContext } from '@gxxc/solid-forms-state';
 
 import { useFormField, useFormFieldLabel } from '../hooks';
+import { type FormFieldProps } from '../types';
 import styles from './TextareaField.module.css';
 
-type OnInputHandler = JSX.EventHandler<HTMLTextAreaElement, InputEvent>;
-type OnInputEvent = Parameters<OnInputHandler>[0];
+export type TextAreaFieldProps<M extends FieldValueMapping, N extends StringKeyOf<M>> = FormFieldProps<
+  'textarea',
+  M,
+  N
+> & {
+  title?: string;
+};
 
-export function TextAreaField(initialProps: any) {
-  function onInput(event?: OnInputEvent) {
-    const textareaEl = event?.target;
-    const currentHeight = textareaEl?.clientHeight;
-    if (heightOffset === undefined) {
-      setHeightOffset(120 - (currentHeight || 0));
-    } else if (textareaEl) {
-      const hasOverflow = textareaEl.scrollHeight > textareaEl.clientHeight;
+export function TextAreaField<M extends FieldValueMapping, N extends StringKeyOf<M>>(
+  initialProps: TextAreaFieldProps<M, N>
+) {
+  const [formState] = useFormContext<M>();
+  const [localProps, parsedProps] = splitProps(initialProps, ['title']);
 
-      if (hasOverflow) {
-        setHeight(textareaEl.scrollHeight + props.heightOffset);
-      }
-    }
-
-    if (event) {
-      props.onInput?.(event);
-    }
-  }
-
-  // @TODO - Re-implement Markdown support
-  function onChangeHandlerMarkdown(value?: string, event?: OnInputEvent) {
-    onInput(event);
-  }
-
-  const TEXTAREA_MIN_HEIGHT = 160;
-  const [heightOffset, setHeightOffset] = createSignal<number>();
-  const [height, setHeight] = createSignal(TEXTAREA_MIN_HEIGHT);
-  const [createField, props] = useFormField<HTMLTextAreaElement>(initialProps);
-
-  const { placeholder } = useFormFieldLabel({
-    value: props.value,
-    label: props.label
-  });
+  const formField = createMemo(() => useFormField(parsedProps));
+  const props = createMemo(() => formField()[0]);
+  const createField = formField()[1];
+  const value = createMemo(() => formState.getFieldValue(props().name));
+  const initialLabel = createMemo(() => props().label);
+  const label = createMemo(() =>
+    useFormFieldLabel({
+      value: value(),
+      label: initialLabel()
+    })
+  );
 
   return createField(
-    'Field',
+    'TextareaField',
     <div class={styles.TextArea}>
-      {props.title && <div class={styles.title}>{props.title}</div>}
+      {localProps.title && <div class={styles.title}>{localProps.title}</div>}
       <div class={styles.textAreaContainer}>
         <div class={styles.textArea}>
-          <Textarea
-            placeholder={placeholder}
-            value={props.value}
-            style={{ height: props.height }}
-            class={styles.textAreaEl}
-            onInput={onInput}
-          />
+          <Textarea {...props} placeholder={label().placeholder} class={styles.textAreaEl} />
         </div>
       </div>
     </div>

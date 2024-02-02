@@ -1,12 +1,14 @@
+import { type StringKeyOf } from 'type-fest';
+
+import { type FieldValueMapping } from '@gxxc/solid-forms-state';
 import { Checkbox } from '@gxxc/solid-forms-elements';
 
-import { FormFieldProps } from '../types';
+import { type FormFieldProps } from '../types';
 import styles from './CheckboxField.module.css';
 
-// ElementProps<HTMLInputElement>,
-export interface CheckboxFieldProps<V> extends FormFieldProps<'input', V> {}
+export type CheckboxFieldProps<M extends FieldValueMapping, N extends StringKeyOf<M>> = FormFieldProps<'input', M, N>;
 
-export function CheckboxField<V>({ value, label, errors: errs, ...props }: CheckboxFieldProps<V>) {
+export function CheckboxField<M extends FieldValueMapping, N extends StringKeyOf<M>>({ value, label, errors: errs, ...props }: CheckboxFieldProps<M, N>) {
   const error = errs?.[0]; // @TODO
   const { id, checked, disabled } = props;
 

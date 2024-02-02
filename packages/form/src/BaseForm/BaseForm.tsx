@@ -1,11 +1,11 @@
-import { For, JSX, children, mergeProps } from 'solid-js';
+import { For, type JSX, children, mergeProps } from 'solid-js';
 
 import { useFormContext } from '@gxxc/solid-forms-state';
 
 import {
   type BaseFormOnSubmit,
   type FormErrors,
-  RequestProps,
+  type RequestProps,
   type Response,
   type ResponseMapping
 } from '../types';
@@ -61,7 +61,8 @@ export function BaseForm<P extends RequestProps, R extends Response | ResponseMa
           return <div>{child}</div>;
         }}
       </For>
-
+      
+      <For each={formButtons}>{(child) => <div>{child}</div>}</For>
       <For each={formState.errors}>{(child) => <div>{child}</div>}</For>
     </form>
   );

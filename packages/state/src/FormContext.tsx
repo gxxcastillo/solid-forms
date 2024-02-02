@@ -1,7 +1,7 @@
-import { type Context, JSX, children, createContext, useContext } from 'solid-js';
+import { type Context, type JSX, children, createContext, useContext } from 'solid-js';
 
 import { createFormStore } from './FormState';
-import { FieldValueMapping, FormStore } from './types';
+import { type FieldValueMapping, type FormStore } from './types';
 
 export const FormContext = createFormContext();
 

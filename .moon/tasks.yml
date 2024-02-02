@@ -28,15 +28,10 @@ tasks:
     #   - '~:lint'
     #   - '~:format'
 
-  type:
+  types:
     command:
       - 'tsc'
-      # Use incremental builds with project references
-      - '--build'
-      # Always use pretty output
-      - '--pretty'
-      # Use verbose logging to see affected projects
-      - '--verbose'
+      - '--noEmit'
     inputs:
       # Source and test files
       - 'src/**/*'
@@ -48,9 +43,6 @@ tasks:
       - 'tsconfig.*.json'
       # Root configs (extended from only)
       - '/tsconfig.options.json'
-    outputs:
-      # Matches `compilerOptions.outDir`
-      - 'lib'
 
   lint:
     command:

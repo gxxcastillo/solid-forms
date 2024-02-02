@@ -1,4 +1,4 @@
-import { ConstraintConfigs, ConstraintName } from './types';
+import { type ConstraintConfigs, type ConstraintName } from './types';
 
 export const constraintConfigs: ConstraintConfigs = {
   match: {

@@ -1,5 +1,5 @@
 import { type JSX } from 'solid-js';
-import { StringKeyOf } from 'type-fest';
+import { type StringKeyOf } from 'type-fest';
 
 import {
   type DisplayValue,
@@ -68,8 +68,8 @@ export type FormFieldProps<
     disabled?: boolean;
     checked?: boolean;
     validator?: CustomValidator<M, N>;
-    parse: ParseFunction<M[N]>;
-    format: FormatFunction<M[N]>;
+    parse?: ParseFunction<M[N]>;
+    format?: FormatFunction<M[N]>;
   };
 
 export interface FieldInternalProps<V> {

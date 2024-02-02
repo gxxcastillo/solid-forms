@@ -1,6 +1,6 @@
 import { type JSX } from 'solid-js';
 
-import { type ErrorMessages, type FieldValue, FieldValueMapping } from '@gxxc/solid-forms-state';
+import { type ErrorMessages, type FieldValue, type FieldValueMapping } from '@gxxc/solid-forms-state';
 
 export type DefaultFieldValue = string;
 export type FieldName = string;

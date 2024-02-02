@@ -1,7 +1,7 @@
 {
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "cSpell.words": ["beforeinput", "moonrepo", "solidjs", "vinxi"],
+  "cSpell.words": ["beforeinput", "moonrepo", "nvmrc", "solidjs", "vinxi"],
   "typescript.tsdk": "node_modules/typescript/lib",
   "local-history.path": "~/.config/vscode-history"
 }

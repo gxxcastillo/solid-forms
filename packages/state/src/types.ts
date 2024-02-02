@@ -1,4 +1,4 @@
-import { StringKeyOf } from 'type-fest';
+import { type StringKeyOf } from 'type-fest';
 
 export type DefaultFieldValue = string;
 export type FieldName = string;

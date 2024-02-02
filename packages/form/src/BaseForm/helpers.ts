@@ -1,15 +1,15 @@
-import { FieldValueMapping, FormFields, FormState, FormStateMutations } from '@gxxc/solid-forms-state';
+import { type FieldValueMapping, type FormFields, type FormState, type FormStateMutations } from '@gxxc/solid-forms-state';
 
 import {
-  BaseFormElementSubmitEvent,
-  BaseFormOnSubmit,
-  OnSubmitHandler,
-  OnSubmitHandlers,
-  RequestProps,
+  type BaseFormElementSubmitEvent,
+  type BaseFormOnSubmit,
+  type OnSubmitHandler,
+  type OnSubmitHandlers,
+  type RequestProps,
   type Response,
   type ResponseMapping
 } from '../types';
-import { BaseFormProps } from './BaseForm';
+import { type BaseFormProps } from './BaseForm';
 
 export function isObject(o: unknown) {
   return o != null && typeof o === 'object';
@@ -42,11 +42,11 @@ export function createBaseFormOnSubmitHandler<
     event.preventDefault();
     const buttonName = (event.submitter as HTMLFormElement)?.name;
 
-    if (formState.isProcessing || !formState.haveValuesChanged) {
+    if (formState.isProcessing ?? !formState.haveValuesChanged) {
       return;
     }
 
-    const submitProps = fieldsToProps<P>(formState.fields);
+    const submitProps = fieldsToProps(formState.fields) as P;
     const result = isSubmitHandlerFn<P, R>(props.onSubmit)
       ? props.onSubmit(submitProps, buttonName)
       : props.onSubmit && isSubmitHandlersObject<P, R>(props.onSubmit)
