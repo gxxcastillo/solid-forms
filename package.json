@@ -5,7 +5,9 @@
   "description": "Solid.js forms",
   "repository": "https://github.com/gxxcastillo/solid-forms",
   "scripts": {
-    "clean": "find . -name 'node_modules' -print -type d -prune -exec rm -rf '{}' + ",
+    "clean": "pnpm clean:modules && pnpm clean:dist",
+    "clean:modules": "find . -name 'node_modules' -print -type d -prune -exec rm -rf '{}' + ",
+    "clean:dist": "find . -name 'dist' -print -type d -prune -exec rm -rf '{}' + ",
     "lint": "pnpm moon :lint",
     "types": "pnpm moon :types",
     "test": "pnpm moon :test",

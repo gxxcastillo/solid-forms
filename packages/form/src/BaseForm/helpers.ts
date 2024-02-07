@@ -1,4 +1,9 @@
-import { type FieldValueMapping, type FormFields, type FormState, type FormStateMutations } from '@gxxc/solid-forms-state';
+import {
+  type FieldValueMapping,
+  type FormFields,
+  type FormState,
+  type FormStateMutations
+} from '@gxxc/solid-forms-state';
 
 import {
   type BaseFormElementSubmitEvent,

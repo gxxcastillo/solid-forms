@@ -6,7 +6,6 @@
   "exports": {
     ".": "./src/index.ts"
   },
-  "scripts": {},
   "dependencies": {
     "@gxxc/solid-forms": "workspace:^",
     "solid-js": "^1.8.11"
@@ -14,6 +13,7 @@
   "devDependencies": {
     "typescript": "^5.3.3",
     "vite": "^5.0.8",
+    "vite-plugin-dts": "^3.7.2",
     "vite-plugin-solid": "^2.9.1"
   }
 }

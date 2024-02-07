@@ -4,9 +4,15 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": {
+      "development": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "import": "./dist/solid-forms-fields.js"
+    }
   },
-  "scripts": {},
+  "files": [
+    "dist"
+  ],
   "dependencies": {
     "@gxxc/solid-forms-elements": "workspace:^",
     "@gxxc/solid-forms-state": "workspace:^",
@@ -17,6 +23,10 @@
     "type-fest": "^4.9.0",
     "typescript": "^5.3.3",
     "vite": "^5.0.8",
+    "vite-plugin-dts": "^3.7.2",
     "vite-plugin-solid": "^2.9.1"
+  },
+  "peerDependencies": {
+    "solid-js": "^1.8.11"
   }
 }

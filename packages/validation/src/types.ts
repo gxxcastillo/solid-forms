@@ -1,4 +1,4 @@
-import { type FieldValue, type FormState } from '@gxxc/solid-forms-state/types';
+import { type FieldValue, type FormState } from '@gxxc/solid-forms-state';
 
 export interface ValidationConstraints {
   match?: string;
@@ -12,10 +12,6 @@ export interface ValidationConstraints {
 
 export type ConstraintName = keyof ValidationConstraints;
 export type Constraint = ValidationConstraints[ConstraintName];
-
-// export type ValidationConstraints = {
-//   [K in ConstraintName]?: ConstraintTypeMap[K];
-// };
 
 export interface ConstraintConfig {
   validate: (v: FieldValue, c: Constraint | undefined, s: FormState) => boolean;

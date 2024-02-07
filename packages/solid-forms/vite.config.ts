@@ -1,13 +1,16 @@
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
 import dts from 'vite-plugin-dts';
 import solid from 'vite-plugin-solid';
 
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
 export default defineConfig({
-  plugins: [solid(), dts()],
+  plugins: [solid(), dts({ include: ['src'], rollupTypes: true })],
   build: {
     lib: {
-      entry: 'src/index.ts',
-      name: 'solid-forms',
+      entry: resolve(__dirname, 'src/index.ts'),
       formats: ['es']
     },
     rollupOptions: {

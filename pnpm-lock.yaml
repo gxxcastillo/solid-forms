@@ -75,6 +75,9 @@ importers:
       vite:
         specifier: ^5.0.8
         version: 5.0.12
+      vite-plugin-dts:
+        specifier: ^3.7.2
+        version: 3.7.2(typescript@5.3.3)(vite@5.0.12)
       vite-plugin-solid:
         specifier: ^2.9.1
         version: 2.9.1(solid-js@1.8.12)(vite@5.0.12)
@@ -94,6 +97,9 @@ importers:
       vite:
         specifier: ^5.0.8
         version: 5.0.12
+      vite-plugin-dts:
+        specifier: ^3.7.2
+        version: 3.7.2(typescript@5.3.3)(vite@5.0.12)
       vite-plugin-solid:
         specifier: ^2.9.1
         version: 2.9.1(solid-js@1.8.12)(vite@5.0.12)
@@ -122,6 +128,9 @@ importers:
       vite:
         specifier: ^5.0.8
         version: 5.0.12
+      vite-plugin-dts:
+        specifier: ^3.7.2
+        version: 3.7.2(typescript@5.3.3)(vite@5.0.12)
       vite-plugin-solid:
         specifier: ^2.9.1
         version: 2.9.1(solid-js@1.8.12)(vite@5.0.12)
@@ -141,6 +150,9 @@ importers:
       vite:
         specifier: ^5.0.8
         version: 5.0.12
+      vite-plugin-dts:
+        specifier: ^3.7.2
+        version: 3.7.2(typescript@5.3.3)(vite@5.0.12)
       vite-plugin-solid:
         specifier: ^2.9.1
         version: 2.9.1(solid-js@1.8.12)(vite@5.0.12)
@@ -148,10 +160,10 @@ importers:
   packages/solid-forms:
     dependencies:
       '@gxxc/solid-forms-fields':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../fields
       '@gxxc/solid-forms-form':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../form
       solid-js:
         specifier: ^1.8.11
@@ -185,6 +197,9 @@ importers:
       vite:
         specifier: ^5.0.8
         version: 5.0.12
+      vite-plugin-dts:
+        specifier: ^3.7.2
+        version: 3.7.2(typescript@5.3.3)(vite@5.0.12)
       vite-plugin-solid:
         specifier: ^2.9.1
         version: 2.9.1(solid-js@1.8.12)(vite@5.0.12)
@@ -207,6 +222,9 @@ importers:
       vite:
         specifier: ^5.0.8
         version: 5.0.12
+      vite-plugin-dts:
+        specifier: ^3.7.2
+        version: 3.7.2(typescript@5.3.3)(vite@5.0.12)
       vite-plugin-solid:
         specifier: ^2.9.1
         version: 2.9.1(solid-js@1.8.12)(vite@5.0.12)

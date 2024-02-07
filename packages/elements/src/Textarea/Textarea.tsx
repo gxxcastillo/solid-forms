@@ -29,7 +29,10 @@ function textareaField(element: HTMLTextAreaElement, props: Accessor<DirectivePr
   createEffect(() => {
     const onBlur = props().onBlur;
     if (onBlur) {
-      element.addEventListener<'blur'>('blur', onBlur as (this: HTMLTextAreaElement, ev: FocusEvent) => unknown);
+      element.addEventListener<'blur'>(
+        'blur',
+        onBlur as (this: HTMLTextAreaElement, ev: FocusEvent) => unknown
+      );
     }
   });
 }

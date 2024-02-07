@@ -8,7 +8,7 @@ import {
   type FieldValue,
   type FieldValueMapping,
   type FormState
-} from '@gxxc/solid-forms-state/types';
+} from '@gxxc/solid-forms-state';
 import { type ValidationConstraints } from '@gxxc/solid-forms-validation';
 
 export type RawFieldValue = boolean | string | undefined;

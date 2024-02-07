@@ -61,7 +61,7 @@ export function BaseForm<P extends RequestProps, R extends Response | ResponseMa
           return <div>{child}</div>;
         }}
       </For>
-      
+
       <For each={formButtons}>{(child) => <div>{child}</div>}</For>
       <For each={formState.errors}>{(child) => <div>{child}</div>}</For>
     </form>

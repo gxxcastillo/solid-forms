@@ -5,7 +5,7 @@ import { Input } from '@gxxc/solid-forms-elements';
 import { type FieldValueMapping, type FormState, useFormContext } from '@gxxc/solid-forms-state';
 
 import { useFormField, useFormFieldLabel } from '../hooks';
-import { type FormatFunction, type FormFieldProps } from '../types';
+import { type FormFieldProps, type FormatFunction } from '../types';
 import styles from './InputField.module.css';
 
 export type ShowIconFn<M extends FieldValueMapping, N extends StringKeyOf<M>> = (
@@ -48,13 +48,11 @@ export function InputField<M extends FieldValueMapping, N extends StringKeyOf<M>
   const leadingIcon = createMemo(() => localProps.leadingIcon);
   const withLabel = createMemo(
     () =>
-      typeof localProps.showLabel === 'function' &&
-      localProps.showLabel(value()!, formState as FormState<M>)
+      typeof localProps.showLabel === 'function' && localProps.showLabel(value()!, formState as FormState<M>)
   );
   const withIcon = createMemo(
     () =>
-      typeof localProps.showIcon === 'function' &&
-      localProps.showIcon(value()!, formState as FormState<M>)
+      typeof localProps.showIcon === 'function' && localProps.showIcon(value()!, formState as FormState<M>)
   );
   const icon = createMemo(() => localProps.icon);
   const context = createMemo(() => localProps.context);

@@ -17,6 +17,7 @@ module.exports = {
     'consistent-return': 0,
     'prefer-destructuring': 0,
     'import/extensions': 0,
+    'no-underscore-dangle': 0,
     'sort-keys': 0,
     'simple-import-sort/imports': 0,
     'import/prefer-default-export': 0,
@@ -26,6 +27,7 @@ module.exports = {
     'promise/prefer-await-to-then': 0,
     'promise/prefer-await-to-callbacks': 0,
     'unicorn/explicit-length-check': 0,
+    '@typescript-eslint/naming-convention': 0,
     '@typescript-eslint/no-confusing-void-expression': 0,
     '@typescript-eslint/no-unnecessary-type-assertion': 0,
     '@typescript-eslint/no-unsafe-call': 0,
@@ -36,12 +38,16 @@ module.exports = {
     '@typescript-eslint/sort-type-constituents': 0,
     '@typescript-eslint/no-redundant-type-constituents': 0,
     '@typescript-eslint/no-unsafe-argument': 0,
-    '@typescript-eslint/consistent-type-imports': [2, {
-      fixStyle: 'inline-type-imports',
-      prefer: 'type-imports'
-    }]
+    '@typescript-eslint/consistent-type-imports': [
+      2,
+      {
+        fixStyle: 'inline-type-imports',
+        prefer: 'type-imports'
+      }
+    ]
   },
   parser: '@typescript-eslint/parser',
+  ignorePatterns: ["vite.config.ts"],
   parserOptions: {
     project: ['./tsconfig.eslint.json', './apps/**/tsconfig.json', './packages/**/tsconfig.json'],
     tsconfigRootDir: __dirname

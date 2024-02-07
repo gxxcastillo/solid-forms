@@ -6,3 +6,6 @@ dist
 # moon
 .moon/cache
 .moon/docker
+
+# ts
+tsconfig.tsbuildinfo

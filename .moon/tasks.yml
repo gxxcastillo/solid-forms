@@ -31,13 +31,11 @@ tasks:
   types:
     command:
       - 'tsc'
-      - '--noEmit'
+      - '--build'
     inputs:
       # Source and test files
-      - 'src/**/*'
-      - 'tests/**/*'
-      # Type declarations
-      - 'types/**/*'
+      - '@globs(sources)'
+      - '@globs(tests)'
       # Project configs
       - 'tsconfig.json'
       - 'tsconfig.*.json'
