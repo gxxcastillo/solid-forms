@@ -17,7 +17,7 @@
     "@gxxc/solid-forms-elements": "workspace:^",
     "@gxxc/solid-forms-state": "workspace:^",
     "@gxxc/solid-forms-validation": "workspace:^",
-    "solid-js": "^1.8.11"
+    "solid-js": "^1.8.12"
   },
   "devDependencies": {
     "type-fest": "^4.9.0",
@@ -27,6 +27,6 @@
     "vite-plugin-solid": "^2.9.1"
   },
   "peerDependencies": {
-    "solid-js": "^1.8.11"
+    "solid-js": "^1.8.12"
   }
 }

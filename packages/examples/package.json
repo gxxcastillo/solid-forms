@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "@gxxc/solid-forms": "workspace:^",
-    "solid-js": "^1.8.11"
+    "solid-js": "^1.8.12"
   },
   "devDependencies": {
     "typescript": "^5.3.3",

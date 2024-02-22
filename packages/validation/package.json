@@ -14,7 +14,7 @@
     "dist"
   ],
   "dependencies": {
-    "solid-js": "^1.8.11"
+    "solid-js": "^1.8.12"
   },
   "devDependencies": {
     "@gxxc/solid-forms-state": "workspace:^",
@@ -25,6 +25,6 @@
     "vite-plugin-solid": "^2.9.1"
   },
   "peerDependencies": {
-    "solid-js": "^1.8.11"
+    "solid-js": "^1.8.12"
   }
 }
