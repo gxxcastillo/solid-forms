@@ -11,6 +11,7 @@
     "lint": "pnpm moon :lint",
     "types": "pnpm moon :types",
     "test": "pnpm moon :test",
+    "format": "pnpm moon :format",
     "bump": "pnpm changeset version",
     "publish": "pnpm changeset publish"
   },
