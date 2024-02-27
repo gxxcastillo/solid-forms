@@ -21,7 +21,7 @@
   "dependencies": {
     "@gxxc/solid-forms-fields": "workspace:*",
     "@gxxc/solid-forms-form": "workspace:*",
-    "solid-js": "^1.8.12"
+    "solid-js": "^1.8.15"
   },
   "devDependencies": {
     "typescript": "^5.3.3",
