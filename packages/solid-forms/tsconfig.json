@@ -4,21 +4,7 @@
     "rootDir": "./src",
     "outDir": "./dist",
     "jsx": "preserve",
-    "jsxImportSource": "solid-js",
-    "paths": {
-      "@gxxc/solid-forms-fields": ["../fields/src/index.ts"],
-      "@gxxc/solid-forms-fields/*": ["../fields/src/*"],
-      "@gxxc/solid-forms-form": ["../form/src/index.ts"],
-      "@gxxc/solid-forms-form/*": ["../form/src/*"]
-    }
+    "jsxImportSource": "solid-js"
   },
-  "include": ["src/**/*.js", "src/**/*.jsx", "src/**/*.ts", "src/**/*.tsx"],
-  "references": [
-    {
-      "path": "../fields"
-    },
-    {
-      "path": "../form"
-    }
-  ]
+  "include": ["src/**/*.js", "src/**/*.jsx", "src/**/*.ts", "src/**/*.tsx"]
 }
