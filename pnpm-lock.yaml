@@ -41,6 +41,7 @@ importers:
       typescript:
         specifier: ^5.3.3
         version: 5.3.3
+    publishDirectory: ./packages/solid-forms
 
   apps/basic-demo:
     dependencies:
