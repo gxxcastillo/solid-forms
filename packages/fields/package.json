@@ -14,9 +14,9 @@
     "dist"
   ],
   "dependencies": {
-    "@gxxc/solid-forms-elements": "workspace:^",
-    "@gxxc/solid-forms-state": "workspace:^",
-    "@gxxc/solid-forms-validation": "workspace:^",
+    "@gxxc/solid-forms-elements": "workspace:*",
+    "@gxxc/solid-forms-state": "workspace:*",
+    "@gxxc/solid-forms-validation": "workspace:*",
     "solid-js": "^1.8.15"
   },
   "devDependencies": {

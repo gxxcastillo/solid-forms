@@ -46,7 +46,7 @@ importers:
   apps/basic-demo:
     dependencies:
       '@gxxc/solid-forms':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../../packages/solid-forms
       '@solidjs/meta':
         specifier: ^0.29.3
@@ -86,7 +86,7 @@ importers:
   packages/examples:
     dependencies:
       '@gxxc/solid-forms':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../solid-forms
       solid-js:
         specifier: ^1.8.15
@@ -108,13 +108,13 @@ importers:
   packages/fields:
     dependencies:
       '@gxxc/solid-forms-elements':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../elements
       '@gxxc/solid-forms-state':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../state
       '@gxxc/solid-forms-validation':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../validation
       solid-js:
         specifier: ^1.8.15
@@ -139,7 +139,7 @@ importers:
   packages/form:
     dependencies:
       '@gxxc/solid-forms-state':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../state
       solid-js:
         specifier: ^1.8.15
@@ -212,7 +212,7 @@ importers:
         version: 1.8.15
     devDependencies:
       '@gxxc/solid-forms-state':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../state
       type-fest:
         specifier: ^4.9.0

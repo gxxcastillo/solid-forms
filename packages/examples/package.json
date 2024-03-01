@@ -7,7 +7,7 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@gxxc/solid-forms": "workspace:^",
+    "@gxxc/solid-forms": "workspace:*",
     "solid-js": "^1.8.15"
   },
   "devDependencies": {
