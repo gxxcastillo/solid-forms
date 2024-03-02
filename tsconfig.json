@@ -1,4 +1,24 @@
 {
   "extends": "./tsconfig.options.json",
-  "files": []
+  "files": [],
+  "references": [
+    {
+      "path": "packages/elements"
+    },
+    {
+      "path": "packages/fields"
+    },
+    {
+      "path": "packages/form"
+    },
+    {
+      "path": "packages/solid-forms"
+    },
+    {
+      "path": "packages/state"
+    },
+    {
+      "path": "packages/validation"
+    }
+  ]
 }

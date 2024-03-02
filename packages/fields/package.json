@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "development": "./src/index.ts",
@@ -16,8 +17,7 @@
   "dependencies": {
     "@gxxc/solid-forms-elements": "workspace:*",
     "@gxxc/solid-forms-state": "workspace:*",
-    "@gxxc/solid-forms-validation": "workspace:*",
-    "solid-js": "^1.8.15"
+    "@gxxc/solid-forms-validation": "workspace:*"
   },
   "devDependencies": {
     "type-fest": "^4.9.0",

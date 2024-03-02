@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "development": "./src/index.ts",
@@ -14,7 +15,6 @@
     "dist"
   ],
   "dependencies": {
-    "solid-js": "^1.8.15",
     "type-fest": "^4.8.3"
   },
   "devDependencies": {
