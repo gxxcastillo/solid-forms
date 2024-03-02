@@ -23,7 +23,7 @@
   "license": "ISC",
   "devDependencies": {
     "@changesets/cli": "^2.27.1",
-    "@moonrepo/cli": "^1.22.0",
+    "@moonrepo/cli": "^1.22.3",
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
