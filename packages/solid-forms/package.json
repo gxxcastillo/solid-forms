@@ -1,6 +1,6 @@
 {
   "name": "@gxxc/solid-forms",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "type": "module",
   "description": "Solid.js forms",
   "repository": {
@@ -18,10 +18,13 @@
   "files": [
     "dist"
   ],
+  "scripts": {
+    "prepublishOnly": "rm -rf ./package && clean-publish",
+    "postpublish": "rm -rf ./package"
+  },
   "dependencies": {
     "@gxxc/solid-forms-fields": "workspace:*",
-    "@gxxc/solid-forms-form": "workspace:*",
-    "solid-js": "^1.8.15"
+    "@gxxc/solid-forms-form": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.3.3",
@@ -31,5 +34,8 @@
   },
   "peerDependencies": {
     "solid-js": "^1.8.12"
+  },
+  "publishConfig": {
+    "directory": "package"
   }
 }

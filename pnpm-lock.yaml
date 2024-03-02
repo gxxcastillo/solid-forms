@@ -23,6 +23,9 @@ importers:
       '@typescript-eslint/parser':
         specifier: ^6.21.0
         version: 6.21.0(eslint@8.57.0)(typescript@5.3.3)
+      clean-publish:
+        specifier: ^4.3.0
+        version: 4.3.0
       eslint:
         specifier: ^8.57.0
         version: 8.57.0
@@ -47,7 +50,7 @@ importers:
     dependencies:
       '@gxxc/solid-forms':
         specifier: workspace:*
-        version: link:../../packages/solid-forms
+        version: link:../../packages/solid-forms/package
       '@solidjs/meta':
         specifier: ^0.29.3
         version: 0.29.3(solid-js@1.8.15)
@@ -87,7 +90,7 @@ importers:
     dependencies:
       '@gxxc/solid-forms':
         specifier: workspace:*
-        version: link:../solid-forms
+        version: link:../solid-forms/package
       solid-js:
         specifier: ^1.8.15
         version: 1.8.15
@@ -167,7 +170,7 @@ importers:
         specifier: workspace:*
         version: link:../form
       solid-js:
-        specifier: ^1.8.15
+        specifier: ^1.8.12
         version: 1.8.15
     devDependencies:
       typescript:
@@ -182,6 +185,7 @@ importers:
       vite-plugin-solid:
         specifier: ^2.10.1
         version: 2.10.1(solid-js@1.8.15)(vite@5.1.4)
+    publishDirectory: package
 
   packages/state:
     dependencies:
@@ -2994,6 +2998,17 @@ packages:
       consola: 3.2.3
     dev: false
 
+  /clean-publish@4.3.0:
+    resolution: {integrity: sha512-Nj2eWZGm2GUeC0il9iX31/jYYr4Fd/VEkUGagiIrYeGJUE+UbbUO1FPD5OkQfZndpYmHgnyXVg4aaniEL0vlNQ==}
+    engines: {node: '>= 16.0.0'}
+    hasBin: true
+    dependencies:
+      cross-spawn: 7.0.3
+      fast-glob: 3.3.2
+      lilconfig: 3.1.1
+      micromatch: 4.0.5
+    dev: true
+
   /clean-regexp@1.0.0:
     resolution: {integrity: sha512-GfisEZEJvzKrmGWkvfhgzcz/BllN1USeqD2V6tg14OAOgaCD2Z/PUEuxnAZ/nPvmaHRG7a8y77p1T/IRQ4D1Hw==}
     engines: {node: '>=4'}
@@ -5274,6 +5289,11 @@ packages:
     dependencies:
       prelude-ls: 1.2.1
       type-check: 0.4.0
+    dev: true
+
+  /lilconfig@3.1.1:
+    resolution: {integrity: sha512-O18pf7nyvHTckunPWCV1XUNXU1piu01y2b7ATJ0ppkUkk8ocqVWBrYjJBCwHDjD/ZWcfyrA0P4gKhzWGi5EINQ==}
+    engines: {node: '>=14'}
     dev: true
 
   /lines-and-columns@1.2.4:

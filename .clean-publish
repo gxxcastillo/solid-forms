@@ -1,0 +1,8 @@
+{
+  "withoutPublish": true,
+  "packageManager": "pnpm",
+  "tempDir": "package",
+  "fields": [
+    "dependencies"
+  ]
+}
