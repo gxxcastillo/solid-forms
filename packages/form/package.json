@@ -6,9 +6,9 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "development": "./src/index.ts",
       "types": "./dist/index.d.ts",
-      "import": "./dist/solid-forms-form.js"
+      "import": "./dist/solid-forms-form.js",
+      "development": "./src/index.ts"
     }
   },
   "files": [
