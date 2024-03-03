@@ -1,6 +1,6 @@
 {
   "name": "@gxxc/solid-forms",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "type": "module",
   "description": "Solid.js forms",
   "repository": {
