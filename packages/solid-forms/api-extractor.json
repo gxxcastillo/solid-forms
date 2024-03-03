@@ -1,0 +1,9 @@
+{
+  "bundledPackages": [
+    "@gxxc/solid-forms-elements",
+    "@gxxc/solid-forms-fields",
+    "@gxxc/solid-forms-form",
+    "@gxxc/solid-forms-state",
+    "@gxxc/solid-forms-validation"
+  ]
+}
