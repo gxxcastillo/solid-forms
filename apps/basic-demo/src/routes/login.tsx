@@ -10,9 +10,9 @@ interface LoginFormProps {
 
 function Login() {
   function onSubmit({ email, password, message }: LoginFormProps) {
-    console.log('email', email)
-    console.log('password', password)
-    console.log('message', message)
+    console.log('email', email);
+    console.log('password', password);
+    console.log('message', message);
   }
 
   const form = useForm<LoginFormProps>();

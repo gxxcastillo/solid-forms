@@ -3,7 +3,13 @@
   "files": [],
   "references": [
     {
+      "path": "apps/basic-demo"
+    },
+    {
       "path": "packages/elements"
+    },
+    {
+      "path": "packages/examples"
     },
     {
       "path": "packages/fields"

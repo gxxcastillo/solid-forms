@@ -47,7 +47,7 @@ module.exports = {
     ]
   },
   parser: '@typescript-eslint/parser',
-  ignorePatterns: ["vite.config.ts"],
+  ignorePatterns: ['vite.config.ts', 'app.config.ts'],
   parserOptions: {
     project: ['./tsconfig.eslint.json', './apps/**/tsconfig.json', './packages/**/tsconfig.json'],
     tsconfigRootDir: __dirname

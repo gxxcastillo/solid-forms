@@ -7,8 +7,8 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/solid-forms-fields.js",
-      "development": "./src/index.ts"
+      "development": "./src/index.ts",
+      "import": "./dist/solid-forms-fields.js"
     }
   },
   "files": [
@@ -20,7 +20,7 @@
     "@gxxc/solid-forms-validation": "workspace:*"
   },
   "devDependencies": {
-    "type-fest": "^4.9.0",
+    "type-fest": "^4.10.3",
     "typescript": "^5.3.3",
     "vite": "^5.1.4",
     "vite-plugin-dts": "^3.7.3",

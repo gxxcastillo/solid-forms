@@ -7,17 +7,15 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/solid-forms-state.js",
-      "development": "./src/index.ts"
+      "development": "./src/index.ts",
+      "import": "./dist/solid-forms-state.js"
     }
   },
   "files": [
     "dist"
   ],
-  "dependencies": {
-    "type-fest": "^4.8.3"
-  },
   "devDependencies": {
+    "type-fest": "^4.10.3",
     "typescript": "^5.3.3",
     "vite": "^5.1.4",
     "vite-plugin-dts": "^3.7.3",
