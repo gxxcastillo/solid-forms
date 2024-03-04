@@ -162,8 +162,6 @@ export function useFormField<G extends FormElementTag, M extends FieldValueMappi
   const props = mergeProps(useFormFieldDefaultProps, initialProps);
   const [formState, formStateMutations] = useFormContext<M>();
 
-  const { isLoading } = formState;
-
   const isSelectable = props.checked !== undefined;
   const isInitialized = formState.hasFieldBeenInitialized(props.name);
   const value = createMemo(() => formState.getFieldValue(props.name));
@@ -196,7 +194,7 @@ export function useFormField<G extends FormElementTag, M extends FieldValueMappi
   const newProps = mergeProps(props, {
     id: props.name,
     value: formattedValue(),
-    disabled: !!(!props.name || isLoading),
+    disabled: !!(!props.name || formState.isLoading),
     errors: getDisplayableErrors(props.name, formState),
     checked: currentChecked,
     isInitialized,
