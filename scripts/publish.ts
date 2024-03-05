@@ -16,6 +16,13 @@ export async function publish() {
   const packageJsonString = readFileSync(packageJsonPath, 'utf8');
   const packageJson = JSON.parse(packageJsonString);
 
+  // Only publish standard exports, others risk breaking
+  const exports = packageJson.exports['.'];
+  packageJson.exports['.'] = {
+    types: exports.types,
+    import: exports.import
+  };
+
   // We need to depend on local packages during development,
   // however, we don't want them in our published package.
   packageJson.dependencies = Object.entries(packageJson.dependencies || {}).reduce(

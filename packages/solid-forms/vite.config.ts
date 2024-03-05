@@ -11,7 +11,8 @@ const bundledPackages = [
   '@gxxc/solid-forms-fields',
   '@gxxc/solid-forms-form',
   '@gxxc/solid-forms-state',
-  '@gxxc/solid-forms-validation'
+  '@gxxc/solid-forms-validation',
+  'type-fest'
 ];
 
 export default defineConfig({
