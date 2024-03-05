@@ -6,8 +6,16 @@ import solid from 'vite-plugin-solid';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
+const bundledPackages = [
+  '@gxxc/solid-forms-elements',
+  '@gxxc/solid-forms-fields',
+  '@gxxc/solid-forms-form',
+  '@gxxc/solid-forms-state',
+  '@gxxc/solid-forms-validation'
+];
+
 export default defineConfig({
-  plugins: [solid(), dts({ rollupTypes: true })],
+  plugins: [solid(), dts({ rollupTypes: true, bundledPackages })],
   build: {
     lib: {
       entry: resolve(__dirname, 'src/index.ts'),
