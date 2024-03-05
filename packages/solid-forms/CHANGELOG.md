@@ -1,5 +1,11 @@
 # @gxxc/solid-forms
 
+## 0.0.7
+
+### Patch Changes
+
+- Fix exported types
+
 ## 0.0.6
 
 ### Patch Changes
