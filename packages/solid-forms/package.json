@@ -19,10 +19,6 @@
   "files": [
     "dist"
   ],
-  "scripts": {
-    "prepublishOnly": "rm -rf ./package && clean-publish",
-    "postpublish": "rm -rf ./package"
-  },
   "dependencies": {
     "@gxxc/solid-forms-fields": "workspace:*",
     "@gxxc/solid-forms-form": "workspace:*"
@@ -35,8 +31,5 @@
   },
   "peerDependencies": {
     "solid-js": "^1.8.12"
-  },
-  "publishConfig": {
-    "directory": "package"
   }
 }

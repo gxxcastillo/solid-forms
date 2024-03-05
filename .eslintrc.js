@@ -38,6 +38,7 @@ module.exports = {
     '@typescript-eslint/sort-type-constituents': 0,
     '@typescript-eslint/no-redundant-type-constituents': 0,
     '@typescript-eslint/no-unsafe-argument': 0,
+    '@typescript-eslint/non-nullable-type-assertion-style': 0,
     '@typescript-eslint/consistent-type-imports': [
       2,
       {
