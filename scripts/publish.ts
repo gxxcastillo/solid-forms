@@ -38,7 +38,9 @@ export async function publish() {
     const originalPackageJson = JSON.parse(packageJsonString);
     writeFileSync(packageJsonPath, JSON.stringify(originalPackageJson, null, 2));
 
-    console.log('child process exited with code ' + code?.toString());
+    if (code !== 0) {
+      console.log('Publish was unsuccessful, exited with code ' + code?.toString());
+    }
   });
 }
 
