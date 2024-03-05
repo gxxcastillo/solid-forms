@@ -31,17 +31,19 @@ pnpm moon :lint
 ### Publishing
 
 Changesets should be provided on every PR. To create a changeset run:
+
 ```bash
 pnpm changeset
-``` 
+```
 
 To bump versions prior to publishing:
-```bash 
+
+```bash
 pnpm bump
 ```
 
 To publish:
-```bash
-pnpm publish
-```
 
+```bash
+pnpm run publish
+```
