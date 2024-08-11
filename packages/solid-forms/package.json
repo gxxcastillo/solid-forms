@@ -12,8 +12,7 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "development": "./src/index.ts",
-      "import": "./dist/solid-forms.js"
+      "import": "./src/index.ts"
     }
   },
   "files": [

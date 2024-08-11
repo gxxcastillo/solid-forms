@@ -7,8 +7,7 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "development": "./src/index.ts",
-      "import": "./dist/solid-forms-validation.js"
+      "import": "./src/index.ts"
     }
   },
   "files": [
@@ -23,6 +22,6 @@
     "vite-plugin-solid": "^2.3.0"
   },
   "peerDependencies": {
-    "solid-js": "^1.8.12"
+    "solid-js": "^1.8.20"
   }
 }
