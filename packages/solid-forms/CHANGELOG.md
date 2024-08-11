@@ -1,5 +1,14 @@
 # @gxxc/solid-forms
 
+## 0.0.10
+
+### Patch Changes
+
+- 05d16fd: Fixes inter-monorepo dependencies
+- Updated dependencies [05d16fd]
+  - @gxxc/solid-forms-fields@0.0.1
+  - @gxxc/solid-forms-form@0.0.1
+
 ## 0.0.9
 
 ### Patch Changes
