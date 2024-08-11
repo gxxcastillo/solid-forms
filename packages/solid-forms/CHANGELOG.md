@@ -1,5 +1,11 @@
 # @gxxc/solid-forms
 
+## 0.0.8
+
+### Patch Changes
+
+- Fixes some bugs
+
 ## 0.0.7
 
 ### Patch Changes
