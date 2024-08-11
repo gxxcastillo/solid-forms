@@ -1,5 +1,14 @@
 # @gxxc/solid-forms
 
+## 0.0.9
+
+### Patch Changes
+
+- Fix types?
+- Updated dependencies
+  - @gxxc/solid-forms-fields@0.0.1
+  - @gxxc/solid-forms-form@0.0.1
+
 ## 0.0.8
 
 ### Patch Changes
