@@ -44,7 +44,7 @@ export function BaseForm<P extends RequestProps, R extends Response | ResponseMa
       <For each={childrenArray}>
         {(child) => {
           const componentName = (child as unknown as { componentName: string })?.componentName;
-          if (componentName.includes('Button')) {
+          if (componentName?.includes('Button')) {
             formButtons.push(child);
             return;
           }
@@ -54,7 +54,7 @@ export function BaseForm<P extends RequestProps, R extends Response | ResponseMa
             return;
           }
 
-          if (componentName.includes('Field')) {
+          if (componentName?.includes('Field')) {
             return child;
           }
 

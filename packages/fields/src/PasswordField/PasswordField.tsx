@@ -9,6 +9,7 @@ export type PasswordFieldProps<M extends FieldValueMapping, N extends StringKeyO
 export function PasswordField<M extends FieldValueMapping, N extends StringKeyOf<M>>(
   props: PasswordFieldProps<M, N>
 ) {
+  props.type = 'password';
   return <InputField {...props} />;
 }
 

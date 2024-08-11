@@ -4,7 +4,7 @@ import { type StringKeyOf } from 'type-fest';
 import { Textarea } from '@gxxc/solid-forms-elements';
 import { type FieldValueMapping, useFormContext } from '@gxxc/solid-forms-state';
 
-import { useFormField, useFormFieldLabel } from '../hooks';
+import { createFormField, useFormFieldLabel } from '../hooks';
 import { type FormFieldProps } from '../types';
 import styles from './TextareaField.module.css';
 
@@ -22,11 +22,9 @@ export function TextAreaField<M extends FieldValueMapping, N extends StringKeyOf
   const [formState] = useFormContext<M>();
   const [localProps, parsedProps] = splitProps(initialProps, ['title']);
 
-  const formField = createMemo(() => useFormField(parsedProps));
-  const props = createMemo(() => formField()[0]);
-  const createField = formField()[1];
-  const value = createMemo(() => formState.getFieldValue(props().name));
-  const initialLabel = createMemo(() => props().label);
+  const [props, createField] = createFormField<'textarea', M, N>(parsedProps)();
+  const value = createMemo(() => formState.getFieldValue(props.name));
+  const initialLabel = createMemo(() => props.label);
   const label = createMemo(() =>
     useFormFieldLabel({
       value: value(),

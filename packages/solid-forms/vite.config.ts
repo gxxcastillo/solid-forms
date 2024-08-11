@@ -18,6 +18,15 @@ const bundledPackages = [
 export default defineConfig({
   plugins: [solid(), dts({ rollupTypes: true, bundledPackages })],
   build: {
+    minify: false,
+    terserOptions: {
+      compress: {
+        drop_console: false,
+        drop_debugger: false
+      },
+      mangle: false
+    },
+    sourcemap: true,
     lib: {
       entry: resolve(__dirname, 'src/index.ts'),
       formats: ['es']

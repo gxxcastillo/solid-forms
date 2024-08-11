@@ -1,4 +1,4 @@
-import { type JSX, createMemo, mergeProps, splitProps } from 'solid-js';
+import { type JSX, createMemo, createSignal, mergeProps, splitProps } from 'solid-js';
 import { type StringKeyOf } from 'type-fest';
 
 import {
@@ -24,7 +24,7 @@ import type {
   SetValue
 } from '../types';
 
-export const useFormFieldDefaultProps = {
+export const formFieldDefaultProps = {
   parse,
   format,
   isControlled: true,
@@ -156,10 +156,12 @@ export function createField(componentName: ComponentName, el: JSX.Element) {
   return fieldElement;
 }
 
-export function useFormField<G extends FormElementTag, M extends FieldValueMapping, N extends StringKeyOf<M>>(
-  initialProps: FormFieldProps<G, M, N>
-) {
-  const props = mergeProps(useFormFieldDefaultProps, initialProps);
+export function createFormField<
+  G extends FormElementTag,
+  M extends FieldValueMapping,
+  N extends StringKeyOf<M>
+>(initialProps: FormFieldProps<G, M, N>) {
+  const props = mergeProps(formFieldDefaultProps, initialProps);
   const [formState, formStateMutations] = useFormContext<M>();
 
   const isSelectable = props.checked !== undefined;
@@ -203,5 +205,5 @@ export function useFormField<G extends FormElementTag, M extends FieldValueMappi
     onBlur
   });
 
-  return [newProps, createField] as const;
+  return createMemo(() => [newProps, createField] as const);
 }

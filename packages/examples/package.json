@@ -8,12 +8,12 @@
   },
   "dependencies": {
     "@gxxc/solid-forms": "workspace:*",
-    "solid-js": "^1.8.15"
+    "solid-js": "^1.8.20"
   },
   "devDependencies": {
-    "typescript": "^5.3.3",
-    "vite": "^5.1.5",
-    "vite-plugin-dts": "^3.7.3",
-    "vite-plugin-solid": "^2.10.1"
+    "typescript": "^5.5.4",
+    "vite": "^5.4.0",
+    "vite-plugin-dts": "^3.9.1",
+    "vite-plugin-solid": "^2.10.2"
   }
 }

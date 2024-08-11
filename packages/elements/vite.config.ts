@@ -9,6 +9,15 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 export default defineConfig({
   plugins: [solid(), dts({ rollupTypes: true })],
   build: {
+    minify: false,
+    sourcemap: true,
+    terserOptions: {
+      compress: {
+        drop_console: false,
+        drop_debugger: false
+      },
+      mangle: false
+    },
     lib: {
       entry: resolve(__dirname, 'src/index.ts'),
       formats: ['es']

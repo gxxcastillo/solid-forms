@@ -4,7 +4,7 @@ import { type StringKeyOf } from 'type-fest';
 import { Input } from '@gxxc/solid-forms-elements';
 import { type FieldValueMapping, type FormState, useFormContext } from '@gxxc/solid-forms-state';
 
-import { useFormField, useFormFieldLabel } from '../hooks';
+import { createFormField, useFormFieldLabel } from '../hooks';
 import { type FormFieldProps, type FormatFunction } from '../types';
 import styles from './InputField.module.css';
 
@@ -35,6 +35,7 @@ export function InputField<M extends FieldValueMapping, N extends StringKeyOf<M>
 ) {
   const [formState] = useFormContext<M>();
   const [localProps, parsedProps] = splitProps(initialProps, [
+    'type',
     'showLabel',
     'leadingIcon',
     'showIcon',
@@ -42,9 +43,7 @@ export function InputField<M extends FieldValueMapping, N extends StringKeyOf<M>
     'context'
   ]);
 
-  const formField = createMemo(() => useFormField(parsedProps));
-  const props = createMemo(() => formField()[0]);
-  const createField = formField()[1];
+  const [props, createField] = createFormField<'input', M, N>(parsedProps)();
   const leadingIcon = createMemo(() => localProps.leadingIcon);
   const withLabel = createMemo(
     () =>
@@ -56,10 +55,10 @@ export function InputField<M extends FieldValueMapping, N extends StringKeyOf<M>
   );
   const icon = createMemo(() => localProps.icon);
   const context = createMemo(() => localProps.context);
-  const value = createMemo(() => formState.getFieldValue(props().name));
-  const initialLabel = createMemo(() => props().label);
+  const value = createMemo(() => formState.getFieldValue(props.name));
+  const initialLabel = createMemo(() => props.label);
   const hasValue = createMemo(() => !!value());
-  const format = createMemo(() => props().format as FormatFunction<M[N]>);
+  const format = createMemo(() => props.format as FormatFunction<M[N]>);
   const label = createMemo(() =>
     useFormFieldLabel({
       value: value(),
@@ -78,20 +77,20 @@ export function InputField<M extends FieldValueMapping, N extends StringKeyOf<M>
   return createField(
     'InputField',
     <div classList={classList}>
-      {props().title && <div class={styles.title}>{props().title}</div>}
+      {props.title && <div class={styles.title}>{props.title}</div>}
       <div class={styles.inputContainer}>
         <div class={styles.leadingIcon}>{leadingIcon()}</div>
         <Input
           {...props}
           class={styles.input}
-          id={props().id}
+          id={props.id}
           placeholder={label().placeholder}
           value={format()(value())}
         />
         {withIcon() && <div class={styles.icon}>{icon()}</div>}
         {context && <div class={styles.context}>{context()}</div>}
         {withLabel() && (
-          <label for={props().id} class={styles.label}>
+          <label for={props.id} class={styles.label}>
             {label().label}
           </label>
         )}
