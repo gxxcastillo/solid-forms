@@ -1,7 +1,7 @@
-export interface UseFormFieldLabelProps {
+export type UseFormFieldLabelProps = {
   value?: unknown;
   label?: string;
-}
+};
 
 export function useFormFieldLabel({ value, label }: UseFormFieldLabelProps) {
   if (value) {

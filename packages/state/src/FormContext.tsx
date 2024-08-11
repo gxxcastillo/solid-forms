@@ -5,10 +5,10 @@ import { type FieldValueMapping, type FormStore } from './types';
 
 export const FormContext = createFormContext();
 
-export interface FormContextProviderProps<M extends FieldValueMapping> {
+export type FormContextProviderProps<M extends FieldValueMapping> = {
   store?: FormStore<M>;
   children: JSX.Element;
-}
+};
 
 export function createFormContext() {
   return createContext([]);

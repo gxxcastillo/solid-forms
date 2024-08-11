@@ -1,13 +1,10 @@
 module.exports = {
   root: true,
-  plugins: ['@typescript-eslint'],
+  plugins: ['@typescript-eslint', '@stylistic'],
   extends: [
-    'moon',
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
     'plugin:@typescript-eslint/recommended-type-checked',
-    'airbnb-base',
-    'airbnb-typescript/base',
     'prettier'
   ],
   rules: {
@@ -32,6 +29,7 @@ module.exports = {
     '@typescript-eslint/no-unnecessary-type-assertion': 0,
     '@typescript-eslint/no-unsafe-call': 0,
     '@typescript-eslint/no-use-before-define': 0,
+    '@typescript-eslint/lines-between-class-members': 0,
     '@typescript-eslint/no-unsafe-assignment': 0,
     '@typescript-eslint/no-unsafe-member-access': 0,
     '@typescript-eslint/no-unsafe-return': 0,

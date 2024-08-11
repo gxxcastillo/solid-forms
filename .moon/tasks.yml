@@ -21,9 +21,8 @@ tasks:
     command: vite
     args:
       - build
-    # deps:
-    #   - '~:lint'
-    #   - '~:format'
+    deps:
+      - '^:build'
 
   types:
     command:

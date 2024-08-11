@@ -4,7 +4,6 @@ import { type StringKeyOf } from 'type-fest';
 import {
   type DisplayValue,
   type ErrorMessages,
-  type FieldName,
   type FieldValue,
   type FieldValueMapping,
   type FormState
@@ -12,10 +11,6 @@ import {
 import { type ValidationConstraints } from '@gxxc/solid-forms-validation';
 
 export type RawFieldValue = boolean | string | undefined;
-
-export type SelectableFieldType = 'checkbox' | 'radio' | 'select';
-
-export type FormErrors = Record<FieldName, ErrorMessages>;
 
 export type ElementProps<T> = Omit<JSX.InputHTMLAttributes<T>, 'value' | 'name'>;
 
@@ -26,65 +21,43 @@ export type CustomValidator<M extends FieldValueMapping, N extends StringKeyOf<M
   setFieldErrors: (e: ErrorMessages) => void
 ) => void;
 
-// export interface FormFieldComponentBaseProps<V> {
-//   value?: V;
-//   defaultValue?: V;
-//   defaultChecked?: boolean;
-//   isControlled?: boolean;
-//   match?: FieldName;
-//   validator?: CustomValidator<V>;
-// }
-
-export type FormElementRef = HTMLDivElement | HTMLFormElement;
-
 export type Constraint = boolean | number | string;
 
-export interface ConstraintConfig {
-  validate: (v: FieldValue | undefined, c: Constraint | undefined, s: FormState) => boolean;
-  message: (n: string, c: Constraint) => string;
-}
-
-export type FormOnChangeHandler = (fieldName: FieldName, fieldValue: FieldValue) => void;
-export type FieldOnChangeHandler<T = JSX.Element> = JSX.EventHandler<T, InputEvent>;
-export type FieldOnBlurHandler<T = JSX.Element> = JSX.EventHandler<T, UIEvent>;
-
-export type FormElementTag = Extract<keyof JSX.HTMLElementTags, 'button' | 'input' | 'select' | 'textarea'>;
+export type FormElementTag = 'button' | 'input' | 'select' | 'textarea';
 export type FormElement<G extends FormElementTag> = HTMLElementTagNameMap[G];
 
-export type FormFieldProps<
-  G extends FormElementTag,
-  M extends FieldValueMapping,
-  N extends StringKeyOf<M>
-> = Omit<JSX.HTMLElementTags[G], 'name' | 'label' | 'defaultValue'> &
-  FieldInternalProps<M[N]> &
-  ValidationConstraints & {
-    name: N;
-    label?: string;
-    errors?: ErrorMessages;
-    defaultValue?: M[N];
-    defaultChecked?: boolean;
-    match?: Omit<StringKeyOf<M>, N>;
-    readonly?: boolean;
-    disabled?: boolean;
-    checked?: boolean;
-    validator?: CustomValidator<M, N>;
-    parse?: ParseFunction<M[N]>;
-    format?: FormatFunction<M[N]>;
-  };
+export type BaseFormFieldProps<G extends FormElementTag> = Omit<JSX.HTMLElementTags[G], 'name' | 'label'>;
 
-export interface FieldInternalProps<V> {
+export type FieldProps<M extends FieldValueMapping, N extends StringKeyOf<M>> = {
+  name: N;
+  label?: string;
+  defaultValue?: M[N];
+  defaultChecked?: boolean;
+  readonly?: boolean;
+  disabled?: boolean;
+  checked?: boolean;
+};
+
+export type FieldInternalProps<M extends FieldValueMapping, N extends StringKeyOf<M>> = {
   isInitialized?: boolean;
   isValid?: boolean;
   isControlled?: boolean;
   isDisabled?: boolean;
   isSelectable?: boolean;
-  setValue?: (value?: V, initialize?: boolean) => void;
-  showIcon?: (value?: V, e?: ErrorMessages) => boolean;
-  onChange?: FieldOnChangeHandler<V>;
-  onBlur?: FieldOnBlurHandler;
-  'data-for'?: string;
-  'data-tip'?: string;
-}
+  errors?: ErrorMessages;
+  match?: Omit<StringKeyOf<M>, N>;
+  setValue?: (value?: M[N], initialize?: boolean) => void;
+  showIcon?: (value?: M[N], e?: ErrorMessages) => boolean;
+  validator?: CustomValidator<M, N>;
+  parse?: ParseFunction<M[N]>;
+  format?: FormatFunction<M[N]>;
+};
+
+export type FormFieldProps<
+  G extends FormElementTag,
+  M extends FieldValueMapping,
+  N extends StringKeyOf<M>
+> = BaseFormFieldProps<G> & FieldProps<M, N> & FieldInternalProps<M, N> & ValidationConstraints;
 
 export type SetValue = (value: DisplayValue, isInitialization?: boolean) => void;
 export type AnyFormFieldEvent = FormFieldEvent<FormFieldElement>;

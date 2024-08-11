@@ -11,10 +11,10 @@
   "dependencies": {
     "@gxxc/solid-forms": "workspace:*",
     "@solidjs/meta": "^0.29.4",
-    "@solidjs/router": "^0.12.5",
-    "@solidjs/start": "^0.6.1",
+    "@solidjs/router": "^0.14.1",
+    "@solidjs/start": "^1.0.6",
     "solid-js": "^1.8.20",
-    "vinxi": "0.3.4"
+    "vinxi": "^0.4.1"
   },
   "engines": {
     "node": ">=18"

@@ -1,4 +1,4 @@
-import { type JSX, createMemo, createSignal, mergeProps, splitProps } from 'solid-js';
+import { type JSX, createMemo, mergeProps, splitProps } from 'solid-js';
 import { type StringKeyOf } from 'type-fest';
 
 import {
@@ -62,7 +62,7 @@ export function getDisplayableErrors<K extends FieldName>(
   fieldName: K,
   { hasFieldBeenValid, hasFieldBlurred, getFieldErrors }: FormState
 ) {
-  return hasFieldBeenValid(fieldName) ?? hasFieldBlurred(fieldName) ? getFieldErrors(fieldName) : undefined;
+  return (hasFieldBeenValid(fieldName) ?? hasFieldBlurred(fieldName)) ? getFieldErrors(fieldName) : undefined;
 }
 
 export function isSelectableEvent(
@@ -161,13 +161,13 @@ export function createFormField<
   M extends FieldValueMapping,
   N extends StringKeyOf<M>
 >(initialProps: FormFieldProps<G, M, N>) {
-  const props = mergeProps(formFieldDefaultProps, initialProps);
   const [formState, formStateMutations] = useFormContext<M>();
 
+  const props = mergeProps(formFieldDefaultProps, initialProps);
   const isSelectable = props.checked !== undefined;
   const isInitialized = formState.hasFieldBeenInitialized(props.name);
   const value = createMemo(() => formState.getFieldValue(props.name));
-  const currentChecked = isSelectable ? props.checked ?? !!value : undefined;
+  const currentChecked = isSelectable ? (props.checked ?? !!value) : undefined;
   const [validationConstraints] = splitProps(props, constraintNames);
 
   const setValue = createValueSetter<G, M, N, typeof validationConstraints>(

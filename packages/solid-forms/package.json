@@ -24,12 +24,12 @@
     "@gxxc/solid-forms-form": "workspace:*"
   },
   "devDependencies": {
-    "typescript": "^5.5.4",
+    "typescript": "5.4.2",
     "vite": "^5.4.0",
     "vite-plugin-dts": "^3.9.1",
-    "vite-plugin-solid": "^2.10.2"
+    "vite-plugin-solid": "^2.3.0"
   },
   "peerDependencies": {
-    "solid-js": "^1.8.12"
+    "solid-js": "^1.8.20"
   }
 }

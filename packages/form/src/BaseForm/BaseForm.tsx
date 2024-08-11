@@ -11,7 +11,7 @@ import {
 } from '../types';
 import { createBaseFormOnSubmitHandler } from './helpers';
 
-export interface BaseFormProps<P extends RequestProps, R extends Response | ResponseMapping<P>> {
+export type BaseFormProps<P extends RequestProps, R extends Response | ResponseMapping<P>> = {
   className?: string;
   fullWidthButtons?: boolean;
   align?: 'center' | 'left';
@@ -20,7 +20,7 @@ export interface BaseFormProps<P extends RequestProps, R extends Response | Resp
   errors?: FormErrors;
   onSubmit?: BaseFormOnSubmit<P, R>;
   children: JSX.Element;
-}
+};
 
 export const baseFormDefaultProps = {
   align: 'left',
