@@ -20,6 +20,7 @@ export default defineConfig({
     },
     lib: {
       entry: resolve(__dirname, 'src/index.ts'),
+      fileName: 'index',
       formats: ['es']
     },
     rollupOptions: {
