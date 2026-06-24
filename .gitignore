@@ -2,6 +2,7 @@ node_modules
 dist
 
 .solid
+.agents
 
 # moon
 .moon/cache

@@ -13,7 +13,12 @@ export const initialFormState = {
 };
 
 export function createFormState<M extends FieldValueMapping>(state?: BaseFormState<M>) {
-  const [formState, setFormState] = createStore<BaseFormState<M>>(state ?? initialFormState);
+  // Create a fresh object each call so multiple stores don't share the same backing state.
+  // In SolidJS's server/SSR build, createStore returns the raw object and mutates it in place,
+  // meaning two calls with the same object reference would share reactive state.
+  const [formState, setFormState] = createStore<BaseFormState<M>>(
+    state ?? ({ ...initialFormState, fields: [], errors: [] } as BaseFormState<M>)
+  );
   const getters = {
     get haveValuesChanged() {
       return !!formState.fields.some((f) => f.hasChanged);
@@ -43,7 +48,9 @@ export function createFormState<M extends FieldValueMapping>(state?: BaseFormSta
       return getters.getField<N>(name)?.hasBeenBlurred;
     },
     isFieldValid<N extends StringKeyOf<M>>(name: N) {
-      return !getters.getField<N>(name)?.errors?.length;
+      const field = getters.getField<N>(name);
+      if (!field) return undefined;
+      return !field.errors?.length;
     }
   };
 
@@ -86,9 +93,6 @@ export function createFormStore<M extends FieldValueMapping>(state?: BaseFormSta
 
       setFieldValue: <N extends FName>(name: N, value?: M[N], errors: FErrors = []) => {
         const hasBeenInitialized = getters.hasFieldBeenInitialized(name);
-        if (hasBeenInitialized && getters.getFieldValue(name) === value) {
-          return;
-        }
 
         if (!hasBeenInitialized) {
           setFormState('fields', (fields) => [
@@ -96,28 +100,34 @@ export function createFormStore<M extends FieldValueMapping>(state?: BaseFormSta
             {
               name,
               value,
-              errors: [],
+              errors: errors ?? [],
               hasBeenInitialized: true,
-              hasBeenValid: false,
+              hasBeenValid: value !== undefined && !errors?.length,
               hasBeenBlurred: false,
               hasChanged: false
             } satisfies FormField<M, N>
           ]);
-
           return;
         }
 
-        const hasBeenValid = getters.hasFieldBeenValid(name);
-        const prevErrors = getters.getFieldErrors(name);
+        const currentValue = getters.getFieldValue(name);
+        const currentErrors = getters.getFieldErrors(name);
+        // Skip only when both value and errors are unchanged.
+        if (currentValue === value && !errors?.length && !currentErrors?.length) {
+          return;
+        }
+
+        const prevHasBeenValid = getters.hasFieldBeenValid(name) ?? false;
+        const prevHasChanged = getters.hasFieldChanged(name) ?? false;
 
         setFormState(
           'fields',
           (f) => f.name === name,
           () => ({
             value,
-            errors: errors === prevErrors ? [] : errors,
-            hasBeenValid: !prevErrors && !hasBeenValid,
-            hasChanged: true
+            errors: errors ?? [],
+            hasBeenValid: prevHasBeenValid || !errors?.length,
+            hasChanged: prevHasChanged || currentValue !== value
           })
         );
       },

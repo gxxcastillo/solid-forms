@@ -17,6 +17,18 @@ fileGroups:
     - '**/__tests__/**/*'
 
 tasks:
+  test:
+    command: vitest
+    args:
+      - run
+      - --passWithNoTests
+    inputs:
+      - '@globs(sources)'
+      - '@globs(tests)'
+      - 'vitest.config.*'
+      - 'package.json'
+      - '/tsconfig.options.json'
+
   build:
     command: vite
     args:
