@@ -43,31 +43,36 @@ export function createBaseFormOnSubmitHandler<
   P extends RequestProps,
   R extends Response | ResponseMapping<P>
 >(props: BaseFormProps<P, R>, formState: FormState, formStateMutations: FormStateMutations) {
-  return (event: BaseFormElementSubmitEvent) => {
+  return async (event: BaseFormElementSubmitEvent) => {
     event.preventDefault();
     const buttonName = (event.submitter as HTMLFormElement)?.name;
 
-    if (formState.isProcessing ?? !formState.haveValuesChanged) {
+    if (formState.isProcessing || !formState.haveValuesChanged) {
       return;
     }
 
     const submitProps = fieldsToProps(formState.fields) as P;
-    const result = isSubmitHandlerFn<P, R>(props.onSubmit)
-      ? props.onSubmit(submitProps, buttonName)
+    const onSubmitFn = isSubmitHandlerFn<P, R>(props.onSubmit)
+      ? props.onSubmit
       : props.onSubmit && isSubmitHandlersObject<P, R>(props.onSubmit)
-        ? props.onSubmit[buttonName](submitProps, buttonName)
+        ? props.onSubmit[buttonName]
         : undefined;
 
-    if (result?.then) {
-      formStateMutations.setIsProcessing(true);
-      result
-        .then(() => {
-          formStateMutations.setIsProcessing(false);
-        })
-        .catch((error: Error) => {
-          formStateMutations.setIsProcessing(false);
-          throw error;
-        });
+    if (!onSubmitFn) return;
+
+    // Set the processing flag before invoking the handler so a rapid second
+    // submit cannot slip past the guard while the first is still awaited.
+    formStateMutations.setIsProcessing(true);
+    try {
+      const result = onSubmitFn(submitProps, buttonName);
+      if (result?.then) {
+        await result;
+      }
+    } catch {
+      // The submit handler threw or rejected. isProcessing is reset by
+      // finally; error handling is the caller's responsibility.
+    } finally {
+      formStateMutations.setIsProcessing(false);
     }
   };
 }

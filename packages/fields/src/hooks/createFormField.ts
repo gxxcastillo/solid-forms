@@ -112,7 +112,7 @@ export function createValueSetter<
     const name = props.name as N;
     const newErrors = validate(name, value, validationConstraints, formState);
 
-    const errorsForDisplay = newErrors.length > 0 ? newErrors : undefined;
+    const errorsForDisplay = newErrors.length > 0 ? newErrors : [];
     if (isInitialization) {
       formStateMutations.initializeField(name, value, errorsForDisplay);
     } else {

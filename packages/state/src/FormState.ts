@@ -4,6 +4,10 @@ import type { StringKeyOf } from 'type-fest';
 
 import { type BaseFormState, type FieldValueMapping, type FormField, type FormStore } from './types';
 
+function arraysEqual<T>(a: T[], b: T[]): boolean {
+  return a.length === b.length && a.every((v, i) => v === b[i]);
+}
+
 export const initialFormState = {
   fields: [],
   errors: [],
@@ -71,38 +75,33 @@ export function createFormStore<M extends FieldValueMapping>(state?: BaseFormSta
           return;
         }
 
-        setFormState('fields', (fields) => {
-          const newField = {
+        setFormState('fields', (fields) => [
+          ...fields,
+          {
             name,
             value,
             errors,
             hasBeenInitialized: true,
             hasChanged: false,
             hasBeenBlurred: false,
-            hasBeenValid: value !== undefined && !errors?.length
-          };
-
-          const index = fields.findIndex((field) => field.name === newField.name);
-          if (index !== -1) {
-            return [...fields.slice(0, index), newField, ...fields.slice(index + 1)];
+            hasBeenValid: !errors.length
           }
-
-          return [...fields, newField];
-        });
+        ]);
       },
 
-      setFieldValue: <N extends FName>(name: N, value?: M[N], errors: FErrors = []) => {
+      setFieldValue: <N extends FName>(name: N, value?: M[N], errors?: FErrors) => {
         const hasBeenInitialized = getters.hasFieldBeenInitialized(name);
 
         if (!hasBeenInitialized) {
+          const initialErrors = errors ?? [];
           setFormState('fields', (fields) => [
             ...(fields || []),
             {
               name,
               value,
-              errors: errors ?? [],
+              errors: initialErrors,
               hasBeenInitialized: true,
-              hasBeenValid: value !== undefined && !errors?.length,
+              hasBeenValid: value !== undefined && !initialErrors.length,
               hasBeenBlurred: false,
               hasChanged: false
             } satisfies FormField<M, N>
@@ -111,9 +110,11 @@ export function createFormStore<M extends FieldValueMapping>(state?: BaseFormSta
         }
 
         const currentValue = getters.getFieldValue(name);
-        const currentErrors = getters.getFieldErrors(name);
-        // Skip only when both value and errors are unchanged.
-        if (currentValue === value && !errors?.length && !currentErrors?.length) {
+        const currentErrors = getters.getFieldErrors(name) ?? [];
+        // When errors is not explicitly provided, preserve current errors rather than clearing them.
+        const effectiveErrors = errors !== undefined ? errors : currentErrors;
+
+        if (currentValue === value && arraysEqual(effectiveErrors, currentErrors)) {
           return;
         }
 
@@ -125,8 +126,8 @@ export function createFormStore<M extends FieldValueMapping>(state?: BaseFormSta
           (f) => f.name === name,
           () => ({
             value,
-            errors: errors ?? [],
-            hasBeenValid: prevHasBeenValid || !errors?.length,
+            errors: effectiveErrors,
+            hasBeenValid: prevHasBeenValid || !effectiveErrors.length,
             hasChanged: prevHasChanged || currentValue !== value
           })
         );

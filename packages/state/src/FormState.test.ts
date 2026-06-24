@@ -152,6 +152,35 @@ describe('setFieldValue', () => {
     expect(state.getField('username')?.hasBeenValid).toBe(true);
     dispose();
   });
+
+  it('preserves existing errors when called without an errors argument', () => {
+    const { store, dispose } = makeStore();
+    const [state, mutations] = store;
+    mutations.initializeField('username', 'alice', ['Server error']);
+    mutations.setFieldValue('username', 'alice');
+    expect(state.getField('username')?.errors).toEqual(['Server error']);
+    dispose();
+  });
+
+  it('skips the reactive update when value and errors are both unchanged', () => {
+    const { store, dispose } = makeStore();
+    const [state, mutations] = store;
+    mutations.initializeField('username', 'alice', ['Required']);
+    const fieldBefore = state.getField('username');
+    mutations.setFieldValue('username', 'alice', ['Required']);
+    expect(state.getField('username')).toBe(fieldBefore);
+    dispose();
+  });
+
+  it('does not flip hasBeenValid when errors are preserved from initialization', () => {
+    const { store, dispose } = makeStore();
+    const [state, mutations] = store;
+    mutations.initializeField('username', undefined, ['Required']);
+    expect(state.getField('username')?.hasBeenValid).toBe(false);
+    mutations.setFieldValue('username', undefined);
+    expect(state.getField('username')?.hasBeenValid).toBe(false);
+    dispose();
+  });
 });
 
 describe('setFieldErrors', () => {
