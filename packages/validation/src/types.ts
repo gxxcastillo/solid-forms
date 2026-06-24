@@ -6,7 +6,7 @@ export type ValidationConstraints = {
   maxLength?: number;
   min?: number;
   minLength?: number;
-  pattern?: string;
+  pattern?: string | RegExp;
   required?: boolean;
 };
 

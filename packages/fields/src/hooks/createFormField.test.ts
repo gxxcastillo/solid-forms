@@ -104,6 +104,43 @@ describe('createValueSetter', () => {
     expect(mutations.initializeField).toHaveBeenCalledWith('username', undefined, []);
   });
 
+  it('calls a sync custom validator when built-in validation passes', () => {
+    const state = makeState(undefined);
+    const mutations = makeMutations();
+    const validator = vi.fn((_name: string, _val: unknown, _state: unknown, setErrors: (e: string[]) => void) => {
+      setErrors(['taken']);
+    });
+    const setValue = createValueSetter(
+      state,
+      mutations,
+      {},
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      { name: 'username', parse: (v: unknown) => v, validator } as any
+    );
+
+    setValue('alice');
+
+    expect(validator).toHaveBeenCalledOnce();
+    expect(mutations.setFieldErrors).toHaveBeenCalledWith('username', ['taken']);
+  });
+
+  it('skips the custom validator when built-in constraints fail', () => {
+    const state = makeState(undefined);
+    const mutations = makeMutations();
+    const validator = vi.fn();
+    const setValue = createValueSetter(
+      state,
+      mutations,
+      { required: true },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      { name: 'username', parse: (v: unknown) => v, validator } as any
+    );
+
+    setValue('');
+
+    expect(validator).not.toHaveBeenCalled();
+  });
+
   it('reads the current value when invoked instead of using a mount-time snapshot', () => {
     let currentValue = false;
     const state = makeState();

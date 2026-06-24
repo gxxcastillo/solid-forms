@@ -1,9 +1,24 @@
 import { type ConstraintConfigs, type ConstraintName } from './types';
 
+const patternCache = new Map<string, RegExp>();
+
+function getCompiledPattern(pattern: string | RegExp): RegExp {
+  if (pattern instanceof RegExp) return pattern;
+  let re = patternCache.get(pattern);
+  if (!re) {
+    re = new RegExp(pattern);
+    patternCache.set(pattern, re);
+  }
+  return re;
+}
+
 export const constraintConfigs: ConstraintConfigs = {
   match: {
-    validate: (val, matchFieldName, { getFieldValue }) =>
-      typeof matchFieldName === 'string' ? val === getFieldValue(matchFieldName) : true,
+    validate: (val, matchFieldName, formState) => {
+      if (typeof matchFieldName !== 'string') return true;
+      if (!formState.hasFieldBeenInitialized(matchFieldName)) return true;
+      return val === formState.getFieldValue(matchFieldName);
+    },
     message: (fieldName, matchFieldName) => `"${fieldName}" does not match "${matchFieldName}"`
   },
 
@@ -13,8 +28,11 @@ export const constraintConfigs: ConstraintConfigs = {
   },
 
   pattern: {
-    validate: (val, pattern) =>
-      typeof val === 'string' && typeof pattern === 'string' && new RegExp(pattern).test(val),
+    validate: (val, pattern) => {
+      if (typeof val !== 'string') return false;
+      if (typeof pattern !== 'string' && !(pattern instanceof RegExp)) return false;
+      return getCompiledPattern(pattern).test(val);
+    },
     message: (fieldName) => `"${fieldName}" is invalid`
   },
 

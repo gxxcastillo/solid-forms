@@ -124,6 +124,14 @@ export function createValueSetter<
     } else {
       formStateMutations.setFieldValue(name, value, errorsForDisplay);
     }
+
+    // Custom validators run after built-in constraints and only when no built-in errors exist.
+    // Sync validators call setFieldErrors immediately; async validators call it when they resolve.
+    if (newErrors.length === 0 && props.validator) {
+      props.validator(name, value, formState, (errors) => {
+        formStateMutations.setFieldErrors(name, errors);
+      });
+    }
   };
 }
 
