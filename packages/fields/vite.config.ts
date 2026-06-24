@@ -7,7 +7,7 @@ import solid from 'vite-plugin-solid';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
-  plugins: [solid(), dts()],
+  plugins: [solid(), dts({ rollupTypes: true })],
   build: {
     minify: false,
     sourcemap: true,

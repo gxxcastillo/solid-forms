@@ -5,7 +5,19 @@ import path from 'node:path';
 /**
  * Publishes to npm using changesets.
  *
- * Also, handles updating package.json prior to publishing and then switching things back
+ * Two transformations are applied to package.json before publishing and
+ * reverted afterwards:
+ *
+ * 1. Strip `@gxxc/*` from `dependencies`.
+ *    Moon's `syncProjectWorkspaceDependencies` automatically injects workspace
+ *    packages into `dependencies` for build-ordering purposes. The build
+ *    bundles them into dist/index.js, so they must not appear as runtime
+ *    dependencies of the published package.
+ *
+ * 2. Strip the `development` export condition.
+ *    The `development` condition points at `./src/index.ts`, which is not
+ *    included in the published tarball. Leaving it in would cause bundlers
+ *    that honour the condition to attempt loading a non-existent file.
  */
 export async function publish() {
   const dir = process.env.npm_package_publishConfig_directory;
@@ -16,26 +28,23 @@ export async function publish() {
   const packageJsonString = readFileSync(packageJsonPath, 'utf8');
   const packageJson = JSON.parse(packageJsonString);
 
-  // Only publish standard exports, others risk breaking
-  const exports = packageJson.exports['.'];
-  packageJson.exports['.'] = {
-    types: exports.types,
-    import: exports.import
-  };
-
-  // We need to depend on local packages during development,
-  // however, we don't want them in our published package.
-  packageJson.dependencies = Object.entries(packageJson.dependencies || {}).reduce(
+  // Strip bundled workspace packages from runtime dependencies.
+  packageJson.dependencies = Object.entries(
+    (packageJson.dependencies ?? {}) as Record<string, unknown>
+  ).reduce(
     (obj: Record<string, unknown>, [name, version]) => {
-      if (name.startsWith('@gxxc')) {
-        return obj;
-      }
-
-      obj[name] = version;
+      if (!name.startsWith('@gxxc')) obj[name] = version;
       return obj;
     },
     {}
   );
+
+  // Strip the workspace-only `development` export before publishing.
+  const rootExport = packageJson.exports['.'];
+  packageJson.exports['.'] = {
+    types: rootExport.types,
+    import: rootExport.import
+  };
 
   writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
 

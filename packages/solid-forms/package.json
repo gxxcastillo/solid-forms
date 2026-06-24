@@ -19,11 +19,10 @@
   "files": [
     "dist"
   ],
-  "dependencies": {
-    "@gxxc/solid-forms-fields": "workspace:*",
-    "@gxxc/solid-forms-form": "workspace:*"
-  },
   "devDependencies": {
+    "@gxxc/solid-forms-fields": "workspace:^",
+    "@gxxc/solid-forms-form": "workspace:^",
+    "type-fest": "^4.24.0",
     "typescript": "5.4.2",
     "vite": "^5.4.0",
     "vite-plugin-dts": "^3.9.1",
@@ -31,5 +30,9 @@
   },
   "peerDependencies": {
     "solid-js": "^1.8.20"
+  },
+  "dependencies": {
+    "@gxxc/solid-forms-fields": "workspace:*",
+    "@gxxc/solid-forms-form": "workspace:*"
   }
 }

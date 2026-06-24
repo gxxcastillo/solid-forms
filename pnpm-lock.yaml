@@ -179,6 +179,9 @@ importers:
         specifier: ^1.8.20
         version: 1.8.20
     devDependencies:
+      type-fest:
+        specifier: ^4.24.0
+        version: 4.24.0
       typescript:
         specifier: 5.4.2
         version: 5.4.2
