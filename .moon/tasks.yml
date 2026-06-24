@@ -12,7 +12,7 @@ fileGroups:
     - 'types/**/*'
   tests:
     - './tests/**/*'
-    - './src/**/*.test.ts'
+    - './src/**/*.{test,bench}.{ts,tsx}'
     - '/*.test.ts'
     - '**/__tests__/**/*'
 
@@ -21,6 +21,31 @@ tasks:
     command: vitest
     args:
       - run
+      - --passWithNoTests
+    inputs:
+      - '@globs(sources)'
+      - '@globs(tests)'
+      - 'vitest.config.*'
+      - 'package.json'
+      - '/tsconfig.options.json'
+
+  coverage:
+    command: vitest
+    args:
+      - run
+      - --coverage
+      - --passWithNoTests
+    inputs:
+      - '@globs(sources)'
+      - '@globs(tests)'
+      - 'vitest.config.*'
+      - 'package.json'
+      - '/tsconfig.options.json'
+
+  bench:
+    command: vitest
+    args:
+      - bench
       - --passWithNoTests
     inputs:
       - '@globs(sources)'

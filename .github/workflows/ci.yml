@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  ci:
+    name: Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.10.0'
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Install pnpm
+        run: corepack prepare pnpm@9.7.0 --activate
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install moon
+        run: pnpm exec moon --version || pnpm add -g @moonrepo/cli
+
+      - name: Type check
+        run: pnpm moon :types
+
+      - name: Lint
+        run: pnpm moon :lint
+
+      - name: Test
+        run: pnpm moon :test
+
+      - name: Build
+        run: pnpm moon :build

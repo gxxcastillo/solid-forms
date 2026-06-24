@@ -44,6 +44,7 @@ export function InputField<M extends FieldValueMapping, N extends StringKeyOf<M>
   ]);
 
   const [props, createField] = createFormField<'input', M, N>(parsedProps)();
+  const value = createMemo(() => formState.getFieldValue(props.name));
   const leadingIcon = createMemo(() => localProps.leadingIcon);
   const withLabel = createMemo(
     () =>
@@ -55,7 +56,6 @@ export function InputField<M extends FieldValueMapping, N extends StringKeyOf<M>
   );
   const icon = createMemo(() => localProps.icon);
   const context = createMemo(() => localProps.context);
-  const value = createMemo(() => formState.getFieldValue(props.name));
   const initialLabel = createMemo(() => props.label);
   const hasValue = createMemo(() => !!value());
   const format = createMemo(() => props.format as FormatFunction<M[N]>);
@@ -86,6 +86,8 @@ export function InputField<M extends FieldValueMapping, N extends StringKeyOf<M>
           id={props.id}
           placeholder={label().placeholder}
           value={format()(value())}
+          aria-invalid={!!props.errors?.length}
+          aria-describedby={props.errors?.length ? `${props.name}-errors` : undefined}
         />
         {withIcon() && <div class={styles.icon}>{icon()}</div>}
         {context && <div class={styles.context}>{context()}</div>}
@@ -95,6 +97,11 @@ export function InputField<M extends FieldValueMapping, N extends StringKeyOf<M>
           </label>
         )}
       </div>
+      {props.errors?.[0] && (
+        <div id={`${props.name}-errors`} class={styles.error} role="alert">
+          {props.errors[0]}
+        </div>
+      )}
     </div>
   );
 }

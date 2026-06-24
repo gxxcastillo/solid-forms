@@ -44,3 +44,9 @@
     outline: 0;
   }
 }
+
+.error {
+  color: #d32f2f;
+  font-size: 0.75rem;
+  margin-top: 4px;
+}

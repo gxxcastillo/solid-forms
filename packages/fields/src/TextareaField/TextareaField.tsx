@@ -38,9 +38,20 @@ export function TextAreaField<M extends FieldValueMapping, N extends StringKeyOf
       {localProps.title && <div class={styles.title}>{localProps.title}</div>}
       <div class={styles.textAreaContainer}>
         <div class={styles.textArea}>
-          <Textarea {...props} placeholder={label().placeholder} class={styles.textAreaEl} />
+          <Textarea
+            {...props}
+            placeholder={label().placeholder}
+            class={styles.textAreaEl}
+            aria-invalid={!!props.errors?.length}
+            aria-describedby={props.errors?.length ? `${props.name}-errors` : undefined}
+          />
         </div>
       </div>
+      {props.errors?.[0] && (
+        <div id={`${props.name}-errors`} class={styles.error} role="alert">
+          {props.errors[0]}
+        </div>
+      )}
     </div>
   );
 }

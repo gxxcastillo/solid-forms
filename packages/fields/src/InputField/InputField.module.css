@@ -101,7 +101,7 @@
   right: 20px;
 }
 
-/* 
+/*
 // @TODO - this all should get moved into a "FormTooltip" component
 .tooltip {
   background-color: $color-eeyore-800 !important;
@@ -118,3 +118,10 @@
   left: -10px !important;
   transform: translate(-100%, -50%);
 } */
+
+.error {
+  color: #d32f2f;
+  font-size: 0.75rem;
+  margin-top: 4px;
+  padding-left: 24px;
+}

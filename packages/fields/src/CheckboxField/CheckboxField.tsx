@@ -31,13 +31,21 @@ export function CheckboxField<M extends FieldValueMapping, N extends StringKeyOf
         [styles.disabled]: !!props.disabled
       }}
     >
-      <Checkbox {...props} />
+      <Checkbox
+        {...props}
+        aria-invalid={!!props.errors?.length}
+        aria-describedby={props.errors?.length ? `${props.name}-errors` : undefined}
+      />
       {localProps.label && (
         <label classList={{ [styles.label]: true, [styles.disabled]: !!props.disabled }} for={props.id}>
           {localProps.label}
         </label>
       )}
-      {props.errors?.[0] && <div class={styles.error}>{props.errors[0]}</div>}
+      {props.errors?.[0] && (
+        <div id={`${props.name}-errors`} class={styles.error}>
+          {props.errors[0]}
+        </div>
+      )}
     </div>
   );
 }
