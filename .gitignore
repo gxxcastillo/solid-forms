@@ -10,3 +10,6 @@ dist
 
 # ts
 tsconfig.tsbuildinfo
+
+# vite
+*.timestamp-*.mjs

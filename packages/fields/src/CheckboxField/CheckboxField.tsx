@@ -1,9 +1,10 @@
-import { splitProps } from 'solid-js';
+import { mergeProps, splitProps } from 'solid-js';
 import { type StringKeyOf } from 'type-fest';
 
 import { Checkbox } from '@gxxc/solid-forms-elements';
 import { type FieldValueMapping } from '@gxxc/solid-forms-state';
 
+import { createFormField } from '../hooks';
 import { type FormFieldProps } from '../types';
 import styles from './CheckboxField.module.css';
 
@@ -16,28 +17,27 @@ export type CheckboxFieldProps<M extends FieldValueMapping, N extends StringKeyO
 export function CheckboxField<M extends FieldValueMapping, N extends StringKeyOf<M>>(
   initialProps: CheckboxFieldProps<M, N>
 ) {
-  const [localProps, props] = splitProps(initialProps, ['value', 'label', 'errors']);
+  const [localProps, parsedProps] = splitProps(initialProps, ['label']);
+  const [props, createField] = createFormField<'input', M, N>(
+    mergeProps({ isSelectable: true }, parsedProps)
+  )();
 
-  const classList = {
-    [styles.CheckboxField]: true,
-    [styles.checked]: props.checked,
-    [styles.disabled]: props.disabled
-  };
-
-  const labelClassNames = {
-    [styles.label]: true,
-    [styles.disabled]: props.disabled
-  };
-
-  return (
-    <div classList={classList}>
-      <Checkbox value={localProps.value} {...props} />
+  return createField(
+    'CheckboxField',
+    <div
+      classList={{
+        [styles.CheckboxFieldSet]: true,
+        [styles.checked]: !!props.checked,
+        [styles.disabled]: !!props.disabled
+      }}
+    >
+      <Checkbox {...props} />
       {localProps.label && (
-        <label classList={labelClassNames} for={props.id}>
+        <label classList={{ [styles.label]: true, [styles.disabled]: !!props.disabled }} for={props.id}>
           {localProps.label}
         </label>
       )}
-      {/* {localProps.errors?.[0] && <div>{localProps.errors?.[0]}</div>} */}
+      {props.errors?.[0] && <div class={styles.error}>{props.errors[0]}</div>}
     </div>
   );
 }

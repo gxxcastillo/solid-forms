@@ -1,4 +1,4 @@
-import { For, type JSX, children, mergeProps } from 'solid-js';
+import { For, type JSX, children, createMemo, mergeProps } from 'solid-js';
 
 import { useFormContext } from '@gxxc/solid-forms-state';
 
@@ -27,42 +27,66 @@ export const baseFormDefaultProps = {
   fullWidthButtons: false
 } as const;
 
+export type ClassifiedBaseFormChild = {
+  child: JSX.Element;
+  wrap: boolean;
+};
+
+const componentNameRegistryKey = Symbol.for('@gxxc/solid-forms/component-name-registry');
+
+function getComponentName(child: JSX.Element) {
+  if (!child || typeof child !== 'object') {
+    return undefined;
+  }
+
+  const registryGlobal = globalThis as unknown as Record<symbol, WeakMap<object, string> | undefined>;
+  return registryGlobal[componentNameRegistryKey]?.get(child) ?? (child as { componentName?: string }).componentName;
+}
+
+export function classifyBaseFormChildren(childrenArray: JSX.Element[]) {
+  const bodyChildren: ClassifiedBaseFormChild[] = [];
+  const footerLinks: JSX.Element[] = [];
+  const formButtons: JSX.Element[] = [];
+
+  for (const child of childrenArray) {
+    const componentName = getComponentName(child);
+    if (componentName?.includes('Button')) {
+      formButtons.push(child);
+    } else if (componentName === 'Link') {
+      footerLinks.push(child);
+    } else if (componentName?.includes('Field')) {
+      bodyChildren.push({ child, wrap: false });
+    } else {
+      bodyChildren.push({ child, wrap: true });
+    }
+  }
+
+  return { bodyChildren, footerLinks, formButtons };
+}
+
 export function BaseForm<P extends RequestProps, R extends Response | ResponseMapping<P>>(
   initialProps: BaseFormProps<P, R>
 ) {
   const props = mergeProps(baseFormDefaultProps, initialProps);
   const [formState, formStateMutations] = useFormContext();
 
-  const footerLinks: JSX.Element[] = [];
-  const formButtons: JSX.Element[] = [];
   const classList = {};
-  const childrenArray = children(() => props.children).toArray();
+  const resolvedChildren = children(() => props.children);
+  const formChildren = createMemo(() => classifyBaseFormChildren(resolvedChildren.toArray()));
   const onSubmitHandler = createBaseFormOnSubmitHandler<P, R>(props, formState, formStateMutations);
 
   return (
-    <form classList={classList} onSubmit={onSubmitHandler}>
-      <For each={childrenArray}>
-        {(child) => {
-          const componentName = (child as unknown as { componentName: string })?.componentName;
-          if (componentName?.includes('Button')) {
-            formButtons.push(child);
-            return;
-          }
-
-          if (componentName === 'Link') {
-            footerLinks.push(child);
-            return;
-          }
-
-          if (componentName?.includes('Field')) {
-            return child;
-          }
-
-          return <div>{child}</div>;
-        }}
+    <form
+      classList={classList}
+      onSubmit={(event) => {
+        void onSubmitHandler(event);
+      }}
+    >
+      <For each={formChildren().bodyChildren}>
+        {({ child, wrap }) => (wrap ? <div>{child}</div> : child)}
       </For>
-
-      <For each={formButtons}>{(child) => <div>{child}</div>}</For>
+      <For each={formChildren().formButtons}>{(child) => <div>{child}</div>}</For>
+      <For each={formChildren().footerLinks}>{(child) => <div>{child}</div>}</For>
       <For each={formState.errors}>{(child) => <div>{child}</div>}</For>
     </form>
   );

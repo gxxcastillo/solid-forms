@@ -46,7 +46,7 @@ export type FieldInternalProps<M extends FieldValueMapping, N extends StringKeyO
   isSelectable?: boolean;
   errors?: ErrorMessages;
   match?: Omit<StringKeyOf<M>, N>;
-  setValue?: (value?: M[N], initialize?: boolean) => void;
+  setValue?: (value?: FieldValue, initialize?: boolean) => void;
   showIcon?: (value?: M[N], e?: ErrorMessages) => boolean;
   validator?: CustomValidator<M, N>;
   parse?: ParseFunction<M[N]>;
@@ -59,7 +59,7 @@ export type FormFieldProps<
   N extends StringKeyOf<M>
 > = BaseFormFieldProps<G> & FieldProps<M, N> & FieldInternalProps<M, N> & ValidationConstraints;
 
-export type SetValue = (value: DisplayValue, isInitialization?: boolean) => void;
+export type SetValue = (value: FieldValue, isInitialization?: boolean) => void;
 export type AnyFormFieldEvent = FormFieldEvent<FormFieldElement>;
 export type SelectableFormFieldEvent = FormFieldEvent<HTMLInputElement>;
 export type FormFieldEvent<E extends FormFieldElement> = FormFieldBlurEvent<E> | FormFieldInputEvent<E>;
