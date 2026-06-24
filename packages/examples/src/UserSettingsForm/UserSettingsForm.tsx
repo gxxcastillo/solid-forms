@@ -2,7 +2,7 @@ import { Form, InputField, SubmitButton, TextAreaField } from '@gxxc/solid-forms
 
 export function UserSettingsForm() {
   function onSubmit(values: unknown) {
-    console.log('adsfaaaaaaaadf', values);
+    console.log('user settings submitted', values);
   }
 
   return (

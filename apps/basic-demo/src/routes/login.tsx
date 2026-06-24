@@ -1,21 +1,18 @@
 import { InputField, PasswordField, SubmitButton, TextAreaField, useForm } from '@gxxc/solid-forms';
 
-interface LoginFormProps {
-  [x: string]: unknown;
-  key: 'name' | 'age';
+interface LoginFormValues {
+  [key: string]: string;
   email: string;
-  password: number;
+  password: string;
   message: string;
 }
 
 function Login() {
-  function onSubmit({ email, password, message }: LoginFormProps) {
-    console.log('email', email);
-    console.log('password', password);
-    console.log('message', message);
+  function onSubmit({ email, password, message }: LoginFormValues) {
+    console.log('login submitted', { email, password, message });
   }
 
-  const form = useForm<LoginFormProps>();
+  const form = useForm<LoginFormValues, void>();
 
   return (
     <div>
@@ -26,9 +23,9 @@ function Login() {
       </div>
 
       <form.Form onSubmit={onSubmit}>
-        <InputField name='email' label='email' />
-        <PasswordField name='password' label='password' />
-        <TextAreaField name='message' label='care to send a message?' />
+        <InputField name='email' label='Email' required />
+        <PasswordField name='password' label='Password' required minLength={8} />
+        <TextAreaField name='message' label='Care to send a message?' />
         <SubmitButton />
       </form.Form>
     </div>
