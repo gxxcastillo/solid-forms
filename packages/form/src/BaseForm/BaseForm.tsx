@@ -1,6 +1,6 @@
 import { For, type JSX, children, createMemo, mergeProps } from 'solid-js';
 
-import { useFormContext } from '@gxxc/solid-forms-state';
+import { getComponentName as lookupComponentName, useFormContext } from '@gxxc/solid-forms-state';
 
 import {
   type BaseFormOnSubmit,
@@ -32,15 +32,12 @@ export type ClassifiedBaseFormChild = {
   wrap: boolean;
 };
 
-const componentNameRegistryKey = Symbol.for('@gxxc/solid-forms/component-name-registry');
-
 function getComponentName(child: JSX.Element) {
   if (!child || typeof child !== 'object') {
     return undefined;
   }
 
-  const registryGlobal = globalThis as unknown as Record<symbol, WeakMap<object, string> | undefined>;
-  return registryGlobal[componentNameRegistryKey]?.get(child) ?? (child as { componentName?: string }).componentName;
+  return lookupComponentName(child);
 }
 
 export function classifyBaseFormChildren(childrenArray: JSX.Element[]) {
@@ -79,7 +76,9 @@ export function BaseForm<P extends RequestProps, R extends Response | ResponseMa
     <form
       classList={classList}
       onSubmit={(event) => {
-        void onSubmitHandler(event);
+        onSubmitHandler(event).catch((error) => {
+          console.error('solid-forms: form submission handler threw', error);
+        });
       }}
     >
       <For each={formChildren().bodyChildren}>

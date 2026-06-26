@@ -1,4 +1,4 @@
-import { type JSX, createMemo, mergeProps, splitProps } from 'solid-js';
+import { type JSX, createEffect, createMemo, mergeProps, splitProps } from 'solid-js';
 import { type StringKeyOf } from 'type-fest';
 
 import {
@@ -8,6 +8,7 @@ import {
   type FieldValueMapping,
   type FormState,
   type FormStateMutations,
+  setComponentName,
   useFormContext
 } from '@gxxc/solid-forms-state';
 import { type ValidationConstraints, constraintNames, validate } from '@gxxc/solid-forms-validation';
@@ -61,7 +62,7 @@ export function getDisplayableErrors<K extends FieldName>(
   fieldName: K,
   { hasFieldBeenValid, hasFieldBlurred, getFieldErrors }: FormState
 ) {
-  return (hasFieldBeenValid(fieldName) ?? hasFieldBlurred(fieldName)) ? getFieldErrors(fieldName) : undefined;
+  return hasFieldBeenValid(fieldName) || hasFieldBlurred(fieldName) ? getFieldErrors(fieldName) : undefined;
 }
 
 export function isSelectableEvent(
@@ -69,14 +70,6 @@ export function isSelectableEvent(
   isSelectable: boolean
 ): event is SelectableFormFieldEvent {
   return !!event && isSelectable;
-}
-
-const componentNameRegistryKey = Symbol.for('@gxxc/solid-forms/component-name-registry');
-
-function getComponentNameRegistry() {
-  const registryGlobal = globalThis as unknown as Record<symbol, WeakMap<object, ComponentName> | undefined>;
-  registryGlobal[componentNameRegistryKey] ??= new WeakMap<object, ComponentName>();
-  return registryGlobal[componentNameRegistryKey];
 }
 
 export function createValueSetter<
@@ -90,35 +83,18 @@ export function createValueSetter<
   validationConstraints: C,
   props: FormFieldProps<G, M, N>
 ) {
-  return function setValue(val?: FieldValue, isInitialization = false) {
-    let value: M[N];
-    const name = props.name as N;
-    const currentValue = formState.getFieldValue(name);
+  const name = props.name as N;
 
-    if ((props.disabled || props.readonly) && !isInitialization) {
-      return;
-    }
+  // Sequencing token: every commit bumps it, and an async custom validator only
+  // applies its result while its captured token is still current. This stops a
+  // slow validation of an older value from clobbering a newer value's errors.
+  let validationToken = 0;
 
-    if (props.isSelectable) {
-      if (!isInitialization && Boolean(currentValue) === val) {
-        return;
-      }
-
-      value = val as M[N];
-    } else if (typeof props.parse === 'function') {
-      value = props.parse(val as DisplayValue);
-
-      if (!isInitialization && currentValue === value) {
-        return;
-      }
-    } else {
-      // There should always be a parser
-      return;
-    }
-
+  function commit(value: M[N], isInitialization: boolean) {
+    const token = ++validationToken;
     const newErrors = validate(name, value, validationConstraints, formState);
-
     const errorsForDisplay = newErrors.length > 0 ? newErrors : [];
+
     if (isInitialization) {
       formStateMutations.initializeField(name, value, errorsForDisplay);
     } else {
@@ -129,10 +105,52 @@ export function createValueSetter<
     // Sync validators call setFieldErrors immediately; async validators call it when they resolve.
     if (newErrors.length === 0 && props.validator) {
       props.validator(name, value, formState, (errors) => {
+        if (token !== validationToken) return;
         formStateMutations.setFieldErrors(name, errors);
       });
     }
-  };
+  }
+
+  const setValue = Object.assign(
+    function setValue(val?: FieldValue, isInitialization = false) {
+      let value: M[N];
+      const currentValue = formState.getFieldValue(name);
+
+      if ((props.disabled || props.readonly) && !isInitialization) {
+        return;
+      }
+
+      if (props.isSelectable) {
+        if (!isInitialization && Boolean(currentValue) === val) {
+          return;
+        }
+
+        value = val as M[N];
+      } else if (typeof props.parse === 'function') {
+        value = props.parse(val as DisplayValue);
+
+        if (!isInitialization && currentValue === value) {
+          return;
+        }
+      } else {
+        // There should always be a parser
+        return;
+      }
+
+      commit(value, isInitialization);
+    },
+    {
+      // Re-run validation against the field's current value without changing it.
+      // Used to refresh a cross-field constraint (e.g. `match`) when the field it
+      // depends on changes, since that change does not flow through this setValue.
+      revalidate() {
+        if (!formState.hasFieldBeenInitialized(name)) return;
+        commit(formState.getFieldValue(name) as M[N], false);
+      }
+    }
+  );
+
+  return setValue;
 }
 
 export function createOnInput<
@@ -166,7 +184,7 @@ export function createOnBlur<G extends FormElementTag, M extends FieldValueMappi
 
 export function createField(componentName: ComponentName, el: JSX.Element) {
   if (el && typeof el === 'object') {
-    getComponentNameRegistry().set(el, componentName);
+    setComponentName(el, componentName);
   }
 
   return el;
@@ -203,18 +221,35 @@ export function createFormField<
       true
     );
   } else if (props.disabled && isInitialized()) {
+    // Preserve the value the user already entered for a non-selectable field
+    // when no explicit default is supplied — otherwise becoming disabled would
+    // wipe the field's value (to undefined) out of the submitted payload.
+    const currentValue = formState.getFieldValue(props.name);
     const disabledValue = (
-      isSelectable() ? (props.checked ?? props.defaultChecked ?? props.defaultValue ?? false) : props.defaultValue
+      isSelectable()
+        ? (props.checked ?? props.defaultChecked ?? props.defaultValue ?? false)
+        : (props.defaultValue ?? currentValue)
     ) as M[N];
     const errors = validate(props.name, disabledValue, validationConstraints, formState);
-    formStateMutations.setFieldValue(
-      props.name,
-      disabledValue,
-      errors.length > 0 ? errors : []
-    );
+    // Only overwrite errors when the disabled value actually violates a
+    // constraint; passing `undefined` preserves any existing error (e.g. one set
+    // by the server) rather than silently clearing it as `[]` would.
+    formStateMutations.setFieldValue(props.name, disabledValue, errors.length > 0 ? errors : undefined);
+  }
+
+  // A `match` constraint depends on another field's value, which changes outside
+  // this field's own input handler. Re-validate whenever that field changes so a
+  // stale "does not match" verdict can't linger after the matched field is edited.
+  if (props.match) {
+    createEffect(() => {
+      formState.getFieldValue(props.match as StringKeyOf<M>); // track the matched field
+      setValue.revalidate();
+    });
   }
 
   const formattedValue = createMemo(() => props.format(value()));
+  const displayableErrors = createMemo(() => getDisplayableErrors(props.name, formState));
+  const isDisabled = createMemo(() => Boolean(props.disabled || !props.name || formState.isLoading));
 
   const newProps = mergeProps(props, {
     get id() {
@@ -224,10 +259,10 @@ export function createFormField<
       return formattedValue();
     },
     get disabled() {
-      return Boolean(props.disabled || !props.name || formState.isLoading);
+      return isDisabled();
     },
     get errors() {
-      return getDisplayableErrors(props.name, formState);
+      return displayableErrors();
     },
     get checked() {
       return currentChecked();

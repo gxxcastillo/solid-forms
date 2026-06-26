@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { createBaseFormOnSubmitHandler, fieldsToProps } from './helpers';
+import { createBaseFormOnSubmitHandler, fieldsToProps, resolveSubmitHandler } from './helpers';
 
 function makeEvent(name = '') {
   return {
@@ -84,7 +84,9 @@ describe('createBaseFormOnSubmitHandler', () => {
     expect(onSubmit).not.toHaveBeenCalled();
   });
 
-  it('does not call onSubmit when no values have changed', async () => {
+  it('submits even when no field values have changed', async () => {
+    // A pristine, pre-filled, or submit-to-validate form must still submit;
+    // submission is only blocked while already processing.
     const onSubmit = vi.fn();
     const state = makeState({ haveValuesChanged: false });
     const mutations = makeMutations();
@@ -93,7 +95,7 @@ describe('createBaseFormOnSubmitHandler', () => {
 
     await handler(makeEvent());
 
-    expect(onSubmit).not.toHaveBeenCalled();
+    expect(onSubmit).toHaveBeenCalledOnce();
   });
 
   it('sets and resets isProcessing around a successful async submit', async () => {
@@ -108,15 +110,16 @@ describe('createBaseFormOnSubmitHandler', () => {
     expect(mutations.setIsProcessing.mock.calls).toEqual([[true], [false]]);
   });
 
-  it('resets isProcessing after a failed async submit without rethrowing', async () => {
+  it('propagates a failed async submit while still resetting isProcessing', async () => {
     const onSubmit = vi.fn().mockRejectedValue(new Error('submit failed'));
     const state = makeState();
     const mutations = makeMutations();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const handler = createBaseFormOnSubmitHandler({ onSubmit } as any, state, mutations);
 
-    // Error is caught inside the handler to avoid unhandled DOM rejections.
-    await handler(makeEvent());
+    // The failure is propagated to the caller (BaseForm surfaces it) rather than
+    // being silently swallowed, but isProcessing is always cleared via finally.
+    await expect(handler(makeEvent())).rejects.toThrow('submit failed');
 
     expect(mutations.setIsProcessing.mock.calls).toEqual([[true], [false]]);
   });
@@ -131,5 +134,45 @@ describe('createBaseFormOnSubmitHandler', () => {
     await handler(makeEvent());
 
     expect(mutations.setIsProcessing.mock.calls).toEqual([[true], [false]]);
+  });
+
+  it('invokes the sole object handler when submitted without a named button (Enter key)', async () => {
+    const login = vi.fn();
+    const state = makeState();
+    const mutations = makeMutations();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const handler = createBaseFormOnSubmitHandler({ onSubmit: { login } } as any, state, mutations);
+
+    await handler(makeEvent('')); // empty submitter name == no named button
+
+    expect(login).toHaveBeenCalledOnce();
+  });
+});
+
+describe('resolveSubmitHandler', () => {
+  it('returns a function-style handler directly', () => {
+    const fn = vi.fn();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    expect(resolveSubmitHandler(fn as any, 'anything')).toBe(fn);
+  });
+
+  it('selects an object handler by submitter name', () => {
+    const saveDraft = vi.fn();
+    const publish = vi.fn();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    expect(resolveSubmitHandler({ saveDraft, publish } as any, 'publish')).toBe(publish);
+  });
+
+  it('falls back to the sole handler when there is no submitter name', () => {
+    const login = vi.fn();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    expect(resolveSubmitHandler({ login } as any, undefined)).toBe(login);
+  });
+
+  it('returns undefined for an ambiguous map with no submitter name', () => {
+    const saveDraft = vi.fn();
+    const publish = vi.fn();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    expect(resolveSubmitHandler({ saveDraft, publish } as any, undefined)).toBeUndefined();
   });
 });

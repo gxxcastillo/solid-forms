@@ -16,13 +16,22 @@ export const initialFormState = {
   isReady: false
 };
 
+// Build a fresh backing object for the store on every call so two stores never
+// share state. This matters under SolidJS's SSR build, where createStore returns
+// the object it's given and mutates it in place — without a copy, two calls with
+// the same `state` reference would share reactive state. The nested `fields`
+// objects and the `errors` array are cloned too; a plain spread would share them.
+function cloneBackingState<M extends FieldValueMapping>(state?: BaseFormState<M>): BaseFormState<M> {
+  const source = state ?? initialFormState;
+  return {
+    ...source,
+    fields: source.fields?.map((field) => ({ ...field })) ?? [],
+    errors: source.errors ? [...source.errors] : []
+  };
+}
+
 export function createFormState<M extends FieldValueMapping>(state?: BaseFormState<M>) {
-  // Create a fresh object each call so multiple stores don't share the same backing state.
-  // In SolidJS's server/SSR build, createStore returns the raw object and mutates it in place,
-  // meaning two calls with the same object reference would share reactive state.
-  const [formState, setFormState] = createStore<BaseFormState<M>>(
-    state ?? ({ ...initialFormState, fields: [], errors: [] } as BaseFormState<M>)
-  );
+  const [formState, setFormState] = createStore<BaseFormState<M>>(cloneBackingState(state));
   const getters = {
     get haveValuesChanged() {
       return !!formState.fields.some((f) => f.hasChanged);
@@ -84,15 +93,17 @@ export function createFormStore<M extends FieldValueMapping>(state?: BaseFormSta
             hasBeenInitialized: true,
             hasChanged: false,
             hasBeenBlurred: false,
-            hasBeenValid: !errors.length
+            hasBeenValid: value !== undefined && !errors.length
           }
         ]);
       },
 
       setFieldValue: <N extends FName>(name: N, value?: M[N], errors?: FErrors) => {
-        const hasBeenInitialized = getters.hasFieldBeenInitialized(name);
+        // Resolve the field once: this runs on every keystroke, so a single O(n)
+        // lookup beats the five separate `.find()` scans the getters would do.
+        const field = getters.getField(name);
 
-        if (!hasBeenInitialized) {
+        if (!field) {
           const initialErrors = errors ?? [];
           setFormState('fields', (fields) => [
             ...(fields || []),
@@ -109,8 +120,8 @@ export function createFormStore<M extends FieldValueMapping>(state?: BaseFormSta
           return;
         }
 
-        const currentValue = getters.getFieldValue(name);
-        const currentErrors = getters.getFieldErrors(name) ?? [];
+        const currentValue = field.value;
+        const currentErrors = field.errors ?? [];
         // When errors is not explicitly provided, preserve current errors rather than clearing them.
         const effectiveErrors = errors !== undefined ? errors : currentErrors;
 
@@ -118,8 +129,8 @@ export function createFormStore<M extends FieldValueMapping>(state?: BaseFormSta
           return;
         }
 
-        const prevHasBeenValid = getters.hasFieldBeenValid(name) ?? false;
-        const prevHasChanged = getters.hasFieldChanged(name) ?? false;
+        const prevHasBeenValid = field.hasBeenValid ?? false;
+        const prevHasChanged = field.hasChanged ?? false;
 
         setFormState(
           'fields',

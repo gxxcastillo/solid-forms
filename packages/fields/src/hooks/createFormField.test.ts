@@ -141,6 +141,72 @@ describe('createValueSetter', () => {
     expect(validator).not.toHaveBeenCalled();
   });
 
+  it('ignores a stale async validator result for a value that was superseded', () => {
+    const state = makeState();
+    let current: unknown = undefined;
+    state.getFieldValue = () => current;
+    const mutations = makeMutations();
+    const pending: Array<(e: string[]) => void> = [];
+    const validator = vi.fn(
+      (_n: string, _v: unknown, _s: unknown, setErrors: (e: string[]) => void) => {
+        pending.push(setErrors);
+      }
+    );
+    const setValue = createValueSetter(
+      state,
+      mutations,
+      {},
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      { name: 'username', parse: (v: unknown) => v, validator } as any
+    );
+
+    setValue('al'); // validator #1 queued
+    current = 'al'; // simulate the store committing the value
+    setValue('alice'); // validator #2 queued
+    current = 'alice';
+
+    // Resolve out of order: the newer value first, then the stale one.
+    pending[1](['result-for-alice']);
+    pending[0](['result-for-al']);
+
+    expect(mutations.setFieldErrors).toHaveBeenCalledTimes(1);
+    expect(mutations.setFieldErrors).toHaveBeenCalledWith('username', ['result-for-alice']);
+  });
+
+  it('revalidate re-runs validation against the current value', () => {
+    const state = makeState('secret');
+    state.hasFieldBeenInitialized = () => true;
+    const mutations = makeMutations();
+    const setValue = createValueSetter(
+      state,
+      mutations,
+      { match: 'password' },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      { name: 'confirm', parse: (v: unknown) => v } as any
+    );
+
+    setValue.revalidate();
+
+    expect(mutations.setFieldValue).toHaveBeenCalledWith('confirm', 'secret', []);
+  });
+
+  it('revalidate is a no-op before the field is initialized', () => {
+    const state = makeState('secret');
+    state.hasFieldBeenInitialized = () => false;
+    const mutations = makeMutations();
+    const setValue = createValueSetter(
+      state,
+      mutations,
+      {},
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      { name: 'confirm', parse: (v: unknown) => v } as any
+    );
+
+    setValue.revalidate();
+
+    expect(mutations.setFieldValue).not.toHaveBeenCalled();
+  });
+
   it('reads the current value when invoked instead of using a mount-time snapshot', () => {
     let currentValue = false;
     const state = makeState();

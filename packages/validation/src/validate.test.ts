@@ -54,6 +54,10 @@ describe('validate — falsey constraints', () => {
   it('treats minLength=0 as active (not falsey)', () => {
     expect(validate('username', '', { minLength: 0 }, makeFormState())).toEqual([]);
   });
+
+  it('skips null constraints', () => {
+    expect(validate('username', 'x', { pattern: null as never }, makeFormState())).toEqual([]);
+  });
 });
 
 describe('required', () => {
@@ -77,6 +81,14 @@ describe('required', () => {
 
   it('passes for a non-empty array', () => {
     expect(validate('username', ['a'] as never, { required: true }, state)).toEqual([]);
+  });
+
+  it('fails for boolean false (an unchecked required checkbox)', () => {
+    expect(validate('username', false as never, { required: true }, state)).toHaveLength(1);
+  });
+
+  it('passes for boolean true (a checked checkbox)', () => {
+    expect(validate('username', true as never, { required: true }, state)).toEqual([]);
   });
 });
 
@@ -104,6 +116,15 @@ describe('pattern', () => {
     expect(validate('username', 'abc', { pattern }, state)).toEqual([]);
     expect(validate('username', 'def', { pattern }, state)).toEqual([]);
     expect(validate('username', 'ABC', { pattern }, state)).toHaveLength(1);
+  });
+
+  it('passes for an empty value (emptiness is required\'s concern)', () => {
+    expect(validate('username', '', { pattern: '^[a-z]+$' }, state)).toEqual([]);
+  });
+
+  it('coerces a non-string value before testing', () => {
+    expect(validate('age', 123 as never, { pattern: '^[0-9]+$' }, state)).toEqual([]);
+    expect(validate('age', 12.5 as never, { pattern: '^[0-9]+$' }, state)).toHaveLength(1);
   });
 });
 
@@ -144,6 +165,17 @@ describe('min / max', () => {
 
   it('max fails when value exceeds the maximum', () => {
     expect(validate('age', 6 as never, { max: 5 }, state)).toHaveLength(1);
+  });
+
+  it('coerces a numeric string value (default string fields)', () => {
+    expect(validate('age', '25' as never, { min: 18 }, state)).toEqual([]);
+    expect(validate('age', '10' as never, { min: 18 }, state)).toHaveLength(1);
+    expect(validate('age', '25' as never, { max: 18 }, state)).toHaveLength(1);
+  });
+
+  it('skips an empty or non-numeric value (required handles emptiness)', () => {
+    expect(validate('age', '' as never, { min: 18 }, state)).toEqual([]);
+    expect(validate('age', 'abc' as never, { min: 18 }, state)).toEqual([]);
   });
 });
 

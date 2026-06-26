@@ -71,4 +71,3 @@ export type ParseFunction<V extends FieldValue> = (val: DisplayValue) => V;
 export type FormatFunction<V extends FieldValue> = (val: V | undefined) => string;
 
 export type ComponentName = `${string}${'Field' | 'Button' | 'Link'}`;
-export type FormFieldComponent = JSX.Element & { componentName: ComponentName };

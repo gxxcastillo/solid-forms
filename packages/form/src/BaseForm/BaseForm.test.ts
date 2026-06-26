@@ -1,9 +1,15 @@
 import { describe, expect, it } from 'vitest';
 
+import { setComponentName } from '@gxxc/solid-forms-state';
+
 import { classifyBaseFormChildren } from './BaseForm';
 
 function component(name: string) {
-  return { componentName: name };
+  // Tag the element via the shared registry, exactly as createField does in
+  // production — names are no longer carried on a `.componentName` property.
+  const el = {};
+  setComponentName(el, name);
+  return el;
 }
 
 const componentNameRegistryKey = Symbol.for('@gxxc/solid-forms/component-name-registry');

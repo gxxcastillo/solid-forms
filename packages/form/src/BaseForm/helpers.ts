@@ -39,24 +39,38 @@ export function fieldsToProps<M extends FieldValueMapping>(formFields: FormField
   }, {}) as M;
 }
 
+export function resolveSubmitHandler<P extends RequestProps, R extends Response | ResponseMapping<P>>(
+  onSubmit: BaseFormOnSubmit<P, R> | undefined,
+  buttonName: string | undefined
+): OnSubmitHandler<P, R> | undefined {
+  if (isSubmitHandlerFn<P, R>(onSubmit)) return onSubmit;
+  if (!onSubmit || !isSubmitHandlersObject<P, R>(onSubmit)) return undefined;
+
+  const handlers = onSubmit as unknown as Record<string, OnSubmitHandler<P, R>>;
+  const matched = buttonName ? handlers[buttonName] : undefined;
+  if (matched) return matched;
+
+  // No named submitter (e.g. the form was submitted via the Enter key) or an
+  // unmatched name. If the map has a single handler it is unambiguous, so use it
+  // rather than silently doing nothing; with multiple handlers we can't guess.
+  const handlerList = Object.values(handlers);
+  return handlerList.length === 1 ? handlerList[0] : undefined;
+}
+
 export function createBaseFormOnSubmitHandler<
   P extends RequestProps,
   R extends Response | ResponseMapping<P>
 >(props: BaseFormProps<P, R>, formState: FormState, formStateMutations: FormStateMutations) {
   return async (event: BaseFormElementSubmitEvent) => {
     event.preventDefault();
-    const buttonName = (event.submitter as HTMLFormElement)?.name;
+    const buttonName = (event.submitter as HTMLButtonElement)?.name;
 
-    if (formState.isProcessing || !formState.haveValuesChanged) {
+    if (formState.isProcessing) {
       return;
     }
 
     const submitProps = fieldsToProps(formState.fields) as P;
-    const onSubmitFn = isSubmitHandlerFn<P, R>(props.onSubmit)
-      ? props.onSubmit
-      : props.onSubmit && isSubmitHandlersObject<P, R>(props.onSubmit)
-        ? props.onSubmit[buttonName]
-        : undefined;
+    const onSubmitFn = resolveSubmitHandler<P, R>(props.onSubmit, buttonName);
 
     if (!onSubmitFn) return;
 
@@ -68,10 +82,10 @@ export function createBaseFormOnSubmitHandler<
       if (result?.then) {
         await result;
       }
-    } catch {
-      // The submit handler threw or rejected. isProcessing is reset by
-      // finally; error handling is the caller's responsibility.
     } finally {
+      // Always clear the processing flag, even when the handler throws/rejects.
+      // The error itself is propagated to the caller (BaseForm surfaces it)
+      // rather than being silently swallowed.
       formStateMutations.setIsProcessing(false);
     }
   };

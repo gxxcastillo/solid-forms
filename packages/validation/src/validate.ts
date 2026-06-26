@@ -34,7 +34,7 @@ export function validate<M extends FieldValueMapping, N extends StringKeyOf<M>>(
   formState: FormState<M>
 ): ErrorMessages {
   return Object.entries(constraints)
-    .filter(([, constraint]) => constraint !== undefined && constraint !== false)
+    .filter(([, constraint]) => constraint != null && constraint !== false)
     .map(([name, constraint]) => {
       const constraintName = name as ConstraintName;
       return validateAgainstConstraint({

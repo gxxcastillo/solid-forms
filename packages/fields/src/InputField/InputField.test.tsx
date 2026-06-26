@@ -52,9 +52,12 @@ describe('InputField', () => {
     ));
 
     const input = screen.getByRole('textbox');
+    const alert = screen.getByRole('alert');
     expect(input).toHaveAttribute('aria-invalid', 'true');
-    expect(screen.getByRole('alert')).toHaveTextContent('Required');
-    expect(input).toHaveAttribute('aria-describedby', 'username-errors');
+    expect(alert).toHaveTextContent('Required');
+    // aria-describedby must reference the error element by its (unique) id.
+    expect(alert.id).toBeTruthy();
+    expect(input).toHaveAttribute('aria-describedby', alert.id);
   });
 
   it('renders label with for attribute matching the input id when showLabel returns true', () => {

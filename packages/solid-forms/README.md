@@ -142,7 +142,7 @@ Sync validators call `setErrors` before returning. Async validators call `setErr
 
 ## Async submission
 
-Return a Promise from `onSubmit`. The form sets `isProcessing` to `true` for the duration and disables the submit button automatically. If the handler throws, `isProcessing` resets to `false` and the error is swallowed into `form.state.errors`.
+Return a Promise from `onSubmit`. The form sets `isProcessing` to `true` for the duration and disables the submit button automatically. If the handler throws, `isProcessing` is reset to `false` (via a `finally`) and the rejection propagates out of the handler — the form logs it to the console but does **not** add it to `form.state.errors`. Catch the error inside your handler and surface it yourself (e.g. through the `errors` prop) if you want it shown in the UI.
 
 ```tsx
 async function onSubmit(values: LoginValues) {
@@ -321,9 +321,10 @@ Renders a submit button. Disabled automatically when the form has validation err
 ```tsx
 <SubmitButton>Log in</SubmitButton>
 
-{/* Named submit — passes the button's name/value into form state */}
-<SubmitButton name="action" defaultValue="save">Save draft</SubmitButton>
-<SubmitButton name="action" defaultValue="publish">Publish</SubmitButton>
+{/* Named submit buttons — each distinct name selects a handler from an
+    object-style onSubmit map: onSubmit={{ saveDraft, publish }} */}
+<SubmitButton name="saveDraft">Save draft</SubmitButton>
+<SubmitButton name="publish">Publish</SubmitButton>
 ```
 
 | Prop | Type | Description |

@@ -1,4 +1,4 @@
-import { createMemo, splitProps } from 'solid-js';
+import { createMemo, createUniqueId, splitProps } from 'solid-js';
 import { type StringKeyOf } from 'type-fest';
 
 import { Textarea } from '@gxxc/solid-forms-elements';
@@ -24,6 +24,7 @@ export function TextAreaField<M extends FieldValueMapping, N extends StringKeyOf
 
   const [props, createField] = createFormField<'textarea', M, N>(parsedProps)();
   const value = createMemo(() => formState.getFieldValue(props.name));
+  const errorId = createUniqueId();
   const initialLabel = createMemo(() => props.label);
   const label = createMemo(() =>
     useFormFieldLabel({
@@ -43,12 +44,12 @@ export function TextAreaField<M extends FieldValueMapping, N extends StringKeyOf
             placeholder={label().placeholder}
             class={styles.textAreaEl}
             aria-invalid={!!props.errors?.length}
-            aria-describedby={props.errors?.length ? `${props.name}-errors` : undefined}
+            aria-describedby={props.errors?.length ? errorId : undefined}
           />
         </div>
       </div>
       {props.errors?.[0] && (
-        <div id={`${props.name}-errors`} class={styles.error} role="alert">
+        <div id={errorId} class={styles.error} role="alert">
           {props.errors[0]}
         </div>
       )}

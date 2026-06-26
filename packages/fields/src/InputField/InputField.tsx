@@ -1,11 +1,11 @@
-import { type JSX, createMemo, splitProps } from 'solid-js';
+import { type JSX, createMemo, createUniqueId, splitProps } from 'solid-js';
 import { type StringKeyOf } from 'type-fest';
 
 import { Input } from '@gxxc/solid-forms-elements';
 import { type FieldValueMapping, type FormState, useFormContext } from '@gxxc/solid-forms-state';
 
 import { createFormField, useFormFieldLabel } from '../hooks';
-import { type FormFieldProps, type FormatFunction } from '../types';
+import { type FormFieldProps } from '../types';
 import styles from './InputField.module.css';
 
 export type ShowIconFn<M extends FieldValueMapping, N extends StringKeyOf<M>> = (
@@ -58,7 +58,7 @@ export function InputField<M extends FieldValueMapping, N extends StringKeyOf<M>
   const context = createMemo(() => localProps.context);
   const initialLabel = createMemo(() => props.label);
   const hasValue = createMemo(() => !!value());
-  const format = createMemo(() => props.format as FormatFunction<M[N]>);
+  const errorId = createUniqueId();
   const label = createMemo(() =>
     useFormFieldLabel({
       value: value(),
@@ -85,9 +85,8 @@ export function InputField<M extends FieldValueMapping, N extends StringKeyOf<M>
           class={styles.input}
           id={props.id}
           placeholder={label().placeholder}
-          value={format()(value())}
           aria-invalid={!!props.errors?.length}
-          aria-describedby={props.errors?.length ? `${props.name}-errors` : undefined}
+          aria-describedby={props.errors?.length ? errorId : undefined}
         />
         {withIcon() && <div class={styles.icon}>{icon()}</div>}
         {context && <div class={styles.context}>{context()}</div>}
@@ -98,7 +97,7 @@ export function InputField<M extends FieldValueMapping, N extends StringKeyOf<M>
         )}
       </div>
       {props.errors?.[0] && (
-        <div id={`${props.name}-errors`} class={styles.error} role="alert">
+        <div id={errorId} class={styles.error} role="alert">
           {props.errors[0]}
         </div>
       )}

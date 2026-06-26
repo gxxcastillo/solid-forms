@@ -1,0 +1,6 @@
+/* Shared field error-message styling, composed into each field's own .error
+   rule so the color and size stay defined in one place. */
+.error {
+  color: #d32f2f;
+  font-size: 0.75rem;
+}

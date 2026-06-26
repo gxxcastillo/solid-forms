@@ -45,6 +45,7 @@ export function SubmitButton<M extends FieldValueMapping, N extends StringKeyOf<
       <Button
         type={props().type}
         {...props}
+        name={parsedProps.name}
         disabled={props().isDisabled}
         onClick={props().onClick}
         value={props().children()?.toString() ?? 'submit'}

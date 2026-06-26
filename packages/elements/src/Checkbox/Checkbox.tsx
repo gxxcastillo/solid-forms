@@ -1,7 +1,10 @@
 import { type JSX } from 'solid-js';
 
+import { stripInvalidProps } from '../utils';
+
 export type CheckboxElementProps = JSX.InputHTMLAttributes<HTMLInputElement>;
 
-export function Checkbox(props: CheckboxElementProps) {
+export function Checkbox(initialProps: CheckboxElementProps) {
+  const props = stripInvalidProps(initialProps) as CheckboxElementProps;
   return <input type='checkbox' {...props} />;
 }
