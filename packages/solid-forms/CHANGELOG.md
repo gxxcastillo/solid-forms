@@ -1,5 +1,11 @@
 # @gxxc/solid-forms
 
+## 0.1.1
+
+### Patch Changes
+
+- Fix publish pipeline: disable moon's syncProjectWorkspaceDependencies so internal workspace packages are never injected into runtime dependencies. Add publishConfig.exports so pnpm strips the development export condition from the tarball automatically. Add CI pack smoke test to catch regressions. Fix publish script to propagate the changeset exit code.
+
 ## 0.1.0
 
 ### Minor Changes
