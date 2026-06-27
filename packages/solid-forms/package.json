@@ -1,6 +1,6 @@
 {
   "name": "@gxxc/solid-forms",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "description": "Solid.js forms",
   "repository": {
@@ -16,6 +16,18 @@
       "development": "./src/index.ts"
     }
   },
+  "publishConfig": {
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "import": "./dist/index.js"
+      }
+    }
+  },
+  "scripts": {
+    "prepublishOnly": "vite build",
+    "postpublish": "git tag @gxxc/solid-forms@$(node -p \"require('./package.json').version\") && git push origin @gxxc/solid-forms@$(node -p \"require('./package.json').version\")"
+  },
   "files": [
     "dist"
   ],
@@ -30,9 +42,5 @@
   },
   "peerDependencies": {
     "solid-js": "^1.8.20"
-  },
-  "dependencies": {
-    "@gxxc/solid-forms-fields": "workspace:*",
-    "@gxxc/solid-forms-form": "workspace:*"
   }
 }

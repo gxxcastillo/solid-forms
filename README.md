@@ -55,7 +55,7 @@ pnpm bump          # bump package versions based on changesets
 pnpm run publish   # build, pack, and publish @gxxc/solid-forms
 ```
 
-The publish script strips workspace-only dependencies from `package.json` before publishing and restores them afterward.
+pnpm uses `publishConfig.exports` in `packages/solid-forms/package.json` to strip the `development` export condition from the published tarball. Internal workspace packages are listed only in `devDependencies` and are bundled into `dist/index.js` at build time, so they do not appear as runtime dependencies.
 
 ---
 
