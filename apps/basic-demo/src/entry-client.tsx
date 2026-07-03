@@ -1,3 +1,3 @@
 import { StartClient, mount } from '@solidjs/start/client';
 
-mount(() => <StartClient />, document.querySelector('#app')!);
+export default mount(() => <StartClient />, document.querySelector('#app')!);

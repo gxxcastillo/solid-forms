@@ -35,7 +35,6 @@ export function InputField<M extends FieldValueMapping, N extends StringKeyOf<M>
 ) {
   const [formState] = useFormContext<M>();
   const [localProps, parsedProps] = splitProps(initialProps, [
-    'type',
     'showLabel',
     'leadingIcon',
     'showIcon',
@@ -74,6 +73,8 @@ export function InputField<M extends FieldValueMapping, N extends StringKeyOf<M>
     [styles.withLabel]: withLabel()
   };
 
+  console.log('!!!!! PROPW', props);
+
   return createField(
     'InputField',
     <div classList={classList}>
@@ -97,7 +98,7 @@ export function InputField<M extends FieldValueMapping, N extends StringKeyOf<M>
         )}
       </div>
       {props.errors?.[0] && (
-        <div id={errorId} class={styles.error} role="alert">
+        <div id={errorId} class={styles.error} role='alert'>
           {props.errors[0]}
         </div>
       )}
