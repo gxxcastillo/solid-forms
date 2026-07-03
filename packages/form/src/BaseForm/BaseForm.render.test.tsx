@@ -4,6 +4,7 @@ import { FormContextProvider, createFormStore } from '@gxxc/solid-forms-state';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { BaseForm } from './BaseForm';
+import styles from './BaseForm.module.css';
 
 type TestForm = { [key: string]: string; email: string };
 
@@ -54,6 +55,40 @@ describe('BaseForm (rendered)', () => {
 
     expect(onSubmit).not.toHaveBeenCalled();
     expect(state.hasFieldBlurred('email')).toBe(true);
+  });
+
+  it('exposes the stable `sf-form` hook and left-aligns by default', () => {
+    const { store } = makeStore();
+    const { container } = render(() => (
+      <FormContextProvider store={store}>
+        <BaseForm onSubmit={vi.fn()}>
+          <button type='submit'>Submit</button>
+        </BaseForm>
+      </FormContextProvider>
+    ));
+
+    const form = container.querySelector('form')!;
+    expect(form.classList.contains('sf-form')).toBe(true);
+    expect(form.classList.contains(styles.form)).toBe(true);
+    expect(form.classList.contains(styles.alignLeft)).toBe(true);
+    expect(form.classList.contains(styles.alignCenter)).toBe(false);
+  });
+
+  it('applies alignment, fullWidthButtons, and a custom className', () => {
+    const { store } = makeStore();
+    const { container } = render(() => (
+      <FormContextProvider store={store}>
+        <BaseForm onSubmit={vi.fn()} align='center' fullWidthButtons className='my-form'>
+          <button type='submit'>Submit</button>
+        </BaseForm>
+      </FormContextProvider>
+    ));
+
+    const form = container.querySelector('form')!;
+    expect(form.classList.contains(styles.alignCenter)).toBe(true);
+    expect(form.classList.contains(styles.alignLeft)).toBe(false);
+    expect(form.classList.contains(styles.fullWidthButtons)).toBe(true);
+    expect(form.classList.contains('my-form')).toBe(true);
   });
 
   it('surfaces a rejected onSubmit into form.state.errors', async () => {

@@ -1,5 +1,17 @@
+/* TextareaField — structure only; skinnable values come from theme tokens
+   (see themes/base.css). */
+
+.TextArea {
+  display: block;
+}
+
 .title {
-  margin-bottom: 15px;
+  margin-bottom: 0.5rem;
+  color: var(--sf-color-text);
+  font-family: var(--sf-font-family);
+  font-size: var(--sf-font-size-title);
+  font-weight: var(--sf-font-weight-label);
+  text-transform: var(--sf-text-transform-label);
 
   &::first-letter {
     text-transform: capitalize;
@@ -10,42 +22,55 @@
   position: relative;
 }
 
-.label {
-  color: #ccc;
-  position: absolute;
-  text-transform: lowercase;
-  pointer-events: none;
-  transform: translate(0, 4px) scale(1);
-  transition: 300ms cubic-bezier(0, 0, 0.2, 1) 0ms;
-  transform-origin: top left;
-  left: 24px;
-}
-
 .textAreaEl {
-  border: 2px solid #444;
-  border-radius: 4px;
-  height: 8.6rem;
-  padding: 24px 16px 12px 22px;
+  box-sizing: border-box;
   width: 100%;
-
-  &[type='password'] {
-    font-family: Verdana, sans-serif;
-    letter-spacing: 0.125em;
-  }
+  min-height: var(--sf-textarea-min-height);
+  padding: var(--sf-textarea-padding-y) var(--sf-control-padding-x);
+  border: var(--sf-border-width) solid var(--sf-color-border);
+  border-radius: var(--sf-radius-control);
+  background-color: var(--sf-color-surface);
+  box-shadow: var(--sf-shadow-control);
+  color: var(--sf-color-text);
+  font-family: var(--sf-font-family);
+  font-size: var(--sf-font-size);
+  font-weight: var(--sf-font-weight);
+  line-height: 1.5;
+  resize: vertical;
+  transition:
+    border-color var(--sf-transition-duration) var(--sf-transition-easing),
+    box-shadow var(--sf-transition-duration) var(--sf-transition-easing);
 
   &::placeholder {
-    color: #bbb;
-    text-transform: capitalize;
+    color: var(--sf-color-placeholder);
+  }
+
+  &:disabled {
+    background-color: var(--sf-color-surface-disabled);
+    color: var(--sf-color-text-muted);
+    cursor: not-allowed;
+  }
+
+  &:hover:not(:disabled, :focus) {
+    border-color: var(--sf-color-border-hover);
   }
 
   &:focus {
-    border: 2px solid #444;
-    box-shadow: 0 0 4px #444;
+    border-color: var(--sf-color-border-focus);
+    box-shadow: var(--sf-shadow-control), 0 0 0 var(--sf-focus-ring-width) var(--sf-color-focus-ring);
     outline: 0;
+  }
+
+  &[aria-invalid='true'] {
+    border-color: var(--sf-color-danger);
+
+    &:focus {
+      box-shadow: var(--sf-shadow-control), 0 0 0 var(--sf-focus-ring-width) var(--sf-color-danger);
+    }
   }
 }
 
 .error {
   composes: error from '../shared/error.module.css';
-  margin-top: 4px;
+  margin-top: 0.35rem;
 }

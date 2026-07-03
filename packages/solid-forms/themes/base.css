@@ -1,0 +1,91 @@
+/*
+ * @gxxc/solid-forms — base design tokens
+ * ---------------------------------------------------------------------------
+ * Every skinnable value in the library is a CSS custom property namespaced with
+ * `--sf-`. This file declares the default value for each token. A "theme" is
+ * nothing more than a stylesheet that re-declares a subset of these variables
+ * under a scope (see themes/minimal.css, themes/midnight.css, ...).
+ *
+ * Defaults are declared on `:where(:root)` so their specificity is (0,0,0).
+ * That means a theme scoped to `[data-sf-theme="x"]` (0,1,0) or a consumer's
+ * own `:root { --sf-... }` rule always wins, regardless of import order.
+ *
+ * To skin the library you only ever need to touch these variables — you never
+ * have to fight the (hashed) CSS-module class names.
+ */
+:where(:root) {
+  /* ---- Surfaces & text ------------------------------------------------- */
+  /* Recommended page background to pair with a theme. Not applied automatically
+     (a form should not hijack your page background) — read it if you want a
+     matching canvas, e.g. `background: var(--sf-color-canvas)`. */
+  --sf-color-canvas: #ffffff;
+  --sf-color-surface: #ffffff;
+  --sf-color-surface-disabled: #f3f4f6;
+  --sf-color-text: #111827;
+  --sf-color-text-muted: #6b7280;
+  --sf-color-label: #6b7280;
+  --sf-color-placeholder: #9ca3af;
+
+  /* ---- Borders & focus ------------------------------------------------- */
+  --sf-color-border: #d1d5db;
+  --sf-color-border-hover: #9ca3af;
+  --sf-color-border-focus: #6366f1;
+  --sf-color-focus-ring: rgb(99 102 241 / 0.35);
+
+  /* ---- Accent / primary actions ---------------------------------------- */
+  --sf-color-primary: #6366f1;
+  --sf-color-primary-hover: #4f46e5;
+  --sf-color-primary-active: #4338ca;
+  --sf-color-on-primary: #ffffff;
+
+  /* ---- Secondary actions (e.g. the "approve" button variant) ----------- */
+  --sf-color-secondary: transparent;
+  --sf-color-secondary-hover: #f3f4f6;
+  --sf-color-secondary-border: #d1d5db;
+  --sf-color-on-secondary: #374151;
+
+  /* ---- Feedback -------------------------------------------------------- */
+  --sf-color-danger: #dc2626;
+
+  /* ---- Icons ----------------------------------------------------------- */
+  --sf-color-icon: #4b5563;
+  --sf-color-icon-muted: #9ca3af;
+
+  /* ---- Typography ------------------------------------------------------ */
+  --sf-font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --sf-font-family-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --sf-font-size: 1rem;
+  --sf-font-size-title: 1rem;
+  --sf-font-size-error: 0.75rem;
+  --sf-font-weight: 400;
+  --sf-font-weight-label: 500;
+  --sf-font-weight-button: 600;
+  --sf-letter-spacing: normal;
+  --sf-letter-spacing-password: 0.125em;
+  --sf-text-transform-label: none;
+  --sf-text-transform-button: none;
+
+  /* ---- Sizing & spacing ------------------------------------------------ */
+  --sf-control-height: 2.75rem;
+  --sf-control-padding-x: 0.875rem;
+  --sf-textarea-padding-y: 0.625rem;
+  --sf-textarea-min-height: 6rem;
+  --sf-field-gap: 1.15rem;
+  --sf-label-inset-x: 0.9rem;
+  --sf-checkbox-size: 1.15rem;
+
+  /* ---- Borders & radii ------------------------------------------------- */
+  --sf-border-width: 1px;
+  --sf-radius-control: 0.5rem;
+  --sf-radius-button: 0.5rem;
+  --sf-radius-checkbox: 0.25rem;
+
+  /* ---- Effects --------------------------------------------------------- */
+  --sf-focus-ring-width: 3px;
+  /* Transparent (not `none`) so it can be composed into a comma-separated
+     box-shadow list alongside the focus ring without invalidating it. */
+  --sf-shadow-control: 0 0 #0000;
+  --sf-shadow-button: 0 0 #0000;
+  --sf-transition-duration: 200ms;
+  --sf-transition-easing: cubic-bezier(0, 0, 0.2, 1);
+}

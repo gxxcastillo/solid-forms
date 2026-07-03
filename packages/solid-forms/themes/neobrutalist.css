@@ -1,0 +1,57 @@
+/*
+ * Theme: neobrutalist
+ * Loud and physical — thick black borders, hard offset shadows, zero radius,
+ * a chunky monospace face, and a high-voltage yellow accent. Deliberately the
+ * opposite of `minimal` to prove how far the tokens can stretch.
+ *
+ * Activate by putting the attribute (or class) on any ancestor of your form:
+ *   <body data-sf-theme="neobrutalist">   or   <div class="sf-theme-neobrutalist">
+ */
+[data-sf-theme='neobrutalist'],
+.sf-theme-neobrutalist {
+  --sf-color-canvas: #f5f3e7;
+  --sf-color-surface: #fffdf5;
+  --sf-color-surface-disabled: #e7e5d8;
+  --sf-color-text: #0a0a0a;
+  --sf-color-text-muted: #52525b;
+  --sf-color-label: #0a0a0a;
+  --sf-color-placeholder: #78716c;
+
+  --sf-color-border: #0a0a0a;
+  --sf-color-border-hover: #0a0a0a;
+  --sf-color-border-focus: #0a0a0a;
+  --sf-color-focus-ring: #ffde59;
+
+  --sf-color-primary: #ffde59;
+  --sf-color-primary-hover: #ffd21f;
+  --sf-color-primary-active: #f5c400;
+  --sf-color-on-primary: #0a0a0a;
+
+  --sf-color-secondary: #a5f3fc;
+  --sf-color-secondary-hover: #67e8f9;
+  --sf-color-secondary-border: #0a0a0a;
+  --sf-color-on-secondary: #0a0a0a;
+
+  --sf-color-danger: #e11d48;
+  --sf-color-icon: #0a0a0a;
+  --sf-color-icon-muted: #0a0a0a;
+
+  --sf-font-family: 'Courier New', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --sf-font-weight: 600;
+  --sf-font-weight-label: 700;
+  --sf-font-weight-button: 800;
+  --sf-letter-spacing: 0.01em;
+  --sf-text-transform-label: uppercase;
+  --sf-text-transform-button: uppercase;
+
+  --sf-border-width: 3px;
+  --sf-radius-control: 0;
+  --sf-radius-button: 0;
+  --sf-radius-checkbox: 0;
+
+  /* Focus is signalled by the yellow ring hugging the box on top of the hard
+     black drop shadow. */
+  --sf-focus-ring-width: 3px;
+  --sf-shadow-control: 4px 4px 0 0 #0a0a0a;
+  --sf-shadow-button: 4px 4px 0 0 #0a0a0a;
+}

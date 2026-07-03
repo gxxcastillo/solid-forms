@@ -1,21 +1,53 @@
-/* stylelint-disable block-no-empty */
+/* CheckboxField — structure only; skinnable values come from theme tokens
+   (see themes/base.css). The native checkbox is themed with `accent-color`,
+   which keeps the control accessible and lightweight. */
+
 .CheckboxFieldSet {
   display: flex;
-  place-content: center flex-start;
-  column-gap: 12px;
-  margin-left: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 0.6rem;
   width: 100%;
+
+  /* Target the native <input type="checkbox"> rendered by the element wrapper.
+     The `.CheckboxFieldSet` portion is hashed; the tag selector is not, so this
+     needs no extra class on the element. `&`-prefixed so it stays valid under
+     the stricter CSS-nesting baseline as well. */
+  & input[type='checkbox'] {
+    box-sizing: border-box;
+    width: var(--sf-checkbox-size);
+    height: var(--sf-checkbox-size);
+    margin: 0;
+    accent-color: var(--sf-color-primary);
+    border-radius: var(--sf-radius-checkbox);
+    cursor: pointer;
+
+    &:focus-visible {
+      outline: var(--sf-focus-ring-width) solid var(--sf-color-focus-ring);
+      outline-offset: 1px;
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+    }
+  }
 }
 
-/* .label {
-  &.disabled {
-    color: theme($mute);
-  }
-} */
+.label {
+  color: var(--sf-color-text);
+  font-family: var(--sf-font-family);
+  font-size: var(--sf-font-size);
+  text-transform: var(--sf-text-transform-label);
+  cursor: pointer;
 
-/* .show {
-} */
+  &.disabled {
+    color: var(--sf-color-text-muted);
+    cursor: not-allowed;
+  }
+}
 
 .error {
   composes: error from '../shared/error.module.css';
+  flex-basis: 100%;
+  margin-top: 0.35rem;
 }

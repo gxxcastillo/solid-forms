@@ -65,17 +65,18 @@ export function InputField<M extends FieldValueMapping, N extends StringKeyOf<M>
     })
   );
 
-  const classList = {
-    [styles.InputFieldSet]: true,
+  // Returned as a thunk and applied inline below so Solid tracks the memos and
+  // re-evaluates the classes (e.g. the floating-label `hasValue` state) reactively.
+  const classList = () => ({
+    [styles.InputField]: true,
     [styles.hasValue]: hasValue(),
     [styles.withLeadingIcon]: !!leadingIcon(),
-    [styles.withIcon]: withIcon(),
     [styles.withLabel]: withLabel()
-  };
+  });
 
   return createField(
     'InputField',
-    <div classList={classList}>
+    <div classList={classList()}>
       {props.title && <div class={styles.title}>{props.title}</div>}
       <div class={styles.inputContainer}>
         <div class={styles.leadingIcon}>{leadingIcon()}</div>

@@ -6,6 +6,7 @@ import { type FieldValueMapping, useFormContext } from '@gxxc/solid-forms-state'
 
 import { createField } from '../hooks';
 import { type FormFieldProps } from '../types';
+import styles from './SubmitButton.module.css';
 
 export type SubmitButtonProps<M extends FieldValueMapping, N extends StringKeyOf<M>> = Omit<
   FormFieldProps<'input', M, N>,
@@ -46,7 +47,17 @@ export function SubmitButton<M extends FieldValueMapping, N extends StringKeyOf<
   return createField(
     'SubmitButton',
     <div>
-      <Button type={buttonType()} name={parsedProps.name} disabled={isDisabled()} onClick={onClick()}>
+      <Button
+        type={buttonType()}
+        name={parsedProps.name}
+        disabled={isDisabled()}
+        onClick={onClick()}
+        classList={{
+          [styles.button]: true,
+          [styles.approve]: localProps.variant === 'approve',
+          [styles.fullWidth]: !!localProps.isFullWidth
+        }}
+      >
         {label()}
       </Button>
     </div>

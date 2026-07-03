@@ -1,0 +1,66 @@
+/* SubmitButton — structure only; skinnable values come from theme tokens
+   (see themes/base.css). */
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-height: var(--sf-control-height);
+  padding: 0 1.25rem;
+  border: var(--sf-border-width) solid transparent;
+  border-radius: var(--sf-radius-button);
+  background-color: var(--sf-color-primary);
+  box-shadow: var(--sf-shadow-button);
+  color: var(--sf-color-on-primary);
+  font-family: var(--sf-font-family);
+  font-size: var(--sf-font-size);
+  font-weight: var(--sf-font-weight-button);
+  letter-spacing: var(--sf-letter-spacing);
+  text-transform: var(--sf-text-transform-button);
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background-color var(--sf-transition-duration) var(--sf-transition-easing),
+    box-shadow var(--sf-transition-duration) var(--sf-transition-easing),
+    transform var(--sf-transition-duration) var(--sf-transition-easing);
+
+  &:hover:not(:disabled) {
+    background-color: var(--sf-color-primary-hover);
+  }
+
+  &:active:not(:disabled) {
+    background-color: var(--sf-color-primary-active);
+    transform: translateY(1px);
+  }
+
+  &:focus-visible {
+    outline: 0;
+    box-shadow: var(--sf-shadow-button), 0 0 0 var(--sf-focus-ring-width) var(--sf-color-focus-ring);
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+
+/* The "approve" variant renders as a secondary / outline action. */
+.approve {
+  background-color: var(--sf-color-secondary);
+  border-color: var(--sf-color-secondary-border);
+  color: var(--sf-color-on-secondary);
+
+  &:hover:not(:disabled) {
+    background-color: var(--sf-color-secondary-hover);
+  }
+
+  &:active:not(:disabled) {
+    background-color: var(--sf-color-secondary-hover);
+  }
+}
+
+.fullWidth {
+  display: flex;
+  width: 100%;
+}

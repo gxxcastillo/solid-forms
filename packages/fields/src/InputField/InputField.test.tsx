@@ -4,6 +4,7 @@ import { FormContextProvider, createFormStore } from '@gxxc/solid-forms-state';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { InputField } from './InputField';
+import styles from './InputField.module.css';
 
 type TestForm = { [key: string]: string; username: string; email: string };
 
@@ -69,5 +70,23 @@ describe('InputField', () => {
     ));
     const label = document.querySelector('label[for="username"]');
     expect(label).not.toBeNull();
+  });
+
+  it('reactively applies the floating-label state class once the field has a value', () => {
+    const { store } = makeStore();
+    const [, mutations] = store;
+    const { container } = render(() => (
+      <FormContextProvider store={store}>
+        <InputField<TestForm, 'email'> name='email' label='Email' showLabel={() => true} />
+      </FormContextProvider>
+    ));
+
+    const root = container.querySelector(`.${styles.InputField}`)!;
+    expect(root.classList.contains(styles.withLabel)).toBe(true);
+    expect(root.classList.contains(styles.hasValue)).toBe(false);
+
+    // Updating the value must toggle the class — a static classList would not.
+    mutations.setFieldValue('email', 'ada@example.com', []);
+    expect(root.classList.contains(styles.hasValue)).toBe(true);
   });
 });

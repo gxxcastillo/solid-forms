@@ -4,6 +4,7 @@ import { FormContextProvider, createFormStore } from '@gxxc/solid-forms-state';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { SubmitButton } from './SubmitButton';
+import styles from './SubmitButton.module.css';
 
 type TestForm = { [key: string]: string; email: string };
 
@@ -105,6 +106,40 @@ describe('SubmitButton', () => {
       </FormContextProvider>
     ));
     expect(screen.getByRole('button')).toBeDisabled();
+  });
+
+  it('applies the themeable button class', () => {
+    const { store } = makeStore();
+    render(() => (
+      <FormContextProvider store={store}>
+        <SubmitButton>Log in</SubmitButton>
+      </FormContextProvider>
+    ));
+    expect(screen.getByRole('button').classList.contains(styles.button)).toBe(true);
+  });
+
+  it('adds the approve variant class only for variant="approve"', () => {
+    const { store } = makeStore();
+    render(() => (
+      <FormContextProvider store={store}>
+        <SubmitButton>Primary</SubmitButton>
+        <SubmitButton variant='approve'>Secondary</SubmitButton>
+      </FormContextProvider>
+    ));
+    expect(screen.getByText('Primary').classList.contains(styles.approve)).toBe(false);
+    expect(screen.getByText('Secondary').classList.contains(styles.approve)).toBe(true);
+  });
+
+  it('adds the fullWidth class when isFullWidth is set', () => {
+    const { store } = makeStore();
+    render(() => (
+      <FormContextProvider store={store}>
+        <SubmitButton isFullWidth>Wide</SubmitButton>
+        <SubmitButton>Narrow</SubmitButton>
+      </FormContextProvider>
+    ));
+    expect(screen.getByText('Wide').classList.contains(styles.fullWidth)).toBe(true);
+    expect(screen.getByText('Narrow').classList.contains(styles.fullWidth)).toBe(false);
   });
 
   it('sets the name attribute for multi-button forms', () => {

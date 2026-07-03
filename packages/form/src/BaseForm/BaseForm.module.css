@@ -1,0 +1,25 @@
+/* BaseForm — owns the vertical rhythm of a form. Fields themselves carry no
+   outer margin; spacing between rows is the container's job (via `gap`), which
+   keeps single fields reusable in any layout. */
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sf-field-gap);
+  font-family: var(--sf-font-family);
+  color: var(--sf-color-text);
+}
+
+.alignCenter {
+  align-items: center;
+  text-align: center;
+}
+
+.alignLeft {
+  align-items: stretch;
+}
+
+/* Stretch every button to the form width when `fullWidthButtons` is set. */
+.fullWidthButtons button {
+  width: 100%;
+}

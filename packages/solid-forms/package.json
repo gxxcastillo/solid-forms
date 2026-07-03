@@ -14,6 +14,23 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "development": "./src/index.ts"
+    },
+    "./styles.css": "./dist/style.css",
+    "./themes/base.css": {
+      "development": "./themes/base.css",
+      "default": "./dist/themes/base.css"
+    },
+    "./themes/minimal.css": {
+      "development": "./themes/minimal.css",
+      "default": "./dist/themes/minimal.css"
+    },
+    "./themes/midnight.css": {
+      "development": "./themes/midnight.css",
+      "default": "./dist/themes/midnight.css"
+    },
+    "./themes/neobrutalist.css": {
+      "development": "./themes/neobrutalist.css",
+      "default": "./dist/themes/neobrutalist.css"
     }
   },
   "publishConfig": {
@@ -21,7 +38,12 @@
       ".": {
         "types": "./dist/index.d.ts",
         "import": "./dist/index.js"
-      }
+      },
+      "./styles.css": "./dist/style.css",
+      "./themes/base.css": "./dist/themes/base.css",
+      "./themes/minimal.css": "./dist/themes/minimal.css",
+      "./themes/midnight.css": "./dist/themes/midnight.css",
+      "./themes/neobrutalist.css": "./dist/themes/neobrutalist.css"
     }
   },
   "scripts": {

@@ -1,6 +1,7 @@
+import { cpSync, mkdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { defineConfig } from 'vite';
+import { type Plugin, defineConfig } from 'vite';
 import dts from 'vite-plugin-dts';
 import solid from 'vite-plugin-solid';
 
@@ -15,8 +16,24 @@ const bundledPackages = [
   'type-fest'
 ];
 
+// Ship the theme stylesheets (token overrides) as standalone, importable files
+// under dist/themes/. `themes/base.css` is also bundled into dist/style.css, but
+// copying it lets consumers pull just the tokens if they want. Structural CSS
+// (the CSS modules) is emitted separately by Vite as dist/style.css.
+function copyThemes(): Plugin {
+  return {
+    name: 'sf-copy-themes',
+    closeBundle() {
+      const src = resolve(__dirname, 'themes');
+      const dest = resolve(__dirname, 'dist/themes');
+      mkdirSync(dest, { recursive: true });
+      cpSync(src, dest, { recursive: true });
+    }
+  };
+}
+
 export default defineConfig({
-  plugins: [solid(), dts({ rollupTypes: true, bundledPackages })],
+  plugins: [solid(), dts({ rollupTypes: true, bundledPackages }), copyThemes()],
   build: {
     minify: false,
     terserOptions: {

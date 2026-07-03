@@ -38,15 +38,13 @@ export function TextAreaField<M extends FieldValueMapping, N extends StringKeyOf
     <div class={styles.TextArea}>
       {localProps.title && <div class={styles.title}>{localProps.title}</div>}
       <div class={styles.textAreaContainer}>
-        <div class={styles.textArea}>
-          <Textarea
-            {...props}
-            placeholder={label().placeholder}
-            class={styles.textAreaEl}
-            aria-invalid={!!props.errors?.length}
-            aria-describedby={props.errors?.length ? errorId : undefined}
-          />
-        </div>
+        <Textarea
+          {...props}
+          placeholder={label().placeholder}
+          class={styles.textAreaEl}
+          aria-invalid={!!props.errors?.length}
+          aria-describedby={props.errors?.length ? errorId : undefined}
+        />
       </div>
       {props.errors?.[0] && (
         <div id={errorId} class={styles.error} role="alert">

@@ -1,0 +1,86 @@
+/* Demo-only chrome. Note it consumes the SAME `--sf-*` tokens the library uses,
+   which is the whole point: a consumer can theme their own surrounding UI from
+   one source of truth. */
+
+.page {
+  min-height: 100vh;
+  padding: 2rem 1rem 4rem;
+  background: var(--sf-color-canvas);
+  color: var(--sf-color-text);
+  font-family: var(--sf-font-family);
+  transition: background 200ms ease, color 200ms ease;
+}
+
+.inner {
+  max-width: 34rem;
+  margin: 0 auto;
+}
+
+.heading {
+  margin: 0 0 0.25rem;
+  max-width: none;
+  color: var(--sf-color-text);
+  font-size: 1.75rem;
+  font-weight: 700;
+}
+
+.sub {
+  margin: 0 0 1.75rem;
+  color: var(--sf-color-text-muted);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.switcher {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.75rem;
+}
+
+.switchBtn {
+  padding: 0.4rem 0.85rem;
+  border: 1px solid var(--sf-color-border);
+  border-radius: 999px;
+  background: var(--sf-color-surface);
+  color: var(--sf-color-text);
+  font-family: var(--sf-font-family);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.switchBtn:hover {
+  border-color: var(--sf-color-border-hover);
+}
+
+.switchBtnActive {
+  border-color: var(--sf-color-primary);
+  background: var(--sf-color-primary);
+  color: var(--sf-color-on-primary);
+}
+
+.card {
+  padding: 1.75rem;
+  border: 1px solid var(--sf-color-border);
+  border-radius: 0.9rem;
+  background: var(--sf-color-surface);
+  box-shadow: 0 12px 30px -18px rgb(0 0 0 / 0.35);
+}
+
+.cardTitle {
+  margin: 0 0 1.25rem;
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.buttonRow {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.themeName {
+  font-variant-numeric: tabular-nums;
+  color: var(--sf-color-primary);
+  font-weight: 600;
+}

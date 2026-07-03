@@ -1,25 +1,18 @@
+/* InputField — structure lives here; every color / size / radius is a theme
+   token (see themes/base.css) so the field can be re-skinned without touching
+   these (hashed) class names. */
+
 .InputField {
   display: block;
 }
 
-.withLeadingIcon {
-  .input {
-    padding-left: 36px;
-  }
-}
-
-.withLabel.hasValue {
-  input {
-    padding-top: 12px;
-  }
-
-  label {
-    transform: translate(0, 4px) scale(0.7);
-  }
-}
-
 .title {
-  margin-bottom: 15px;
+  margin-bottom: 0.5rem;
+  color: var(--sf-color-text);
+  font-family: var(--sf-font-family);
+  font-size: var(--sf-font-size-title);
+  font-weight: var(--sf-font-weight-label);
+  text-transform: var(--sf-text-transform-label);
 
   &::first-letter {
     text-transform: capitalize;
@@ -30,97 +23,144 @@
   position: relative;
 }
 
-.label {
-  position: absolute;
-  text-transform: lowercase;
-  pointer-events: none;
-  transform: translate(0, 12px) scale(1);
-  transition: 300ms cubic-bezier(0, 0, 0.2, 1) 0ms;
-  transform-origin: top left;
-  left: 26px;
-}
-
 .input {
-  border: 2px solid #333;
-  border-radius: 50px;
-  height: 4.8rem;
-  padding: 0 16px 0 24px;
+  box-sizing: border-box;
   width: 100%;
+  height: var(--sf-control-height);
+  padding: 0 var(--sf-control-padding-x);
+  border: var(--sf-border-width) solid var(--sf-color-border);
+  border-radius: var(--sf-radius-control);
+  background-color: var(--sf-color-surface);
+  box-shadow: var(--sf-shadow-control);
+  color: var(--sf-color-text);
+  font-family: var(--sf-font-family);
+  font-size: var(--sf-font-size);
+  font-weight: var(--sf-font-weight);
+  letter-spacing: var(--sf-letter-spacing);
+  transition:
+    border-color var(--sf-transition-duration) var(--sf-transition-easing),
+    box-shadow var(--sf-transition-duration) var(--sf-transition-easing);
 
   &[type='password'] {
-    font-family: Verdana, sans-serif;
-    letter-spacing: 0.125em;
+    font-family: var(--sf-font-family-mono);
+    letter-spacing: var(--sf-letter-spacing-password);
   }
 
   &[readonly] {
-    background-color: #fff;
+    background-color: var(--sf-color-surface-disabled);
+  }
+
+  &:disabled {
+    background-color: var(--sf-color-surface-disabled);
+    color: var(--sf-color-text-muted);
+    cursor: not-allowed;
   }
 
   &::placeholder {
-    color: #ddd;
-    font-family: #ccc; /* Overrides the modification to the font for input[type='password'] */
-    text-transform: capitalize;
+    color: var(--sf-color-placeholder);
+    /* Reset the mono font applied to password inputs so the placeholder still
+       reads in the body font. */
+    font-family: var(--sf-font-family);
+    letter-spacing: var(--sf-letter-spacing);
+  }
+
+  &:hover:not(:disabled, :focus) {
+    border-color: var(--sf-color-border-hover);
   }
 
   &:focus {
-    border: 2px solid #999;
-    box-shadow: 0 0 4px #999;
+    border-color: var(--sf-color-border-focus);
+    box-shadow: var(--sf-shadow-control), 0 0 0 var(--sf-focus-ring-width) var(--sf-color-focus-ring);
     outline: 0;
+  }
+
+  &[aria-invalid='true'] {
+    border-color: var(--sf-color-danger);
+
+    &:focus {
+      box-shadow: var(--sf-shadow-control), 0 0 0 var(--sf-focus-ring-width) var(--sf-color-danger);
+    }
+  }
+}
+
+/* ---- Floating label (opt-in via the `showLabel` prop) ------------------- */
+.label {
+  position: absolute;
+  left: var(--sf-label-inset-x);
+  top: 50%;
+  transform: translateY(-50%);
+  transform-origin: left center;
+  color: var(--sf-color-placeholder);
+  font-family: var(--sf-font-family);
+  font-size: var(--sf-font-size);
+  text-transform: var(--sf-text-transform-label);
+  pointer-events: none;
+  transition: transform var(--sf-transition-duration) var(--sf-transition-easing),
+    color var(--sf-transition-duration) var(--sf-transition-easing);
+}
+
+.withLabel {
+  & .input {
+    padding-top: 0.9rem;
+  }
+}
+
+.withLabel.hasValue {
+  & .label {
+    transform: translateY(calc(-50% - 0.82rem)) scale(0.72);
+    color: var(--sf-color-label);
+  }
+}
+
+/* ---- Leading / trailing adornments ------------------------------------- */
+.withLeadingIcon {
+  & .input {
+    padding-left: 2.5rem;
+  }
+
+  /* Keep the floating label clear of the leading icon. */
+  & .label {
+    left: 2.5rem;
   }
 }
 
 .leadingIcon {
   position: absolute;
-  top: calc(50% - (2.6rem / 2));
-  left: 8px;
+  top: 50%;
+  left: 0.65rem;
+  transform: translateY(-50%);
 
   > svg {
-    color: #333;
     display: block;
-    width: 2.6rem;
-    height: 2.6rem;
+    width: 1.4rem;
+    height: 1.4rem;
+    color: var(--sf-color-icon);
   }
 }
 
 .icon {
   position: absolute;
-  top: calc(50% - (2.2rem / 2));
-  right: 20px;
+  top: 50%;
+  right: 0.85rem;
+  transform: translateY(-50%);
 
   > svg {
-    color: #777;
     display: block;
-    width: 2.2rem;
-    height: 2.2rem;
+    width: 1.25rem;
+    height: 1.25rem;
+    color: var(--sf-color-icon-muted);
   }
 }
 
 .context {
   position: absolute;
-  top: calc(50% - (3.2rem / 2));
-  right: 20px;
+  top: 50%;
+  right: 0.85rem;
+  transform: translateY(-50%);
 }
-
-/*
-// @TODO - this all should get moved into a "FormTooltip" component
-.tooltip {
-  background-color: $color-eeyore-800 !important;
-  background-repeat: no-repeat !important;
-  border: none !important;
-  margin-top: 0 !important;
-  padding: 0.8rem 1.2rem !important;
-  min-width: 220px;
-  width: fit-content !important;
-  color: theme($text) !important;
-  text-align: left !important;
-  position: absolute !important;
-  top: 50% !important;
-  left: -10px !important;
-  transform: translate(-100%, -50%);
-} */
 
 .error {
   composes: error from '../shared/error.module.css';
-  margin-top: 4px;
-  padding-left: 24px;
+  margin-top: 0.35rem;
+  padding-left: var(--sf-label-inset-x);
 }

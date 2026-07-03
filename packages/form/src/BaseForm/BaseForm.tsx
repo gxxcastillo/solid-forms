@@ -9,6 +9,7 @@ import {
   type Response,
   type ResponseMapping
 } from '../types';
+import styles from './BaseForm.module.css';
 import { createBaseFormOnSubmitHandler } from './helpers';
 
 export type BaseFormProps<P extends RequestProps, R extends Response | ResponseMapping<P>> = {
@@ -67,14 +68,27 @@ export function BaseForm<P extends RequestProps, R extends Response | ResponseMa
   const props = mergeProps(baseFormDefaultProps, initialProps);
   const [formState, formStateMutations] = useFormContext();
 
-  const classList = {};
   const resolvedChildren = children(() => props.children);
   const formChildren = createMemo(() => classifyBaseFormChildren(resolvedChildren.toArray()));
   const onSubmitHandler = createBaseFormOnSubmitHandler<P, R>(props, formState, formStateMutations);
 
+  // `sf-form` is a stable, un-hashed hook consumers/themes can target, the rest
+  // are hashed module classes that own the layout.
+  const className = createMemo(() =>
+    [
+      'sf-form',
+      styles.form,
+      props.align === 'center' ? styles.alignCenter : styles.alignLeft,
+      props.fullWidthButtons ? styles.fullWidthButtons : '',
+      props.className ?? ''
+    ]
+      .filter(Boolean)
+      .join(' ')
+  );
+
   return (
     <form
-      classList={classList}
+      class={className()}
       onSubmit={(event) => {
         void onSubmitHandler(event);
       }}

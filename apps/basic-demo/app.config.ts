@@ -9,6 +9,9 @@ export default defineConfig({
   vite: {
     resolve: {
       alias: {
+        // More specific entry first: theme CSS lives as standalone files, while
+        // the bare package points at source for live-editing in dev.
+        '@gxxc/solid-forms/themes': resolve(__dirname, '../../packages/solid-forms/themes'),
         '@gxxc/solid-forms': resolve(__dirname, '../../packages/solid-forms/src/index.ts')
       }
     },
