@@ -149,6 +149,7 @@ export function createFormStore<M extends FieldValueMapping>(state?: BaseFormSta
         setFormState('fields', (f) => f.name === name, 'hasChanged', true),
       setBlurredField: <N extends FName>(name: N) =>
         setFormState('fields', (f) => f.name === name, 'hasBeenBlurred', true),
+      setErrors: (errors: BaseFormState<M>['errors'] = []) => setFormState('errors', errors),
       setIsReady: (isReady: boolean) => setFormState('isReady', isReady),
       setIsLoading: (isLoading: boolean) => setFormState('isLoading', isLoading),
       setIsProcessing: (isProcessing: boolean) => setFormState('isProcessing', isProcessing)

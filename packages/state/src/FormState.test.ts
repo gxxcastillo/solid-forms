@@ -45,6 +45,108 @@ describe('createFormStore', () => {
     expect(state.isFieldValid('username')).toBe(false);
     dispose();
   });
+
+  it('haveValuesChanged is false when no field has changed', () => {
+    const { store, dispose } = makeStore();
+    const [state, mutations] = store;
+    mutations.initializeField('username', '', []);
+    expect(state.haveValuesChanged).toBe(false);
+    dispose();
+  });
+
+  it('haveValuesChanged is true once a field value has changed', () => {
+    const { store, dispose } = makeStore();
+    const [state, mutations] = store;
+    mutations.initializeField('username', '', []);
+    mutations.setFieldValue('username', 'alice');
+    expect(state.haveValuesChanged).toBe(true);
+    dispose();
+  });
+
+  it('isFormValid is true when no field has errors', () => {
+    const { store, dispose } = makeStore();
+    const [state, mutations] = store;
+    mutations.initializeField('username', 'alice', []);
+    expect(state.isFormValid).toBe(true);
+    dispose();
+  });
+
+  it('isFormValid is false when any field has errors', () => {
+    const { store, dispose } = makeStore();
+    const [state, mutations] = store;
+    mutations.initializeField('username', '', ['Required']);
+    expect(state.isFormValid).toBe(false);
+    dispose();
+  });
+
+  it('getFieldValue returns the current value for a registered field', () => {
+    const { store, dispose } = makeStore();
+    const [state, mutations] = store;
+    mutations.initializeField('username', 'alice', []);
+    expect(state.getFieldValue('username')).toBe('alice');
+    dispose();
+  });
+
+  it('getFieldValue returns undefined for a missing field', () => {
+    const { store, dispose } = makeStore();
+    const [state] = store;
+    expect(state.getFieldValue('username')).toBeUndefined();
+    dispose();
+  });
+
+  it('hasFieldBeenValid returns undefined for a missing field', () => {
+    const { store, dispose } = makeStore();
+    const [state] = store;
+    expect(state.hasFieldBeenValid('username')).toBeUndefined();
+    dispose();
+  });
+
+  it('hasFieldBeenValid reflects the field having been error-free', () => {
+    const { store, dispose } = makeStore();
+    const [state, mutations] = store;
+    mutations.initializeField('username', 'alice', []);
+    expect(state.hasFieldBeenValid('username')).toBe(true);
+    dispose();
+  });
+
+  it('getFieldErrors returns undefined for a missing field', () => {
+    const { store, dispose } = makeStore();
+    const [state] = store;
+    expect(state.getFieldErrors('username')).toBeUndefined();
+    dispose();
+  });
+
+  it('getFieldErrors returns the errors for a registered field', () => {
+    const { store, dispose } = makeStore();
+    const [state, mutations] = store;
+    mutations.initializeField('username', '', ['Required']);
+    expect(state.getFieldErrors('username')).toEqual(['Required']);
+    dispose();
+  });
+
+  it('hasFieldChanged returns undefined for a missing field', () => {
+    const { store, dispose } = makeStore();
+    const [state] = store;
+    expect(state.hasFieldChanged('username')).toBeUndefined();
+    dispose();
+  });
+
+  it('hasFieldChanged reflects whether the field value has changed', () => {
+    const { store, dispose } = makeStore();
+    const [state, mutations] = store;
+    mutations.initializeField('username', '', []);
+    expect(state.hasFieldChanged('username')).toBe(false);
+    mutations.setFieldValue('username', 'alice');
+    expect(state.hasFieldChanged('username')).toBe(true);
+    dispose();
+  });
+
+  it('hasFieldBlurred returns undefined for a missing field', () => {
+    const { store, dispose } = makeStore();
+    const [state] = store;
+    expect(state.hasFieldBlurred('username')).toBeUndefined();
+    dispose();
+  });
 });
 
 describe('initializeField', () => {
@@ -203,6 +305,18 @@ describe('setFieldErrors', () => {
   });
 });
 
+describe('setChangedField', () => {
+  it('marks a field as changed', () => {
+    const { store, dispose } = makeStore();
+    const [state, mutations] = store;
+    mutations.initializeField('username', '', []);
+    expect(state.getField('username')?.hasChanged).toBe(false);
+    mutations.setChangedField('username');
+    expect(state.getField('username')?.hasChanged).toBe(true);
+    dispose();
+  });
+});
+
 describe('setBlurredField', () => {
   it('marks a field as blurred', () => {
     const { store, dispose } = makeStore();
@@ -211,6 +325,25 @@ describe('setBlurredField', () => {
     expect(state.getField('username')?.hasBeenBlurred).toBe(false);
     mutations.setBlurredField('username');
     expect(state.getField('username')?.hasBeenBlurred).toBe(true);
+    dispose();
+  });
+});
+
+describe('setErrors', () => {
+  it('sets form-level errors', () => {
+    const { store, dispose } = makeStore();
+    const [state, mutations] = store;
+    mutations.setErrors(['Server error']);
+    expect(state.errors).toEqual(['Server error']);
+    dispose();
+  });
+
+  it('defaults to an empty array when called without arguments', () => {
+    const { store, dispose } = makeStore();
+    const [state, mutations] = store;
+    mutations.setErrors(['Server error']);
+    mutations.setErrors();
+    expect(state.errors).toEqual([]);
     dispose();
   });
 });

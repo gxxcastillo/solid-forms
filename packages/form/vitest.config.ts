@@ -1,15 +1,18 @@
+import solid from 'vite-plugin-solid';
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
+  plugins: [solid()],
   test: {
-    environment: 'node',
+    environment: 'happy-dom',
+    setupFiles: ['@testing-library/jest-dom/vitest'],
     coverage: {
       provider: 'v8',
       thresholds: {
-        lines: 65,
-        functions: 65,
-        branches: 60,
-        statements: 65
+        lines: 75,
+        functions: 75,
+        branches: 85,
+        statements: 75
       }
     }
   }

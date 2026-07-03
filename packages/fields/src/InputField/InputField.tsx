@@ -73,8 +73,6 @@ export function InputField<M extends FieldValueMapping, N extends StringKeyOf<M>
     [styles.withLabel]: withLabel()
   };
 
-  console.log('!!!!! PROPW', props);
-
   return createField(
     'InputField',
     <div classList={classList}>

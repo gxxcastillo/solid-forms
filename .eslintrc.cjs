@@ -8,6 +8,7 @@ module.exports = {
     'prettier'
   ],
   rules: {
+    'no-console': [2, { allow: ['warn', 'error'] }],
     'no-restricted-syntax': 0,
     'import/no-extraneous-dependencies': 0,
     'import/no-default-export': 0,
@@ -50,5 +51,14 @@ module.exports = {
   parserOptions: {
     project: ['./tsconfig.eslint.json', './apps/**/tsconfig.json', './packages/**/tsconfig.json'],
     tsconfigRootDir: __dirname
-  }
+  },
+  overrides: [
+    {
+      // Illustrative example/demo code logs submitted values on purpose.
+      files: ['packages/examples/**/*', 'apps/basic-demo/**/*'],
+      rules: {
+        'no-console': 0
+      }
+    }
+  ]
 };

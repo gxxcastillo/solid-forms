@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { createBaseFormOnSubmitHandler, fieldsToProps, resolveSubmitHandler } from './helpers';
+import { createBaseFormOnSubmitHandler, fieldsToProps, getSubmitErrorMessage, resolveSubmitHandler } from './helpers';
 
 function makeEvent(name = '') {
   return {
@@ -38,6 +38,7 @@ function makeMutations() {
     setFieldErrors: vi.fn(),
     setChangedField: vi.fn(),
     setBlurredField: vi.fn(),
+    setErrors: vi.fn(),
     setIsReady: vi.fn(),
     setIsLoading: vi.fn(),
     setIsProcessing: vi.fn()
@@ -110,18 +111,62 @@ describe('createBaseFormOnSubmitHandler', () => {
     expect(mutations.setIsProcessing.mock.calls).toEqual([[true], [false]]);
   });
 
-  it('propagates a failed async submit while still resetting isProcessing', async () => {
+  it('surfaces a failed async submit into form state instead of rejecting', async () => {
     const onSubmit = vi.fn().mockRejectedValue(new Error('submit failed'));
     const state = makeState();
     const mutations = makeMutations();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const handler = createBaseFormOnSubmitHandler({ onSubmit } as any, state, mutations);
 
-    // The failure is propagated to the caller (BaseForm surfaces it) rather than
-    // being silently swallowed, but isProcessing is always cleared via finally.
-    await expect(handler(makeEvent())).rejects.toThrow('submit failed');
+    // The failure is captured into form state (via setErrors) rather than
+    // rejecting the handler's promise, but isProcessing is always cleared via finally.
+    await expect(handler(makeEvent())).resolves.toBeUndefined();
 
     expect(mutations.setIsProcessing.mock.calls).toEqual([[true], [false]]);
+    expect(mutations.setErrors).toHaveBeenCalledWith(['submit failed']);
+  });
+
+  it('stringifies a non-Error rejection reason', async () => {
+    const onSubmit = vi.fn().mockRejectedValue('nope');
+    const state = makeState();
+    const mutations = makeMutations();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const handler = createBaseFormOnSubmitHandler({ onSubmit } as any, state, mutations);
+
+    await handler(makeEvent());
+
+    expect(mutations.setErrors).toHaveBeenCalledWith(['nope']);
+  });
+
+  it('clears previous submit errors before invoking the handler again', async () => {
+    const onSubmit = vi.fn().mockResolvedValue(undefined);
+    const state = makeState();
+    const mutations = makeMutations();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const handler = createBaseFormOnSubmitHandler({ onSubmit } as any, state, mutations);
+
+    await handler(makeEvent());
+
+    expect(mutations.setErrors).toHaveBeenCalledWith([]);
+  });
+
+  it('blocks submit and marks every field blurred when the form is invalid', async () => {
+    const onSubmit = vi.fn();
+    const state = makeState({
+      isFormValid: false,
+      fields: [
+        { name: 'email', value: '', errors: ['Required'], hasBeenInitialized: true, hasBeenBlurred: false, hasChanged: false, hasBeenValid: false },
+        { name: 'password', value: '', errors: ['Required'], hasBeenInitialized: true, hasBeenBlurred: false, hasChanged: false, hasBeenValid: false }
+      ]
+    });
+    const mutations = makeMutations();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const handler = createBaseFormOnSubmitHandler({ onSubmit } as any, state, mutations);
+
+    await handler(makeEvent());
+
+    expect(onSubmit).not.toHaveBeenCalled();
+    expect(mutations.setBlurredField.mock.calls).toEqual([['email'], ['password']]);
   });
 
   it('sets and resets isProcessing for a sync submit handler', async () => {
@@ -146,6 +191,17 @@ describe('createBaseFormOnSubmitHandler', () => {
     await handler(makeEvent('')); // empty submitter name == no named button
 
     expect(login).toHaveBeenCalledOnce();
+  });
+});
+
+describe('getSubmitErrorMessage', () => {
+  it('returns the message of an Error instance', () => {
+    expect(getSubmitErrorMessage(new Error('boom'))).toBe('boom');
+  });
+
+  it('stringifies non-Error values', () => {
+    expect(getSubmitErrorMessage('boom')).toBe('boom');
+    expect(getSubmitErrorMessage(404)).toBe('404');
   });
 });
 

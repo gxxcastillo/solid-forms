@@ -39,6 +39,9 @@ jobs:
       - name: Test
         run: pnpm moon :test
 
+      - name: Coverage
+        run: pnpm moon :coverage
+
       - name: Build
         run: pnpm moon :build
 

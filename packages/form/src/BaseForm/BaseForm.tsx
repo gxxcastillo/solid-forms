@@ -76,9 +76,7 @@ export function BaseForm<P extends RequestProps, R extends Response | ResponseMa
     <form
       classList={classList}
       onSubmit={(event) => {
-        onSubmitHandler(event).catch((error) => {
-          console.error('solid-forms: form submission handler threw', error);
-        });
+        void onSubmitHandler(event);
       }}
     >
       <For each={formChildren().bodyChildren}>

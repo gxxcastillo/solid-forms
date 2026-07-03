@@ -1,7 +1,7 @@
 import { createMemo, children as prepareChildren, splitProps } from 'solid-js';
 import { type StringKeyOf } from 'type-fest';
 
-import { Button } from '@gxxc/solid-forms-elements';
+import { Button, type ButtonElementProps } from '@gxxc/solid-forms-elements';
 import { type FieldValueMapping, useFormContext } from '@gxxc/solid-forms-state';
 
 import { createField } from '../hooks';
@@ -12,7 +12,7 @@ export type SubmitButtonProps<M extends FieldValueMapping, N extends StringKeyOf
   'name'
 > & {
   name?: string;
-  type?: 'approve' | 'primary';
+  variant?: 'approve' | 'primary';
   isFullWidth?: boolean;
 };
 
@@ -21,35 +21,34 @@ export function SubmitButton<M extends FieldValueMapping, N extends StringKeyOf<
 ) {
   const [formState] = useFormContext();
   const [localProps, parsedProps] = splitProps(initialProps, [
-    'type',
+    'variant',
     'isDisabled',
     'isValid',
     'isFullWidth',
     'onClick'
   ]);
 
-  const props = createMemo(() => ({
-    type: localProps.type === 'approve' ? 'button' : 'submit',
-    onClick: localProps.onClick
-      ? localProps.onClick
+  const resolvedChildren = prepareChildren(() => parsedProps.children);
+  const label = createMemo(() => resolvedChildren() ?? 'submit');
+  const buttonType = createMemo(() => (localProps.variant === 'approve' ? 'button' : 'submit'));
+  // localProps.onClick is typed against the 'input' element tag (SubmitButton reuses
+  // FormFieldProps to inherit value/parse/setValue), but Button renders a real
+  // <button>; a mouse click handler works identically on either element.
+  const onClick = createMemo(() =>
+    localProps.onClick
+      ? (localProps.onClick as ButtonElementProps['onClick'])
       : parsedProps.name
         ? () => parsedProps.setValue?.(parsedProps.parse?.(parsedProps.value))
-        : undefined,
-    isDisabled: localProps.isDisabled ?? (!localProps.isDisabled && !formState.isFormValid),
-    children: prepareChildren(() => parsedProps.children)
-  }));
+        : undefined
+  );
+  const isDisabled = createMemo(() => localProps.isDisabled ?? !formState.isFormValid);
 
   return createField(
     'SubmitButton',
     <div>
-      <Button
-        type={props().type}
-        {...props}
-        name={parsedProps.name}
-        disabled={props().isDisabled}
-        onClick={props().onClick}
-        value={props().children()?.toString() ?? 'submit'}
-      />
+      <Button type={buttonType()} name={parsedProps.name} disabled={isDisabled()} onClick={onClick()}>
+        {label()}
+      </Button>
     </div>
   );
 }

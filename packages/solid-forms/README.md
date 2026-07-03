@@ -142,7 +142,7 @@ Sync validators call `setErrors` before returning. Async validators call `setErr
 
 ## Async submission
 
-Return a Promise from `onSubmit`. The form sets `isProcessing` to `true` for the duration and disables the submit button automatically. If the handler throws, `isProcessing` is reset to `false` (via a `finally`) and the rejection propagates out of the handler — the form logs it to the console but does **not** add it to `form.state.errors`. Catch the error inside your handler and surface it yourself (e.g. through the `errors` prop) if you want it shown in the UI.
+Return a Promise from `onSubmit`. The form sets `isProcessing` to `true` for the duration and disables the submit button automatically. If the handler throws or its returned Promise rejects, `isProcessing` is reset to `false` (via a `finally`) and the error message is added to `form.state.errors` for display.
 
 ```tsx
 async function onSubmit(values: LoginValues) {
@@ -152,6 +152,8 @@ async function onSubmit(values: LoginValues) {
   }
 }
 ```
+
+Each new submit attempt clears `form.state.errors` before invoking the handler, so a stale error from a previous attempt does not linger once the user retries.
 
 ---
 
@@ -333,7 +335,7 @@ Renders a submit button. Disabled automatically when the form has validation err
 | `isDisabled` | `boolean` | Override disable state |
 | `isFullWidth` | `boolean` | Stretch to container width |
 | `name` | `string` | Optional field name for multi-button forms |
-| `type` | `'primary' \| 'approve'` | Visual variant (`'approve'` renders `type="button"`) |
+| `variant` | `'primary' \| 'approve'` | Visual variant (`'approve'` renders `type="button"`) |
 
 ---
 
@@ -347,7 +349,7 @@ Renders a submit button. Disabled automatically when the form has validation err
 | `haveValuesChanged` | `boolean` | `true` when any field has changed from its initial value |
 | `isLoading` | `boolean` | Form is in a loading state |
 | `isProcessing` | `boolean` | Async submit handler is in flight |
-| `errors` | `string[]` | Form-level errors |
+| `errors` | `string[]` | Form-level errors, including a thrown/rejected `onSubmit` error message |
 | `getFieldValue(name)` | `M[N] \| undefined` | Current parsed value for a field |
 | `getFieldErrors(name)` | `string[] \| undefined` | Current errors for a field |
 | `isFieldValid(name)` | `boolean \| undefined` | `false` if field has errors; `undefined` if not yet registered |

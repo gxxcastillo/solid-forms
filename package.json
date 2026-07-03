@@ -15,6 +15,7 @@
     "lint": "pnpm moon :lint",
     "types": "pnpm moon :types",
     "test": "pnpm moon :test",
+    "coverage": "pnpm moon :coverage",
     "format": "pnpm moon :format",
     "bump": "pnpm changeset version",
     "prepublishOnly": "node --eval \"console.error('\\nRun pnpm run publish instead.\\n'); process.exit(1)\"",

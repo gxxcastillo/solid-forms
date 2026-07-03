@@ -58,6 +58,7 @@ export type FormStateMutations<M extends FieldValueMapping = FieldValueMapping> 
   setFieldErrors: <N extends StringKeyOf<M>>(name: N, errors?: ErrorMessages) => void;
   setChangedField: <N extends StringKeyOf<M>>(name: N) => void;
   setBlurredField: <N extends StringKeyOf<M>>(name: N) => void;
+  setErrors: (errors?: ErrorMessages) => void;
   setIsReady: (isReady: boolean) => void;
   setIsLoading: (isLoading: boolean) => void;
   setIsProcessing: (isProcessing: boolean) => void;

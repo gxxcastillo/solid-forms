@@ -57,6 +57,10 @@ export function resolveSubmitHandler<P extends RequestProps, R extends Response 
   return handlerList.length === 1 ? handlerList[0] : undefined;
 }
 
+export function getSubmitErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
 export function createBaseFormOnSubmitHandler<
   P extends RequestProps,
   R extends Response | ResponseMapping<P>
@@ -69,6 +73,16 @@ export function createBaseFormOnSubmitHandler<
       return;
     }
 
+    if (!formState.isFormValid) {
+      // Nothing may have been touched yet (e.g. a pristine required field), so
+      // an invalid submit attempt must mark every field blurred to make its
+      // errors visible instead of silently doing nothing.
+      for (const field of formState.fields) {
+        formStateMutations.setBlurredField(field.name);
+      }
+      return;
+    }
+
     const submitProps = fieldsToProps(formState.fields) as P;
     const onSubmitFn = resolveSubmitHandler<P, R>(props.onSubmit, buttonName);
 
@@ -77,15 +91,16 @@ export function createBaseFormOnSubmitHandler<
     // Set the processing flag before invoking the handler so a rapid second
     // submit cannot slip past the guard while the first is still awaited.
     formStateMutations.setIsProcessing(true);
+    formStateMutations.setErrors([]);
     try {
       const result = onSubmitFn(submitProps, buttonName);
       if (result?.then) {
         await result;
       }
+    } catch (error) {
+      formStateMutations.setErrors([getSubmitErrorMessage(error)]);
     } finally {
       // Always clear the processing flag, even when the handler throws/rejects.
-      // The error itself is propagated to the caller (BaseForm surfaces it)
-      // rather than being silently swallowed.
       formStateMutations.setIsProcessing(false);
     }
   };
