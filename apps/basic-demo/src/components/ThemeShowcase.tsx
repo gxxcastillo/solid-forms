@@ -93,8 +93,6 @@ export function ThemeShowcase() {
     window.location.hash = id;
   }
 
-  const activeThemeLabel = () => THEMES.find((t) => t.id === theme())?.label ?? 'Minimal';
-
   return (
     <div class={styles.page} data-sf-theme={theme()}>
       <div class={styles.inner}>
