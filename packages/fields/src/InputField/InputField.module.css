@@ -99,15 +99,20 @@
     color var(--sf-transition-duration) var(--sf-transition-easing);
 }
 
-.withLabel {
+/* Only reserve room / float once the label has actually risen above the text —
+   while empty, the input shows the plain placeholder (no floated label), so it
+   should stay vertically centered rather than pushed down for unused space. */
+.withLabel.hasValue {
   & .input {
     padding-top: 0.9rem;
   }
-}
 
-.withLabel.hasValue {
   & .label {
-    transform: translateY(calc(-50% - 0.82rem)) scale(0.72);
+    /* The lift is a fixed rem amount but the input's border eats into the same
+       fixed space, so heavier border themes (e.g. neobrutalist's 3px) push the
+       label to overlap the border. Compensate by the theme's own border width
+       so the label clears it by a consistent margin regardless of theme. */
+    transform: translateY(calc(-50% - 0.82rem + var(--sf-border-width))) scale(0.72);
     color: var(--sf-color-label);
   }
 }

@@ -12,6 +12,7 @@ export type FormField<M extends FieldValueMapping, N extends StringKeyOf<M>> = {
   name: N;
   value: M[N] | undefined;
   errors: ErrorMessages;
+  label?: string;
   hasBeenInitialized: boolean;
   hasBeenBlurred: boolean;
   hasChanged: boolean;
@@ -53,7 +54,12 @@ export type FormStateGetters<M extends FieldValueMapping = FieldValueMapping> = 
 };
 
 export type FormStateMutations<M extends FieldValueMapping = FieldValueMapping> = {
-  initializeField: <N extends StringKeyOf<M>>(name: N, value?: M[N], errors?: ErrorMessages) => void;
+  initializeField: <N extends StringKeyOf<M>>(
+    name: N,
+    value?: M[N],
+    errors?: ErrorMessages,
+    label?: string
+  ) => void;
   setFieldValue: <N extends StringKeyOf<M>>(name: N, value?: M[N], errors?: ErrorMessages) => void;
   setFieldErrors: <N extends StringKeyOf<M>>(name: N, errors?: ErrorMessages) => void;
   setChangedField: <N extends StringKeyOf<M>>(name: N) => void;

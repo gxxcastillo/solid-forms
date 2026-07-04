@@ -5,15 +5,17 @@ import { Suspense } from 'solid-js';
 
 import './app.css';
 
+// Deployed under a subpath on GitHub Pages (see VITE_BASE_PATH in app.config.ts);
+// the VITE_ prefix makes it available in the browser bundle via import.meta.env.
+const basePath = (import.meta.env.VITE_BASE_PATH ?? '/').replace(/\/$/, '');
+
 export default function App() {
   return (
     <Router
+      base={basePath}
       root={(props) => (
         <MetaProvider>
-          <Title>SolidStart - Basic</Title>
-          <a href='/'>Index</a>
-          <a href='/login'>Login</a>
-          <a href='/about'>About</a>
+          <Title>Solid Forms - Demo</Title>
           <Suspense>{props.children}</Suspense>
         </MetaProvider>
       )}

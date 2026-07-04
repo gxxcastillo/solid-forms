@@ -79,7 +79,12 @@ export function createFormStore<M extends FieldValueMapping>(state?: BaseFormSta
   return [
     mergeProps(formState, getters),
     {
-      initializeField: <N extends StringKeyOf<M>>(name: N, value?: M[N], errors: FErrors = []) => {
+      initializeField: <N extends StringKeyOf<M>>(
+        name: N,
+        value?: M[N],
+        errors: FErrors = [],
+        label?: string
+      ) => {
         if (getters.hasFieldBeenInitialized(name) || !name) {
           return;
         }
@@ -90,6 +95,7 @@ export function createFormStore<M extends FieldValueMapping>(state?: BaseFormSta
             name,
             value,
             errors,
+            label,
             hasBeenInitialized: true,
             hasChanged: false,
             hasBeenBlurred: false,

@@ -1,0 +1,113 @@
+.panel {
+  padding: 1.15rem;
+  border: 1px dashed var(--sf-color-border);
+  border-radius: 0.9rem;
+  background: var(--sf-color-surface);
+  font-family: var(--sf-font-family);
+  color: var(--sf-color-text);
+}
+
+.heading {
+  margin: 0 0 0.85rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--sf-color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.9rem;
+}
+
+.badge,
+.badgeGood,
+.badgeBad {
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid var(--sf-color-border);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--sf-color-text-muted);
+}
+
+.badgeGood {
+  border-color: var(--sf-color-primary);
+  background: var(--sf-color-primary);
+  color: var(--sf-color-on-primary);
+}
+
+.badgeBad {
+  border-color: var(--sf-color-danger);
+  background: var(--sf-color-danger);
+  color: var(--sf-color-on-primary);
+}
+
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin: 0;
+}
+
+.field {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--sf-color-border);
+  border-radius: 0.6rem;
+  background: var(--sf-color-canvas);
+}
+
+.fieldName {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--sf-color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.fieldValue {
+  margin: 0.1rem 0 0.35rem;
+  font-family: var(--sf-font-family-mono);
+  font-size: 0.85rem;
+  word-break: break-all;
+}
+
+.fieldMeta {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.tagOn,
+.tagOff {
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  border: 1px solid var(--sf-color-border);
+  font-size: 0.66rem;
+}
+
+.tagOn {
+  border-color: var(--sf-color-primary);
+  color: var(--sf-color-primary);
+}
+
+.tagOff {
+  color: var(--sf-color-text-muted);
+  opacity: 0.55;
+}
+
+.errors {
+  margin: 0.45rem 0 0;
+  padding-left: 1.1rem;
+  color: var(--sf-color-danger);
+  font-size: 0.78rem;
+}
+
+.empty {
+  margin: 0;
+  color: var(--sf-color-text-muted);
+  font-size: 0.85rem;
+}

@@ -48,7 +48,11 @@ export const constraintConfigs: ConstraintConfigs = {
       if (!formState.hasFieldBeenInitialized(matchFieldName)) return true;
       return val === formState.getFieldValue(matchFieldName);
     },
-    message: (fieldName, matchFieldName) => `"${fieldName}" does not match "${matchFieldName}"`
+    message: (fieldName, matchFieldName, formState) => {
+      const matchLabel =
+        (typeof matchFieldName === 'string' && formState.getField(matchFieldName)?.label) || matchFieldName;
+      return `"${fieldName}" does not match "${matchLabel}"`;
+    }
   },
 
   required: {

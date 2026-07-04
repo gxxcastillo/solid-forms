@@ -10,7 +10,8 @@ export interface ValidateFieldArgs<
   N extends StringKeyOf<M>,
   C extends ConstraintName
 > {
-  fieldName: N;
+  // Display text only (e.g. a field's configured `label`) — never used as a form key.
+  fieldName: string;
   fieldValue: M[N] | undefined;
   formState: FormState<M>;
   constraintName: C;
@@ -24,21 +25,22 @@ export function validateAgainstConstraint<
 >({ fieldName, fieldValue, formState, constraintName, constraint }: ValidateFieldArgs<M, N, C>) {
   const validator = constraintConfigs[constraintName];
   const isValid = validator.validate(fieldValue, constraint, formState);
-  return isValid ? '' : validator.message(fieldName, constraint);
+  return isValid ? '' : validator.message(fieldName, constraint, formState);
 }
 
 export function validate<M extends FieldValueMapping, N extends StringKeyOf<M>>(
   fieldName: N,
   fieldValue: M[N] | undefined,
   constraints: ValidationConstraints,
-  formState: FormState<M>
+  formState: FormState<M>,
+  displayName: string = fieldName
 ): ErrorMessages {
   return Object.entries(constraints)
     .filter(([, constraint]) => constraint != null && constraint !== false)
     .map(([name, constraint]) => {
       const constraintName = name as ConstraintName;
       return validateAgainstConstraint({
-        fieldName,
+        fieldName: displayName,
         fieldValue,
         formState,
         constraintName,

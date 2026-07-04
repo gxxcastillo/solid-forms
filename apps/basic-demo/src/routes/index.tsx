@@ -12,7 +12,7 @@ import { ThemeShowcase } from '../components/ThemeShowcase';
 export default function Home() {
   return (
     <>
-      <Title>solid-forms — theming</Title>
+      <Title>solid-forms — demo</Title>
       <ThemeShowcase />
     </>
   );

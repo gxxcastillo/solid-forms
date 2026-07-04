@@ -92,11 +92,11 @@ export function createValueSetter<
 
   function commit(value: M[N], isInitialization: boolean) {
     const token = ++validationToken;
-    const newErrors = validate(name, value, validationConstraints, formState);
+    const newErrors = validate(name, value, validationConstraints, formState, props.label);
     const errorsForDisplay = newErrors.length > 0 ? newErrors : [];
 
     if (isInitialization) {
-      formStateMutations.initializeField(name, value, errorsForDisplay);
+      formStateMutations.initializeField(name, value, errorsForDisplay, props.label);
     } else {
       formStateMutations.setFieldValue(name, value, errorsForDisplay);
     }

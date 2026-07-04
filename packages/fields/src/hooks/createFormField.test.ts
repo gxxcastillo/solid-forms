@@ -101,7 +101,7 @@ describe('createValueSetter', () => {
 
     setValue(undefined, true);
 
-    expect(mutations.initializeField).toHaveBeenCalledWith('username', undefined, []);
+    expect(mutations.initializeField).toHaveBeenCalledWith('username', undefined, [], undefined);
   });
 
   it('calls a sync custom validator when built-in validation passes', () => {

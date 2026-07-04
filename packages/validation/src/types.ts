@@ -15,7 +15,7 @@ export type Constraint = ValidationConstraints[ConstraintName];
 
 export type ConstraintConfig = {
   validate: (v: FieldValue, c: Constraint | undefined, s: FormState) => boolean;
-  message: (n: string, c: Constraint) => string;
+  message: (n: string, c: Constraint, s: FormState) => string;
 };
 
 export type ConstraintConfigs = {

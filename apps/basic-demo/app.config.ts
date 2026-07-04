@@ -6,6 +6,11 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   ssr: false,
+  server: {
+    // Set to '/solid-forms/' in CI when deploying to GitHub Pages;
+    // defaults to root so local dev/build are unaffected.
+    baseURL: process.env.VITE_BASE_PATH ?? '/'
+  },
   vite: {
     resolve: {
       alias: {

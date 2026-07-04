@@ -8,12 +8,21 @@
   background: var(--sf-color-canvas);
   color: var(--sf-color-text);
   font-family: var(--sf-font-family);
-  transition: background 200ms ease, color 200ms ease;
+  transition:
+    background 200ms ease,
+    color 200ms ease;
 }
 
 .inner {
   max-width: 34rem;
   margin: 0 auto;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: start;
 }
 
 .heading {
@@ -25,7 +34,7 @@
 }
 
 .sub {
-  margin: 0 0 1.75rem;
+  margin: 0 0 1.25rem;
   color: var(--sf-color-text-muted);
   font-size: 0.95rem;
   line-height: 1.5;
@@ -35,7 +44,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
-  margin-bottom: 1.75rem;
+  margin-bottom: 1rem;
 }
 
 .switchBtn {
@@ -58,6 +67,40 @@
   border-color: var(--sf-color-primary);
   background: var(--sf-color-primary);
   color: var(--sf-color-on-primary);
+}
+
+/* Tabs, not pills — a different shape from the theme switcher above so the two
+   rows read as different kinds of controls (cosmetic option vs. content view). */
+.tabs {
+  display: flex;
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+  padding-left: 2rem;
+  border-bottom: 1px solid var(--sf-color-border);
+}
+
+.tabBtn {
+  margin-bottom: -1px;
+  padding: 0.5rem 0.05rem;
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--sf-color-text-muted);
+  font-family: var(--sf-font-family);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.tabBtn:hover {
+  color: var(--sf-color-text);
+}
+
+.tabBtnActive {
+  color: var(--sf-color-primary);
+  border-bottom-color: var(--sf-color-primary);
+  font-weight: 600;
 }
 
 .card {
@@ -83,4 +126,14 @@
   font-variant-numeric: tabular-nums;
   color: var(--sf-color-primary);
   font-weight: 600;
+}
+
+@media (min-width: 860px) {
+  .inner {
+    max-width: 56rem;
+  }
+
+  .layout {
+    grid-template-columns: minmax(0, 1fr) minmax(260px, 340px);
+  }
 }
