@@ -1,0 +1,123 @@
+.showcase {
+  margin-top: 1.5rem;
+  color: var(--sf-color-text);
+  font-family: var(--sf-font-family);
+  transition: color 200ms ease;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.switcher {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.switchBtn {
+  appearance: none;
+  display: inline-flex;
+  flex: 0 0 10rem;
+  align-items: center;
+  justify-content: center;
+  width: 10rem;
+  height: 3.5rem;
+  margin: 0;
+  padding: 0 1rem;
+  border: 1px solid var(--sf-color-border);
+  border-radius: 999px;
+  background: var(--sf-color-surface);
+  color: var(--sf-color-text);
+  box-sizing: border-box;
+  font-family: var(--sf-font-family);
+  font-size: 0.85rem;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    color 150ms ease;
+}
+
+.switchBtn:hover {
+  border-color: var(--sf-color-border-hover);
+}
+
+.switchBtnActive {
+  border-color: var(--sf-color-primary);
+  background: var(--sf-color-primary);
+  color: var(--sf-color-on-primary);
+}
+
+.tabs {
+  display: flex;
+  align-items: flex-end;
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--sf-color-border);
+}
+
+.tabBtn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 2.5rem;
+  margin-bottom: -1px;
+  padding: 0 0.05rem;
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  box-sizing: border-box;
+  color: var(--sf-color-text-muted);
+  font-family: var(--sf-font-family);
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    border-color 150ms ease,
+    color 150ms ease;
+}
+
+.tabBtn:hover {
+  color: var(--sf-color-text);
+}
+
+.tabBtnActive {
+  color: var(--sf-color-primary);
+  border-bottom-color: var(--sf-color-primary);
+}
+
+.card {
+  padding: 1.75rem;
+  border: 1px solid var(--sf-color-border);
+  border-radius: 0.5rem;
+  background: var(--sf-color-surface);
+  box-shadow: 0 12px 30px -18px rgb(0 0 0 / 0.35);
+}
+
+.cardTitle {
+  margin: 0 0 1.25rem;
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.buttonRow {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+@media (min-width: 860px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr) minmax(260px, 340px);
+  }
+}

@@ -1,0 +1,28 @@
+$schema: 'https://moonrepo.dev/schemas/project.json'
+
+language: 'typescript'
+
+tasks:
+  dev:
+    command: 'astro'
+    args:
+      - 'dev'
+
+  preview:
+    command: 'astro'
+    args:
+      - 'preview'
+
+  build:
+    command: 'astro'
+    args:
+      - 'build'
+    options:
+      mergeArgs: 'replace'
+
+  types:
+    command: 'astro'
+    args:
+      - 'check'
+    options:
+      mergeArgs: 'replace'

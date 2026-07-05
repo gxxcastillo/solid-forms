@@ -22,7 +22,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20.10.0'
+          node-version: '22.12.0'
 
       - name: Enable corepack
         run: corepack enable
@@ -33,19 +33,16 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build basic-demo
+      - name: Build docs
         env:
           VITE_BASE_PATH: /solid-forms/
-        run: pnpm --filter basic-demo build
-
-      - name: Add SPA fallback
-        run: cp apps/basic-demo/.output/public/index.html apps/basic-demo/.output/public/404.html
+        run: pnpm --filter docs build
 
       - uses: actions/configure-pages@v5
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: apps/basic-demo/.output/public
+          path: apps/docs/dist
 
   deploy:
     needs: build

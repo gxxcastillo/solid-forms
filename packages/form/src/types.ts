@@ -1,8 +1,6 @@
 import { type JSX } from 'solid-js';
 
-import { type ErrorMessages, type FieldName, type FieldValueMapping } from '@gxxc/solid-forms-state';
-
-export type FormErrors = Record<FieldName, ErrorMessages>;
+import { type FieldValueMapping } from '@gxxc/solid-forms-state';
 
 export type ErrorResult = {
   message: string;
@@ -25,5 +23,5 @@ export type OnSubmitHandlers<P extends RequestProps, M extends ResponseMapping<P
 export type BaseFormOnSubmit<P extends RequestProps, R extends Response | ResponseMapping<P>> =
   R extends ResponseMapping<P> ? OnSubmitHandlers<P, R> : OnSubmitHandler<P, R>;
 
-export type BaseFormElementSubmitEvent = Event & { submitter: HTMLElement };
+export type BaseFormElementSubmitEvent = Event & { submitter: HTMLElement | null };
 export type BaseFormElementOnSubmitHandler = JSX.EventHandler<HTMLFormElement, BaseFormElementSubmitEvent>;

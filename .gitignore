@@ -1,5 +1,6 @@
 node_modules
 dist
+dist-types
 coverage
 
 .solid
@@ -14,3 +15,5 @@ tsconfig.tsbuildinfo
 
 # vite
 *.timestamp-*.mjs
+*.timestamp_*.js
+.astro

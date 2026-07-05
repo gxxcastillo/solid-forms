@@ -67,7 +67,7 @@ export function createBaseFormOnSubmitHandler<
 >(props: BaseFormProps<P, R>, formState: FormState, formStateMutations: FormStateMutations) {
   return async (event: BaseFormElementSubmitEvent) => {
     event.preventDefault();
-    const buttonName = (event.submitter as HTMLButtonElement)?.name;
+    const buttonName = (event.submitter as HTMLButtonElement | HTMLInputElement | null)?.name ?? '';
 
     if (formState.isProcessing) {
       return;

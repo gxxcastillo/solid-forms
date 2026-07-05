@@ -1,0 +1,21 @@
+{
+  "extends": "../../tsconfig.options.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "outDir": "./dist-types",
+    "emitDeclarationOnly": true,
+    "types": ["astro/client"],
+    "jsx": "preserve",
+    "jsxImportSource": "solid-js",
+    "paths": {
+      "@gxxc/solid-forms": ["../../packages/solid-forms/src/index.ts"],
+      "@gxxc/solid-forms/themes/*": ["../../packages/solid-forms/themes/*"]
+    }
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  "references": [
+    {
+      "path": "../../packages/solid-forms"
+    }
+  ]
+}

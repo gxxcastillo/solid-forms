@@ -1,10 +1,13 @@
 import { For, type JSX, children, createMemo, mergeProps } from 'solid-js';
 
-import { getComponentName as lookupComponentName, useFormContext } from '@gxxc/solid-forms-state';
+import {
+  type ErrorMessages,
+  getComponentName as lookupComponentName,
+  useFormContext
+} from '@gxxc/solid-forms-state';
 
 import {
   type BaseFormOnSubmit,
-  type FormErrors,
   type RequestProps,
   type Response,
   type ResponseMapping
@@ -18,7 +21,7 @@ export type BaseFormProps<P extends RequestProps, R extends Response | ResponseM
   align?: 'center' | 'left';
   isLoading?: boolean;
   isProcessing?: boolean;
-  errors?: FormErrors;
+  errors?: ErrorMessages;
   onSubmit?: BaseFormOnSubmit<P, R>;
   children: JSX.Element;
 };
@@ -70,6 +73,7 @@ export function BaseForm<P extends RequestProps, R extends Response | ResponseMa
 
   const resolvedChildren = children(() => props.children);
   const formChildren = createMemo(() => classifyBaseFormChildren(resolvedChildren.toArray()));
+  const formErrors = createMemo(() => [...(props.errors ?? []), ...formState.errors]);
   const onSubmitHandler = createBaseFormOnSubmitHandler<P, R>(props, formState, formStateMutations);
 
   // `sf-form` is a stable, un-hashed hook consumers/themes can target, the rest
@@ -98,7 +102,7 @@ export function BaseForm<P extends RequestProps, R extends Response | ResponseMa
       </For>
       <For each={formChildren().formButtons}>{(child) => <div>{child}</div>}</For>
       <For each={formChildren().footerLinks}>{(child) => <div>{child}</div>}</For>
-      <For each={formState.errors}>{(child) => <div>{child}</div>}</For>
+      <For each={formErrors()}>{(child) => <div>{child}</div>}</For>
     </form>
   );
 }

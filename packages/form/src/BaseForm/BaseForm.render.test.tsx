@@ -91,6 +91,23 @@ describe('BaseForm (rendered)', () => {
     expect(form.classList.contains('my-form')).toBe(true);
   });
 
+  it('renders the errors prop alongside form-state errors', () => {
+    const { store } = makeStore();
+    const [, mutations] = store;
+    mutations.setErrors(['State error']);
+
+    render(() => (
+      <FormContextProvider store={store}>
+        <BaseForm onSubmit={vi.fn()} errors={['Server error']}>
+          <button type='submit'>Submit</button>
+        </BaseForm>
+      </FormContextProvider>
+    ));
+
+    expect(screen.getByText('Server error')).toBeInTheDocument();
+    expect(screen.getByText('State error')).toBeInTheDocument();
+  });
+
   it('surfaces a rejected onSubmit into form.state.errors', async () => {
     const { store } = makeStore();
     const [state, mutations] = store;

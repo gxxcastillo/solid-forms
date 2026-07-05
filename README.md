@@ -2,6 +2,8 @@
 
 Typed, reactive forms for SolidJS.
 
+**Demo:** https://gxxcastillo.github.io/solid-forms/
+
 **User docs:** [`packages/solid-forms/README.md`](packages/solid-forms/README.md)
 
 ---
@@ -10,10 +12,10 @@ Typed, reactive forms for SolidJS.
 
 ### Setup
 
-Requires Node 20 and pnpm 9. With [nvm](https://github.com/nvm-sh/nvm):
+Requires Node 22 and pnpm 9. With [nvm](https://github.com/nvm-sh/nvm):
 
 ```bash
-nvm use          # reads .nvmrc → Node 20.10.0
+nvm use          # reads .nvmrc → Node 22.12.0
 pnpm install
 ```
 

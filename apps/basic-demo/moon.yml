@@ -2,6 +2,11 @@ $schema: 'https://moonrepo.dev/schemas/project.json'
 
 language: 'typescript'
 
+workspace:
+  inheritedTasks:
+    exclude:
+      - 'build'
+
 tasks:
   dev:
     command: 'pnpm dev'
@@ -10,4 +15,9 @@ tasks:
     command: 'pnpm start'
 
   build:
-    command: 'pnpm build'
+    command: 'node'
+    args:
+      - '--eval'
+      - "console.log('basic-demo build retired; use docs:build')"
+    options:
+      mergeArgs: 'replace'

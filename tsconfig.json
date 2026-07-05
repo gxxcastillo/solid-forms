@@ -6,6 +6,9 @@
       "path": "apps/basic-demo"
     },
     {
+      "path": "apps/docs"
+    },
+    {
       "path": "packages/elements"
     },
     {
