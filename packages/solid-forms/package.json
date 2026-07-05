@@ -8,6 +8,7 @@
     "url": "https://github.com/gxxcastillo/solid-forms",
     "directory": "packages/solid-forms"
   },
+  "homepage": "https://gxxcastillo.github.io/solid-forms/",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {

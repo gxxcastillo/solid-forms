@@ -2,9 +2,11 @@
 
 Typed, reactive forms for SolidJS.
 
-**Demo:** https://gxxcastillo.github.io/solid-forms/
+**Docs:** https://gxxcastillo.github.io/solid-forms/
 
-**User docs:** [`packages/solid-forms/README.md`](packages/solid-forms/README.md)
+**Demo:** https://gxxcastillo.github.io/solid-forms/demo/
+
+**Package README:** [`packages/solid-forms/README.md`](packages/solid-forms/README.md)
 
 ---
 
