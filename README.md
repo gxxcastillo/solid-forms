@@ -29,13 +29,13 @@ pnpm moon :lint     # lint all packages
 
 # target a single project
 pnpm moon solid-forms-state:test
-pnpm moon basic-demo:dev
+pnpm moon docs:dev
 ```
 
-### Run the demo app
+### Run the docs site (includes the live demo)
 
 ```bash
-pnpm moon basic-demo:dev
+pnpm moon docs:dev
 ```
 
 ---
@@ -72,4 +72,4 @@ pnpm uses `publishConfig.exports` in `packages/solid-forms/package.json` to stri
 | `packages/elements` | `@gxxc/solid-forms-elements` | Primitive DOM wrappers |
 | `packages/validation` | `@gxxc/solid-forms-validation` | Built-in constraint validation |
 | `packages/examples` | — | Standalone example components |
-| `apps/basic-demo` | — | SolidStart demo application |
+| `apps/docs` | — | Astro docs site with live demo |

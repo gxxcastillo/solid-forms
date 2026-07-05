@@ -55,7 +55,7 @@ module.exports = {
   overrides: [
     {
       // Illustrative example/demo code logs submitted values on purpose.
-      files: ['packages/examples/**/*', 'apps/basic-demo/**/*'],
+      files: ['packages/examples/**/*'],
       rules: {
         'no-console': 0
       }

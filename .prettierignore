@@ -6,8 +6,3 @@ dist
 # moon repo
 .moon/cache
 .moon/docker
-
-# solid-start
-.solid
-.vinxi
-.output

@@ -132,7 +132,7 @@ import './my-brand.css';
 If you want only the tokens (e.g. to reuse them in your own surrounding UI
 without the structural CSS), import `@gxxc/solid-forms/themes/base.css`.
 
-The demo app (`apps/basic-demo`) renders one form under all three themes with a
+The docs site (`apps/docs`) renders one form under all three themes with a
 live switcher — a good reference for what each token affects.
 
 ### Token reference
