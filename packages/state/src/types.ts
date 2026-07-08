@@ -60,6 +60,7 @@ export type FormStateMutations<M extends FieldValueMapping = FieldValueMapping> 
     errors?: ErrorMessages,
     label?: string
   ) => void;
+  removeField: <N extends StringKeyOf<M>>(name: N) => void;
   setFieldValue: <N extends StringKeyOf<M>>(name: N, value?: M[N], errors?: ErrorMessages) => void;
   setFieldErrors: <N extends StringKeyOf<M>>(name: N, errors?: ErrorMessages) => void;
   setChangedField: <N extends StringKeyOf<M>>(name: N) => void;

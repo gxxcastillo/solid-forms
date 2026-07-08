@@ -104,6 +104,13 @@ export function createFormStore<M extends FieldValueMapping>(state?: BaseFormSta
         ]);
       },
 
+      // A re-mounting field re-initializes fresh (see initializeField's
+      // hasFieldBeenInitialized guard) rather than preserving the removed
+      // field's prior value — this matches how a never-before-seen field
+      // behaves today.
+      removeField: <N extends FName>(name: N) =>
+        setFormState('fields', (fields) => fields.filter((f) => f.name !== name)),
+
       setFieldValue: <N extends FName>(name: N, value?: M[N], errors?: FErrors) => {
         // Resolve the field once: this runs on every keystroke, so a single O(n)
         // lookup beats the five separate `.find()` scans the getters would do.

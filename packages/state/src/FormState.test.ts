@@ -329,6 +329,58 @@ describe('setBlurredField', () => {
   });
 });
 
+describe('removeField', () => {
+  it('removes a registered field', () => {
+    const { store, dispose } = makeStore();
+    const [state, mutations] = store;
+    mutations.initializeField('username', 'alice', []);
+    expect(state.getField('username')).toBeDefined();
+    mutations.removeField('username');
+    expect(state.getField('username')).toBeUndefined();
+    dispose();
+  });
+
+  it('stops a removed field from counting toward isFormValid', () => {
+    const { store, dispose } = makeStore();
+    const [state, mutations] = store;
+    mutations.initializeField('username', '', ['Required']);
+    expect(state.isFormValid).toBe(false);
+    mutations.removeField('username');
+    expect(state.isFormValid).toBe(true);
+    dispose();
+  });
+
+  it('stops a removed field from counting toward haveValuesChanged', () => {
+    const { store, dispose } = makeStore();
+    const [state, mutations] = store;
+    mutations.initializeField('username', '', []);
+    mutations.setFieldValue('username', 'alice');
+    expect(state.haveValuesChanged).toBe(true);
+    mutations.removeField('username');
+    expect(state.haveValuesChanged).toBe(false);
+    dispose();
+  });
+
+  it('is a no-op for a field that was never registered', () => {
+    const { store, dispose } = makeStore();
+    const [state, mutations] = store;
+    expect(() => mutations.removeField('username')).not.toThrow();
+    expect(state.fields).toEqual([]);
+    dispose();
+  });
+
+  it('leaves other fields untouched', () => {
+    const { store, dispose } = makeStore();
+    const [state, mutations] = store;
+    mutations.initializeField('username', 'alice', []);
+    mutations.initializeField('password', 'secret', []);
+    mutations.removeField('username');
+    expect(state.getField('username')).toBeUndefined();
+    expect(state.getField('password')?.value).toBe('secret');
+    dispose();
+  });
+});
+
 describe('setErrors', () => {
   it('sets form-level errors', () => {
     const { store, dispose } = makeStore();

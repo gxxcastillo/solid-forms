@@ -1,4 +1,4 @@
-import { type JSX, createEffect, createMemo, mergeProps, splitProps } from 'solid-js';
+import { type JSX, createEffect, createMemo, mergeProps, onCleanup, splitProps } from 'solid-js';
 import { type StringKeyOf } from 'type-fest';
 
 import {
@@ -214,6 +214,11 @@ export function createFormField<
   );
   const onInput = createOnInput<G, M, N>(setValue, props);
   const onBlur = createOnBlur<G, M, N>(setValue, props, formStateMutations.setBlurredField);
+
+  // Without this, a conditionally-rendered field leaves a stale entry in the
+  // store that keeps counting toward isFormValid/haveValuesChanged/submitted
+  // values after it unmounts (see strategic-backlog.md B1).
+  onCleanup(() => formStateMutations.removeField(props.name));
 
   if (props.isControlled && !isInitialized()) {
     setValue(

@@ -34,6 +34,7 @@ function makeState(overrides: Record<string, unknown> = {}) {
 function makeMutations() {
   return {
     initializeField: vi.fn(),
+    removeField: vi.fn(),
     setFieldValue: vi.fn(),
     setFieldErrors: vi.fn(),
     setChangedField: vi.fn(),

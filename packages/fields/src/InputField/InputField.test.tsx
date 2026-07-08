@@ -1,5 +1,5 @@
 import { cleanup, render, screen } from '@solidjs/testing-library';
-import { createRoot } from 'solid-js';
+import { Show, createRoot, createSignal } from 'solid-js';
 import { FormContextProvider, createFormStore } from '@gxxc/solid-forms-state';
 import { afterEach, describe, expect, it } from 'vitest';
 
@@ -103,5 +103,27 @@ describe('InputField', () => {
     // Updating the value must toggle the class — a static classList would not.
     mutations.setFieldValue('email', 'ada@example.com', []);
     expect(root.classList.contains(styles.hasValue)).toBe(true);
+  });
+
+  it('unregisters the field from form state on unmount', () => {
+    const { store } = makeStore();
+    const [state] = store;
+    const [show, setShow] = createSignal(true);
+
+    render(() => (
+      <FormContextProvider store={store}>
+        <Show when={show()}>
+          <InputField<TestForm, 'username'> name='username' label='Username' required />
+        </Show>
+      </FormContextProvider>
+    ));
+
+    expect(state.getField('username')).toBeDefined();
+    expect(state.isFormValid).toBe(false); // required + empty
+
+    setShow(false);
+
+    expect(state.getField('username')).toBeUndefined();
+    expect(state.isFormValid).toBe(true);
   });
 });
