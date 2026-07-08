@@ -59,6 +59,7 @@ export default defineConfig({
   vite: {
     resolve: {
       alias: {
+        '@gxxc/solid-forms-examples': resolve(__dirname, '../../packages/examples/src/index.ts'),
         '@gxxc/solid-forms/themes': resolve(__dirname, '../../packages/solid-forms/themes'),
         '@gxxc/solid-forms': resolve(__dirname, '../../packages/solid-forms/src/index.ts')
       }

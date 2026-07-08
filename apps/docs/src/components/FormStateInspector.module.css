@@ -79,6 +79,11 @@
   display: flex;
   gap: 0.4rem;
   flex-wrap: wrap;
+  margin-left: 0;
+}
+
+.fieldErrors {
+  margin-left: 0;
 }
 
 .tagOn,
@@ -95,8 +100,9 @@
 }
 
 .tagOff {
-  color: var(--sf-color-text-muted);
-  opacity: 0.55;
+  background: var(--sf-color-surface-disabled);
+  color: var(--sf-color-text);
+  font-weight: 600;
 }
 
 .errors {

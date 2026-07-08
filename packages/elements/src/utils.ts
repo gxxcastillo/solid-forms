@@ -15,6 +15,7 @@ export function stripInvalidProps(props: Record<any, any>) {
     'validator',
     'match',
     'showIcon',
+    'label',
     'defaultValue',
     'defaultChecked'
   ])[1];

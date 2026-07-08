@@ -1,0 +1,58 @@
+$schema: 'https://moonrepo.dev/schemas/project.json'
+
+language: 'typescript'
+
+tasks:
+  dev:
+    command: 'vite'
+    args:
+      - '--host'
+      - '127.0.0.1'
+
+  build:
+    command: 'vite'
+    args:
+      - 'build'
+    deps:
+      - '^:build'
+    options:
+      mergeArgs: 'replace'
+
+  types:
+    command: 'tsc'
+    args:
+      - '--build'
+    deps:
+      - '^:types'
+    options:
+      mergeArgs: 'replace'
+
+  a11y:
+    command: 'playwright'
+    args:
+      - 'test'
+    inputs:
+      - 'playwright.config.ts'
+      - 'vite.config.ts'
+      - 'tsconfig.json'
+      - 'index.html'
+      - 'tests/**/*'
+      - 'src/**/*'
+      - 'package.json'
+      - '/package.json'
+      - '/pnpm-lock.yaml'
+      - '/packages/elements/src/**/*'
+      - '/packages/elements/package.json'
+      - '/packages/examples/src/**/*'
+      - '/packages/examples/package.json'
+      - '/packages/fields/src/**/*'
+      - '/packages/fields/package.json'
+      - '/packages/form/src/**/*'
+      - '/packages/form/package.json'
+      - '/packages/state/src/**/*'
+      - '/packages/state/package.json'
+      - '/packages/solid-forms/src/**/*'
+      - '/packages/solid-forms/package.json'
+      - '/packages/solid-forms/themes/**/*'
+      - '/packages/validation/src/**/*'
+      - '/packages/validation/package.json'

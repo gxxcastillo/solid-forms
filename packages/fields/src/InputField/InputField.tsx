@@ -4,7 +4,7 @@ import { type StringKeyOf } from 'type-fest';
 import { Input } from '@gxxc/solid-forms-elements';
 import { type FieldValueMapping, type FormState, useFormContext } from '@gxxc/solid-forms-state';
 
-import { createFormField, useFormFieldLabel } from '../hooks';
+import { createFormField } from '../hooks';
 import { type FormFieldProps } from '../types';
 import styles from './InputField.module.css';
 
@@ -58,12 +58,7 @@ export function InputField<M extends FieldValueMapping, N extends StringKeyOf<M>
   const initialLabel = createMemo(() => props.label);
   const hasValue = createMemo(() => !!value());
   const errorId = createUniqueId();
-  const label = createMemo(() =>
-    useFormFieldLabel({
-      value: value(),
-      label: initialLabel()
-    })
-  );
+  const placeholder = createMemo(() => (withLabel() ? undefined : initialLabel()));
 
   // Returned as a thunk and applied inline below so Solid tracks the memos and
   // re-evaluates the classes (e.g. the floating-label `hasValue` state) reactively.
@@ -84,15 +79,15 @@ export function InputField<M extends FieldValueMapping, N extends StringKeyOf<M>
           {...props}
           class={styles.input}
           id={props.id}
-          placeholder={label().placeholder}
+          placeholder={placeholder()}
           aria-invalid={!!props.errors?.length}
           aria-describedby={props.errors?.length ? errorId : undefined}
         />
         {withIcon() && <div class={styles.icon}>{icon()}</div>}
         {context && <div class={styles.context}>{context()}</div>}
-        {withLabel() && (
-          <label for={props.id} class={styles.label}>
-            {label().label}
+        {initialLabel() && (
+          <label for={props.id} class={withLabel() ? styles.label : styles.screenReaderOnly}>
+            {initialLabel()}
           </label>
         )}
       </div>

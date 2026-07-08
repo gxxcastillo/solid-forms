@@ -1,21 +1,31 @@
-import { Form, InputField, PasswordField, SubmitButton } from '@gxxc/solid-forms';
+import { Form, InputField, PasswordField, SubmitButton, TextAreaField } from '@gxxc/solid-forms';
 
-interface LoginValues {
+export interface LoginValues {
   [key: string]: string;
-  username: string;
+  email: string;
   password: string;
+  message: string;
 }
 
-export function LoginForm() {
-  function onSubmit(values: LoginValues) {
-    console.log('login submitted', values);
-  }
+export interface LoginFormProps {
+  onSubmit?: (values: LoginValues) => void | Promise<void>;
+}
 
+export function LoginFields() {
   return (
-    <Form onSubmit={onSubmit}>
-      <InputField name='username' label='Username' required />
+    <>
+      <InputField name='email' label='Email' required />
       <PasswordField name='password' label='Password' required minLength={8} />
-      <SubmitButton>Login</SubmitButton>
+      <TextAreaField name='message' label='Care to send a message?' />
+      <SubmitButton />
+    </>
+  );
+}
+
+export function LoginForm(props: LoginFormProps) {
+  return (
+    <Form<LoginValues, void> onSubmit={props.onSubmit ?? (() => undefined)}>
+      <LoginFields />
     </Form>
   );
 }

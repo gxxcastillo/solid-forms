@@ -32,26 +32,33 @@ export function FormStateInspector<M extends FieldValueMapping>(
         </Show>
       </div>
 
-      <dl class={styles.fields}>
-        <For each={props.state.fields} fallback={<p class={styles.empty}>No fields registered yet.</p>}>
-          {(field) => (
-            <div class={styles.field}>
-              <dt class={styles.fieldName}>{field.label ?? field.name}</dt>
-              <dd class={styles.fieldValue}>{formatValue(field.value)}</dd>
-              <div class={styles.fieldMeta}>
-                <span class={field.hasChanged ? styles.tagOn : styles.tagOff}>changed</span>
-                <span class={field.hasBeenBlurred ? styles.tagOn : styles.tagOff}>blurred</span>
-                <span class={field.errors.length ? styles.tagOff : styles.tagOn}>valid</span>
+      <Show
+        when={props.state.fields.length}
+        fallback={<p class={styles.empty}>No fields registered yet.</p>}
+      >
+        <dl class={styles.fields}>
+          <For each={props.state.fields}>
+            {(field) => (
+              <div class={styles.field}>
+                <dt class={styles.fieldName}>{field.label ?? field.name}</dt>
+                <dd class={styles.fieldValue}>{formatValue(field.value)}</dd>
+                <dd class={styles.fieldMeta}>
+                  <span class={field.hasChanged ? styles.tagOn : styles.tagOff}>changed</span>
+                  <span class={field.hasBeenBlurred ? styles.tagOn : styles.tagOff}>blurred</span>
+                  <span class={field.errors.length ? styles.tagOff : styles.tagOn}>valid</span>
+                </dd>
+                <Show when={(field.hasBeenValid || field.hasBeenBlurred) && field.errors.length}>
+                  <dd class={styles.fieldErrors}>
+                    <ul class={styles.errors}>
+                      <For each={field.errors}>{(err) => <li>{err}</li>}</For>
+                    </ul>
+                  </dd>
+                </Show>
               </div>
-              <Show when={(field.hasBeenValid || field.hasBeenBlurred) && field.errors.length}>
-                <ul class={styles.errors}>
-                  <For each={field.errors}>{(err) => <li>{err}</li>}</For>
-                </ul>
-              </Show>
-            </div>
-          )}
-        </For>
-      </dl>
+            )}
+          </For>
+        </dl>
+      </Show>
     </div>
   );
 }

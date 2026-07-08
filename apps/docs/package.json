@@ -13,6 +13,7 @@
     "@astrojs/solid-js": "^7.0.1",
     "@astrojs/starlight": "^0.41.3",
     "@gxxc/solid-forms": "workspace:^",
+    "@gxxc/solid-forms-examples": "workspace:*",
     "astro": "^7.0.6",
     "solid-js": "^1.9.14"
   },

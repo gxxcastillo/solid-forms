@@ -6,6 +6,7 @@
 }
 
 .title {
+  display: block;
   margin-bottom: 0.5rem;
   color: var(--sf-color-text);
   font-family: var(--sf-font-family);

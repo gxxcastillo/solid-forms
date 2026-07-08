@@ -27,6 +27,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Install Playwright browser
+        run: pnpm exec playwright install --with-deps chromium
+
       - name: Install moon
         run: pnpm exec moon --version || pnpm add -g @moonrepo/cli
 
@@ -44,6 +47,9 @@ jobs:
 
       - name: Build
         run: pnpm moon :build
+
+      - name: Accessibility
+        run: pnpm moon :a11y
 
       - name: Verify pack
         run: |

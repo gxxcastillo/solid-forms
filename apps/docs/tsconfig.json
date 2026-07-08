@@ -4,16 +4,20 @@
     "rootDir": ".",
     "outDir": "./dist-types",
     "emitDeclarationOnly": true,
-    "types": ["astro/client"],
+    "types": ["astro/client", "node"],
     "jsx": "preserve",
     "jsxImportSource": "solid-js",
     "paths": {
+      "@gxxc/solid-forms-examples": ["../../packages/examples/src/index.ts"],
       "@gxxc/solid-forms": ["../../packages/solid-forms/src/index.ts"],
       "@gxxc/solid-forms/themes/*": ["../../packages/solid-forms/themes/*"]
     }
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"],
   "references": [
+    {
+      "path": "../../packages/examples"
+    },
     {
       "path": "../../packages/solid-forms"
     }

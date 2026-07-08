@@ -1,0 +1,24 @@
+{
+  "name": "a11y",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build",
+    "types": "tsc --build",
+    "a11y": "playwright test"
+  },
+  "dependencies": {
+    "@gxxc/solid-forms": "workspace:^",
+    "@gxxc/solid-forms-examples": "workspace:*",
+    "solid-js": "^1.9.14"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.12.1",
+    "@playwright/test": "^1.61.1",
+    "typescript": "5.4.2",
+    "vite": "^5.4.0",
+    "vite-plugin-solid": "^2.3.0"
+  }
+}

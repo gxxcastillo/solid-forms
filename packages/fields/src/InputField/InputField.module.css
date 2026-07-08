@@ -23,6 +23,18 @@
   position: relative;
 }
 
+.screenReaderOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .input {
   box-sizing: border-box;
   width: 100%;
@@ -90,7 +102,7 @@
   top: 50%;
   transform: translateY(-50%);
   transform-origin: left center;
-  color: var(--sf-color-placeholder);
+  color: var(--sf-color-label);
   font-family: var(--sf-font-family);
   font-size: var(--sf-font-size);
   text-transform: var(--sf-text-transform-label);

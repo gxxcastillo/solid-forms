@@ -32,15 +32,21 @@ export function TextAreaField<M extends FieldValueMapping, N extends StringKeyOf
       label: initialLabel()
     })
   );
+  const visibleLabel = createMemo(() => localProps.title ?? initialLabel());
+  const placeholder = createMemo(() => (localProps.title ? label().placeholder : undefined));
 
   return createField(
     'TextareaField',
     <div class={styles.TextArea}>
-      {localProps.title && <div class={styles.title}>{localProps.title}</div>}
+      {visibleLabel() && (
+        <label for={props.id} class={styles.title}>
+          {visibleLabel()}
+        </label>
+      )}
       <div class={styles.textAreaContainer}>
         <Textarea
           {...props}
-          placeholder={label().placeholder}
+          placeholder={placeholder()}
           class={styles.textAreaEl}
           aria-invalid={!!props.errors?.length}
           aria-describedby={props.errors?.length ? errorId : undefined}

@@ -28,6 +28,21 @@ describe('InputField', () => {
     expect(screen.getByRole('textbox')).toHaveAttribute('id', 'username');
   });
 
+  it('associates the default placeholder-style input with its label', () => {
+    const { store } = makeStore();
+    render(() => (
+      <FormContextProvider store={store}>
+        <InputField<TestForm, 'username'> name='username' label='Username' />
+      </FormContextProvider>
+    ));
+
+    const input = screen.getByLabelText('Username');
+    const label = document.querySelector('label[for="username"]');
+
+    expect(input).toHaveAttribute('placeholder', 'Username');
+    expect(label).toHaveClass(styles.screenReaderOnly);
+  });
+
   it('sets aria-invalid=false when there are no errors', () => {
     const { store } = makeStore();
     render(() => (
