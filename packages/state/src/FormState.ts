@@ -1,4 +1,4 @@
-import { mergeProps } from 'solid-js';
+import { batch, mergeProps } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import type { StringKeyOf } from 'type-fest';
 
@@ -84,6 +84,92 @@ export function createFormStore<M extends object = FieldValueMapping>(
   type FName = StringKeyOf<M>;
   type FErrors = (typeof formState)['fields'][number]['errors'];
 
+  // Store-scoped, not per-field: a field that unmounts (removeField deletes
+  // its record) and later re-registers under the same name must get a
+  // generation no earlier write could have captured. Restarting each field at
+  // 0 would let a stale async validator from the removed instance collide
+  // with the freshly re-initialized one, since both would read generation 0
+  // (see the guard in createFormField.ts's commit()).
+  let nextGeneration = 0;
+
+  const buildFreshField = <N extends FName>(
+    name: N,
+    value: FieldValueFor<M, N> | undefined,
+    errors: FErrors,
+    label?: string
+  ): FormField<M, N> => ({
+    name,
+    value,
+    initialValue: value,
+    errors,
+    label,
+    hasBeenInitialized: true,
+    hasChanged: false,
+    hasBeenBlurred: false,
+    hasBeenValid: value !== undefined && !errors.length,
+    generation: nextGeneration++,
+    wasReset: false
+  });
+
+  const applyFieldValue = (
+    field: FormField<M, FName>,
+    value: FieldValueFor<M, FName> | undefined,
+    errors: FErrors | undefined,
+    bumpGeneration: boolean
+  ) => {
+    const currentValue = field.value;
+    const currentErrors = field.errors ?? [];
+    // When errors is not explicitly provided, preserve current errors rather than clearing them.
+    const effectiveErrors = errors !== undefined ? errors : currentErrors;
+
+    const prevHasBeenValid = field.hasBeenValid ?? false;
+    const nextHasBeenValid = prevHasBeenValid || !effectiveErrors.length;
+
+    // A revalidation pass after resetField/reset can recompute the exact same
+    // value and (empty) errors the reset already force-set — a true no-op by
+    // value/errors alone. But resetField/reset also force hasBeenValid to
+    // false without knowing whether the reverted value is actually valid, so
+    // that recomputed hasBeenValid must still land even when nothing else changed.
+    if (currentValue === value && arraysEqual(effectiveErrors, currentErrors) && nextHasBeenValid === prevHasBeenValid) {
+      return;
+    }
+
+    const prevHasChanged = field.hasChanged ?? false;
+
+    setFormState('fields', (f) => f.name === field.name, () => ({
+      value,
+      errors: effectiveErrors,
+      hasBeenValid: nextHasBeenValid,
+      hasChanged: prevHasChanged || currentValue !== value,
+      ...(bumpGeneration ? { generation: nextGeneration++, wasReset: false } : {})
+    }));
+  };
+
+  const applyFieldReset = (
+    name: FName,
+    value: FieldValueFor<M, FName> | undefined,
+    initialValue: FieldValueFor<M, FName> | undefined
+  ) => {
+    setFormState('fields', (f) => f.name === name, () => ({
+      value,
+      initialValue,
+      errors: [],
+      hasChanged: false,
+      hasBeenBlurred: false,
+      // Real validity is unknown here (errors are force-cleared above without
+      // checking constraints), so this can't reuse the `value !== undefined &&
+      // !errors.length` pattern the way initializeField/setFieldValue's fresh
+      // branches do — that would wrongly claim a defined-but-invalid reverted
+      // value as "has been valid". Leave it false and let the follow-up
+      // revalidation pass (createFormField's wasReset-triggered effect, which
+      // re-applies real errors via applyFieldValue's OR-forward) promote it to
+      // true only once a real validation pass confirms it.
+      hasBeenValid: false,
+      generation: nextGeneration++,
+      wasReset: true
+    }));
+  };
+
   return [
     mergeProps(formState, getters),
     {
@@ -97,19 +183,7 @@ export function createFormStore<M extends object = FieldValueMapping>(
           return;
         }
 
-        setFormState('fields', (fields) => [
-          ...fields,
-          {
-            name,
-            value,
-            errors,
-            label,
-            hasBeenInitialized: true,
-            hasChanged: false,
-            hasBeenBlurred: false,
-            hasBeenValid: value !== undefined && !errors.length
-          }
-        ]);
+        setFormState('fields', (fields) => [...fields, buildFreshField(name, value, errors, label)]);
       },
 
       // A re-mounting field re-initializes fresh (see initializeField's
@@ -125,44 +199,11 @@ export function createFormStore<M extends object = FieldValueMapping>(
         const field = getters.getField(name);
 
         if (!field) {
-          const initialErrors = errors ?? [];
-          setFormState('fields', (fields) => [
-            ...(fields || []),
-            {
-              name,
-              value,
-              errors: initialErrors,
-              hasBeenInitialized: true,
-              hasBeenValid: value !== undefined && !initialErrors.length,
-              hasBeenBlurred: false,
-              hasChanged: false
-            } satisfies FormField<M, N>
-          ]);
+          setFormState('fields', (fields) => [...(fields || []), buildFreshField(name, value, errors ?? [])]);
           return;
         }
 
-        const currentValue = field.value;
-        const currentErrors = field.errors ?? [];
-        // When errors is not explicitly provided, preserve current errors rather than clearing them.
-        const effectiveErrors = errors !== undefined ? errors : currentErrors;
-
-        if (currentValue === value && arraysEqual(effectiveErrors, currentErrors)) {
-          return;
-        }
-
-        const prevHasBeenValid = field.hasBeenValid ?? false;
-        const prevHasChanged = field.hasChanged ?? false;
-
-        setFormState(
-          'fields',
-          (f) => f.name === name,
-          () => ({
-            value,
-            errors: effectiveErrors,
-            hasBeenValid: prevHasBeenValid || !effectiveErrors.length,
-            hasChanged: prevHasChanged || currentValue !== value
-          })
-        );
+        applyFieldValue(field, value, errors, false);
       },
       setFieldErrors: <N extends FName>(name: N, errors?: FErrors) =>
         setFormState('fields', (f) => f.name === name, 'errors', errors ?? []),
@@ -170,6 +211,42 @@ export function createFormStore<M extends object = FieldValueMapping>(
         setFormState('fields', (f) => f.name === name, 'hasChanged', true),
       setBlurredField: <N extends FName>(name: N) =>
         setFormState('fields', (f) => f.name === name, 'hasBeenBlurred', true),
+
+      resetField: <N extends FName>(name: N) => {
+        const field = getters.getField(name);
+        if (!field) return;
+
+        applyFieldReset(name, field.initialValue, field.initialValue);
+      },
+
+      reset: (toValues?: Partial<M>) => {
+        batch(() => {
+          setFormState('errors', []);
+
+          for (const field of formState.fields) {
+            const name = field.name as FName;
+            const hasNewValue = !!toValues && Object.hasOwn(toValues, name);
+            const value = (
+              hasNewValue ? toValues![name as keyof typeof toValues] : field.initialValue
+            ) as FieldValueFor<M, FName>;
+            const initialValue = hasNewValue ? value : field.initialValue;
+
+            applyFieldReset(name, value, initialValue);
+          }
+        });
+      },
+
+      setValues: (values: Partial<M>) => {
+        batch(() => {
+          for (const name of Object.keys(values) as FName[]) {
+            const field = getters.getField(name);
+            if (!field) continue;
+
+            applyFieldValue(field, values[name as keyof typeof values] as FieldValueFor<M, FName>, undefined, true);
+          }
+        });
+      },
+
       setErrors: (errors: BaseFormState<M>['errors'] = []) => setFormState('errors', errors),
       setIsReady: (isReady: boolean) => setFormState('isReady', isReady),
       setIsLoading: (isLoading: boolean) => setFormState('isLoading', isLoading),

@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from '@solidjs/testing-library';
+import { cleanup, fireEvent, render, screen } from '@solidjs/testing-library';
 import { Show, createRoot, createSignal } from 'solid-js';
 import { afterEach, describe, expect, it } from 'vitest';
 
@@ -104,6 +104,123 @@ describe('InputField', () => {
     // Updating the value must toggle the class — a static classList would not.
     mutations.setFieldValue('email', 'ada@example.com', []);
     expect(root.classList.contains(styles.hasValue)).toBe(true);
+  });
+
+  it('reverts to its initial value when resetField is called', () => {
+    const { store } = makeStore();
+    const [, mutations] = store;
+    render(() => (
+      <FormContextProvider store={store}>
+        <InputField<TestForm, 'username'> name='username' label='Username' defaultValue='alice' />
+      </FormContextProvider>
+    ));
+
+    const input = screen.getByRole('textbox') as HTMLInputElement;
+    fireEvent.input(input, { target: { value: 'bob' } });
+    expect(input.value).toBe('bob');
+
+    mutations.resetField('username');
+
+    expect(input.value).toBe('alice');
+  });
+
+  it('re-validates against constraints after resetField reverts to an invalid value', () => {
+    const { store } = makeStore();
+    const [state, mutations] = store;
+    render(() => (
+      <FormContextProvider store={store}>
+        <InputField<TestForm, 'username'> name='username' label='Username' required />
+      </FormContextProvider>
+    ));
+
+    const input = screen.getByRole('textbox') as HTMLInputElement;
+    fireEvent.input(input, { target: { value: 'alice' } });
+    expect(state.isFormValid).toBe(true);
+
+    mutations.resetField('username');
+
+    // The field's initial value was empty (no defaultValue), so reverting to it
+    // should re-surface the "required" error instead of leaving isFormValid
+    // incorrectly true just because resetField force-cleared errors.
+    expect(input.value).toBe('');
+    expect(state.isFormValid).toBe(false);
+  });
+
+  it('immediately displays a new error introduced right after resetField reverts to a valid value', () => {
+    const { store } = makeStore();
+    const [, mutations] = store;
+    render(() => (
+      <FormContextProvider store={store}>
+        <InputField<TestForm, 'username'> name='username' label='Username' defaultValue='alice' required />
+      </FormContextProvider>
+    ));
+
+    const input = screen.getByRole('textbox') as HTMLInputElement;
+    fireEvent.input(input, { target: { value: 'bob' } });
+
+    // Reverts to 'alice', which is itself valid — the post-reset revalidate
+    // pass must still promote hasBeenValid back to true (not leave it stuck at
+    // the reset's pessimistic `false`), or the very next error below would be
+    // suppressed until blur instead of showing immediately.
+    mutations.resetField('username');
+    fireEvent.input(input, { target: { value: '' } });
+
+    expect(screen.getByRole('alert')).toHaveTextContent(/required/i);
+  });
+
+  it('does not re-validate after setValues, preserving whatever errors were already there', () => {
+    const { store } = makeStore();
+    const [state, mutations] = store;
+    mutations.initializeField('username', 'alice', []);
+    mutations.setFieldValue('username', '', ['Required']);
+
+    render(() => (
+      <FormContextProvider store={store}>
+        <InputField<TestForm, 'username'> name='username' label='Username' required />
+      </FormContextProvider>
+    ));
+
+    mutations.setValues({ username: 'bob' });
+
+    // setValues intentionally preserves whatever errors were already there;
+    // unlike resetField, it must not trigger the auto-revalidate effect.
+    expect(state.getFieldErrors('username')).toEqual(['Required']);
+  });
+
+  it('reflects a value loaded via setValues', () => {
+    const { store } = makeStore();
+    const [, mutations] = store;
+    render(() => (
+      <FormContextProvider store={store}>
+        <InputField<TestForm, 'username'> name='username' label='Username' />
+      </FormContextProvider>
+    ));
+
+    mutations.setValues({ username: 'loaded-alice' });
+
+    expect((screen.getByRole('textbox') as HTMLInputElement).value).toBe('loaded-alice');
+  });
+
+  it('applies a custom validator result on mount for a field that is not the first in the store', () => {
+    const { store } = makeStore();
+    const [state] = store;
+
+    render(() => (
+      <FormContextProvider store={store}>
+        <InputField<TestForm, 'username'> name='username' label='Username' defaultValue='alice' />
+        <InputField<TestForm, 'email'>
+          name='email'
+          label='Email'
+          defaultValue='taken@example.com'
+          validator={(_name, _value, _formState, setErrors) => setErrors(['Email is taken'])}
+        />
+      </FormContextProvider>
+    ));
+
+    // `username` is the first field ever registered in this store, so its
+    // generation happens to be 0; `email` registers second, so its real
+    // generation is 1. The custom validator's result must still land.
+    expect(state.getFieldErrors('email')).toEqual(['Email is taken']);
   });
 
   it('unregisters the field from form state on unmount', () => {

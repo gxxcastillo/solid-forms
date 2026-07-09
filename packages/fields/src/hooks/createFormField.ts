@@ -1,4 +1,4 @@
-import { type JSX, createEffect, createMemo, mergeProps, onCleanup, splitProps } from 'solid-js';
+import { type JSX, createEffect, createMemo, mergeProps, onCleanup, splitProps, untrack } from 'solid-js';
 import { type StringKeyOf } from 'type-fest';
 
 import {
@@ -103,11 +103,23 @@ export function createValueSetter<
       formStateMutations.setFieldValue(name, value, errorsForDisplay);
     }
 
+    // Captured after the mutation above (which, for an uninitialized field,
+    // is what actually assigns its generation from the store-wide counter) —
+    // capturing it before would read a field that doesn't exist yet, always
+    // falling back to 0 regardless of the real assigned value. The field's
+    // generation only changes via resetField/reset/setValues from here on
+    // (never via this field's own commit), so comparing it alongside the
+    // token tells apart "a newer commit of mine superseded this" from "an
+    // external reset overwrote the field out from under this pending
+    // validation."
+    const generation = formState.getField(name)?.generation ?? 0;
+
     // Custom validators run after built-in constraints and only when no built-in errors exist.
     // Sync validators call setFieldErrors immediately; async validators call it when they resolve.
     if (newErrors.length === 0 && props.validator) {
       props.validator(name, value, formState, (errors) => {
         if (token !== validationToken) return;
+        if ((formState.getField(name)?.generation ?? 0) !== generation) return;
         formStateMutations.setFieldErrors(name, errors);
       });
     }
@@ -254,6 +266,21 @@ export function createFormField<
       setValue.revalidate();
     });
   }
+
+  // resetField/reset clear the field's errors without checking them against
+  // constraints or the custom validator — they live in the state package, which
+  // has no access to either. `wasReset` (set alongside `generation`) tells us
+  // when a generation bump was one of theirs so we can follow up with a real
+  // validation pass; a setValues-caused bump leaves `wasReset` false, since
+  // setValues intentionally preserves whatever errors were already there.
+  createEffect(() => {
+    const fieldName = props.name as StringKeyOf<M>;
+    const field = formState.getField(fieldName);
+    if (field?.generation === undefined) return;
+    if (untrack(() => field.wasReset)) {
+      setValue.revalidate();
+    }
+  });
 
   const formattedValue = createMemo(() => props.format(value()));
   const displayableErrors = createMemo(() => getDisplayableErrors(props.name, formState));

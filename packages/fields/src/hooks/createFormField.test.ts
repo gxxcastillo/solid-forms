@@ -31,6 +31,9 @@ function makeMutations() {
     setFieldErrors: vi.fn(),
     setChangedField: vi.fn(),
     setBlurredField: vi.fn(),
+    resetField: vi.fn(),
+    reset: vi.fn(),
+    setValues: vi.fn(),
     setIsReady: vi.fn(),
     setIsLoading: vi.fn(),
     setIsProcessing: vi.fn()
@@ -172,6 +175,55 @@ describe('createValueSetter', () => {
 
     expect(mutations.setFieldErrors).toHaveBeenCalledTimes(1);
     expect(mutations.setFieldErrors).toHaveBeenCalledWith('username', ['result-for-alice']);
+  });
+
+  it('ignores an async validator result after the field was externally reset', () => {
+    let generation = 0;
+    const state = makeState();
+    state.getField = () => ({ generation }) as never;
+    const mutations = makeMutations();
+    let pendingSetErrors!: (e: string[]) => void;
+    const validator = vi.fn((_n: string, _v: unknown, _s: unknown, setErrors: (e: string[]) => void) => {
+      pendingSetErrors = setErrors;
+    });
+    const setValue = createValueSetter(
+      state,
+      mutations,
+      {},
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      { name: 'username', parse: (v: unknown) => v, validator } as any
+    );
+
+    setValue('alice');
+
+    // Simulate resetField/reset/setValues bumping the field's generation while
+    // this validator call is still in flight.
+    generation++;
+    pendingSetErrors(['stale']);
+
+    expect(mutations.setFieldErrors).not.toHaveBeenCalled();
+  });
+
+  it('still applies an async validator result when the generation is unchanged', () => {
+    const state = makeState();
+    state.getField = () => ({ generation: 0 }) as never;
+    const mutations = makeMutations();
+    let pendingSetErrors!: (e: string[]) => void;
+    const validator = vi.fn((_n: string, _v: unknown, _s: unknown, setErrors: (e: string[]) => void) => {
+      pendingSetErrors = setErrors;
+    });
+    const setValue = createValueSetter(
+      state,
+      mutations,
+      {},
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      { name: 'username', parse: (v: unknown) => v, validator } as any
+    );
+
+    setValue('alice');
+    pendingSetErrors(['taken']);
+
+    expect(mutations.setFieldErrors).toHaveBeenCalledWith('username', ['taken']);
   });
 
   it('revalidate re-runs validation against the current value', () => {

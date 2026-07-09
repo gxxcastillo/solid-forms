@@ -30,11 +30,14 @@ describe('groupSchemaIssuesByField', () => {
         {
           name: 'email',
           value: '',
+          initialValue: '',
           errors: [],
           hasBeenInitialized: true,
           hasBeenBlurred: false,
           hasChanged: false,
-          hasBeenValid: false
+          hasBeenValid: false,
+          generation: 0,
+          wasReset: false
         }
       ]
     );
