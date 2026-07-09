@@ -5,6 +5,7 @@ import {
   type DisplayValue,
   type FieldName,
   type FieldValue,
+  type FieldValueFor,
   type FieldValueMapping,
   type FormState,
   type FormStateMutations,
@@ -58,11 +59,12 @@ export function format<V extends FieldValue>(val: V | undefined) {
   return val?.toString() ?? '';
 }
 
-export function getDisplayableErrors<K extends FieldName>(
+export function getDisplayableErrors<M extends object, K extends FieldName>(
   fieldName: K,
-  { hasFieldBeenValid, hasFieldBlurred, getFieldErrors }: FormState
+  { hasFieldBeenValid, hasFieldBlurred, getFieldErrors }: FormState<M>
 ) {
-  return hasFieldBeenValid(fieldName) || hasFieldBlurred(fieldName) ? getFieldErrors(fieldName) : undefined;
+  const name = fieldName as StringKeyOf<M>;
+  return hasFieldBeenValid(name) || hasFieldBlurred(name) ? getFieldErrors(name) : undefined;
 }
 
 export function isSelectableEvent(
@@ -74,7 +76,7 @@ export function isSelectableEvent(
 
 export function createValueSetter<
   G extends FormElementTag,
-  M extends FieldValueMapping,
+  M extends object,
   N extends StringKeyOf<M>,
   C extends ValidationConstraints
 >(
@@ -90,7 +92,7 @@ export function createValueSetter<
   // slow validation of an older value from clobbering a newer value's errors.
   let validationToken = 0;
 
-  function commit(value: M[N], isInitialization: boolean) {
+  function commit(value: FieldValueFor<M, N>, isInitialization: boolean) {
     const token = ++validationToken;
     const newErrors = validate(name, value, validationConstraints, formState, props.label);
     const errorsForDisplay = newErrors.length > 0 ? newErrors : [];
@@ -113,7 +115,7 @@ export function createValueSetter<
 
   const setValue = Object.assign(
     function setValue(val?: FieldValue, isInitialization = false) {
-      let value: M[N];
+      let value: FieldValueFor<M, N>;
       const currentValue = formState.getFieldValue(name);
 
       if ((props.disabled || props.readonly) && !isInitialization) {
@@ -125,7 +127,7 @@ export function createValueSetter<
           return;
         }
 
-        value = val as M[N];
+        value = val as FieldValueFor<M, N>;
       } else if (typeof props.parse === 'function') {
         value = props.parse(val as DisplayValue);
 
@@ -145,7 +147,7 @@ export function createValueSetter<
       // depends on changes, since that change does not flow through this setValue.
       revalidate() {
         if (!formState.hasFieldBeenInitialized(name)) return;
-        commit(formState.getFieldValue(name) as M[N], false);
+        commit(formState.getFieldValue(name) as FieldValueFor<M, N>, false);
       }
     }
   );
@@ -153,11 +155,10 @@ export function createValueSetter<
   return setValue;
 }
 
-export function createOnInput<
-  G extends FormElementTag,
-  M extends FieldValueMapping,
-  N extends StringKeyOf<M>
->(setValue: SetValue, props: FormFieldProps<G, M, N>) {
+export function createOnInput<G extends FormElementTag, M extends object, N extends StringKeyOf<M>>(
+  setValue: SetValue,
+  props: FormFieldProps<G, M, N>
+) {
   return function onInput(event: FormFieldInputEvent<HTMLElementTagNameMap[G]>) {
     if (isSelectableEvent(event, !!props.isSelectable)) {
       setValue(event.currentTarget.checked);
@@ -167,7 +168,7 @@ export function createOnInput<
   };
 }
 
-export function createOnBlur<G extends FormElementTag, M extends FieldValueMapping, N extends StringKeyOf<M>>(
+export function createOnBlur<G extends FormElementTag, M extends object, N extends StringKeyOf<M>>(
   setField: SetValue,
   props: FormFieldProps<G, M, N>,
   setBlurredField: (name: N) => void
@@ -192,8 +193,8 @@ export function createField(componentName: ComponentName, el: JSX.Element) {
 
 export function createFormField<
   G extends FormElementTag,
-  M extends FieldValueMapping,
-  N extends StringKeyOf<M>
+  M extends object = FieldValueMapping,
+  N extends StringKeyOf<M> = StringKeyOf<M>
 >(initialProps: FormFieldProps<G, M, N>) {
   const [formState, formStateMutations] = useFormContext<M>();
 
@@ -222,7 +223,9 @@ export function createFormField<
 
   if (props.isControlled && !isInitialized()) {
     setValue(
-      isSelectable() ? (props.checked ?? props.defaultChecked ?? props.defaultValue ?? false) : props.defaultValue,
+      isSelectable()
+        ? (props.checked ?? props.defaultChecked ?? props.defaultValue ?? false)
+        : props.defaultValue,
       true
     );
   } else if (props.disabled && isInitialized()) {
@@ -234,7 +237,7 @@ export function createFormField<
       isSelectable()
         ? (props.checked ?? props.defaultChecked ?? props.defaultValue ?? false)
         : (props.defaultValue ?? currentValue)
-    ) as M[N];
+    ) as FieldValueFor<M, N>;
     const errors = validate(props.name, disabledValue, validationConstraints, formState);
     // Only overwrite errors when the disabled value actually violates a
     // constraint; passing `undefined` preserves any existing error (e.g. one set

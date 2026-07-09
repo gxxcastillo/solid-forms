@@ -1,7 +1,8 @@
+import { createRoot } from 'solid-js';
 import { generateHydrationScript, renderToString } from 'solid-js/web';
 import { describe, expect, it } from 'vitest';
+
 import { FormContextProvider, createFormStore } from '@gxxc/solid-forms-state';
-import { createRoot } from 'solid-js';
 
 import { InputField } from './InputField/InputField';
 

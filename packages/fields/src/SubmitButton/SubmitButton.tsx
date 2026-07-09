@@ -8,16 +8,16 @@ import { createField } from '../hooks';
 import { type FormFieldProps } from '../types';
 import styles from './SubmitButton.module.css';
 
-export type SubmitButtonProps<M extends FieldValueMapping, N extends StringKeyOf<M>> = Omit<
-  FormFieldProps<'input', M, N>,
-  'name'
-> & {
+export type SubmitButtonProps<
+  M extends object = FieldValueMapping,
+  N extends StringKeyOf<M> = StringKeyOf<M>
+> = Omit<FormFieldProps<'input', M, N>, 'name'> & {
   name?: string;
   variant?: 'approve' | 'primary';
   isFullWidth?: boolean;
 };
 
-export function SubmitButton<M extends FieldValueMapping, N extends StringKeyOf<M>>(
+export function SubmitButton<M extends object = FieldValueMapping, N extends StringKeyOf<M> = StringKeyOf<M>>(
   initialProps: SubmitButtonProps<M, N>
 ) {
   const [formState] = useFormContext();

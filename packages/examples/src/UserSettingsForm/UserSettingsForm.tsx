@@ -1,7 +1,6 @@
 import { Form, InputField, SubmitButton, TextAreaField } from '@gxxc/solid-forms';
 
 export interface UserSettingsValues {
-  [key: string]: string;
   username: string;
   bio: string;
 }

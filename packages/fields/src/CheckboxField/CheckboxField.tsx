@@ -8,15 +8,15 @@ import { createFormField } from '../hooks';
 import { type FormFieldProps } from '../types';
 import styles from './CheckboxField.module.css';
 
-export type CheckboxFieldProps<M extends FieldValueMapping, N extends StringKeyOf<M>> = FormFieldProps<
-  'input',
-  M,
-  N
->;
+export type CheckboxFieldProps<
+  M extends object = FieldValueMapping,
+  N extends StringKeyOf<M> = StringKeyOf<M>
+> = FormFieldProps<'input', M, N>;
 
-export function CheckboxField<M extends FieldValueMapping, N extends StringKeyOf<M>>(
-  initialProps: CheckboxFieldProps<M, N>
-) {
+export function CheckboxField<
+  M extends object = FieldValueMapping,
+  N extends StringKeyOf<M> = StringKeyOf<M>
+>(initialProps: CheckboxFieldProps<M, N>) {
   const [localProps, parsedProps] = splitProps(initialProps, ['label', 'value']);
   const [props, createField] = createFormField<'input', M, N>(
     mergeProps({ isSelectable: true }, parsedProps)
@@ -44,7 +44,7 @@ export function CheckboxField<M extends FieldValueMapping, N extends StringKeyOf
         </label>
       )}
       {props.errors?.[0] && (
-        <div id={errorId} class={styles.error} role="alert">
+        <div id={errorId} class={styles.error} role='alert'>
           {props.errors[0]}
         </div>
       )}

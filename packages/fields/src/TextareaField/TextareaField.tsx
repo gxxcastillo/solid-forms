@@ -8,17 +8,17 @@ import { createFormField, useFormFieldLabel } from '../hooks';
 import { type FormFieldProps } from '../types';
 import styles from './TextareaField.module.css';
 
-export type TextAreaFieldProps<M extends FieldValueMapping, N extends StringKeyOf<M>> = FormFieldProps<
-  'textarea',
-  M,
-  N
-> & {
+export type TextAreaFieldProps<
+  M extends object = FieldValueMapping,
+  N extends StringKeyOf<M> = StringKeyOf<M>
+> = FormFieldProps<'textarea', M, N> & {
   title?: string;
 };
 
-export function TextAreaField<M extends FieldValueMapping, N extends StringKeyOf<M>>(
-  initialProps: TextAreaFieldProps<M, N>
-) {
+export function TextAreaField<
+  M extends object = FieldValueMapping,
+  N extends StringKeyOf<M> = StringKeyOf<M>
+>(initialProps: TextAreaFieldProps<M, N>) {
   const [formState] = useFormContext<M>();
   const [localProps, parsedProps] = splitProps(initialProps, ['title']);
 
@@ -53,7 +53,7 @@ export function TextAreaField<M extends FieldValueMapping, N extends StringKeyOf
         />
       </div>
       {props.errors?.[0] && (
-        <div id={errorId} class={styles.error} role="alert">
+        <div id={errorId} class={styles.error} role='alert'>
           {props.errors[0]}
         </div>
       )}

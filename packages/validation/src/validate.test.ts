@@ -1,5 +1,6 @@
-import { type FormState } from '@gxxc/solid-forms-state';
 import { describe, expect, it } from 'vitest';
+
+import { type FormState } from '@gxxc/solid-forms-state';
 
 import { validate } from './validate';
 
@@ -118,7 +119,7 @@ describe('pattern', () => {
     expect(validate('username', 'ABC', { pattern }, state)).toHaveLength(1);
   });
 
-  it('passes for an empty value (emptiness is required\'s concern)', () => {
+  it("passes for an empty value (emptiness is required's concern)", () => {
     expect(validate('username', '', { pattern: '^[a-z]+$' }, state)).toEqual([]);
   });
 

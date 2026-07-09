@@ -1,9 +1,4 @@
-import {
-  type FieldValueMapping,
-  type FormFields,
-  type FormState,
-  type FormStateMutations
-} from '@gxxc/solid-forms-state';
+import { type FormFields, type FormState, type FormStateMutations } from '@gxxc/solid-forms-state';
 
 import {
   type BaseFormElementSubmitEvent,
@@ -14,7 +9,8 @@ import {
   type Response,
   type ResponseMapping
 } from '../types';
-import { type BaseFormProps } from './BaseForm';
+import { type BaseFormPropsWithSubmit } from './BaseForm';
+import { applySchemaValidationFailure, validateWithSchema } from './schema';
 
 export function isObject(o: unknown) {
   return o != null && typeof o === 'object';
@@ -32,11 +28,26 @@ export function isSubmitHandlersObject<P extends RequestProps, R extends Respons
   return isObject(onSubmit);
 }
 
-export function fieldsToProps<M extends FieldValueMapping>(formFields: FormFields<M>) {
+export function fieldsToProps<M extends object>(formFields: FormFields<M>) {
   return formFields.reduce<Record<string, unknown>>((obj, field) => {
     obj[field.name] = field.value;
     return obj;
   }, {}) as M;
+}
+
+export function fieldsToValueSnapshot<M extends object>(formFields: FormFields<M>) {
+  return new Map(formFields.map((field) => [field.name, field.value] as const));
+}
+
+export function haveFieldValuesChangedSinceSnapshot<M extends object>(
+  formFields: FormFields<M>,
+  snapshot: ReadonlyMap<string, unknown>
+) {
+  if (formFields.length !== snapshot.size) {
+    return true;
+  }
+
+  return formFields.some((field) => !snapshot.has(field.name) || snapshot.get(field.name) !== field.value);
 }
 
 export function resolveSubmitHandler<P extends RequestProps, R extends Response | ResponseMapping<P>>(
@@ -62,9 +73,14 @@ export function getSubmitErrorMessage(error: unknown): string {
 }
 
 export function createBaseFormOnSubmitHandler<
-  P extends RequestProps,
-  R extends Response | ResponseMapping<P>
->(props: BaseFormProps<P, R>, formState: FormState, formStateMutations: FormStateMutations) {
+  FieldValues extends RequestProps,
+  SubmitValues extends RequestProps = FieldValues,
+  R extends Response | ResponseMapping<SubmitValues> = SubmitValues
+>(
+  props: BaseFormPropsWithSubmit<FieldValues, SubmitValues, R>,
+  formState: FormState<FieldValues>,
+  formStateMutations: FormStateMutations<FieldValues>
+) {
   return async (event: BaseFormElementSubmitEvent) => {
     event.preventDefault();
     const buttonName = (event.submitter as HTMLButtonElement | HTMLInputElement | null)?.name ?? '';
@@ -83,17 +99,45 @@ export function createBaseFormOnSubmitHandler<
       return;
     }
 
-    const submitProps = fieldsToProps(formState.fields) as P;
-    const onSubmitFn = resolveSubmitHandler<P, R>(props.onSubmit, buttonName);
+    const onSubmitFn = resolveSubmitHandler<SubmitValues, R>(props.onSubmit, buttonName);
 
-    if (!onSubmitFn) return;
+    // resolveSubmitHandler also returns undefined for an ambiguous/unmatched
+    // named handler (props.onSubmit is set but ambiguous) rather than for no
+    // onSubmit at all. Only the latter should still validate via schema, since
+    // the former will never invoke a handler regardless of validation outcome.
+    if (!onSubmitFn && (props.onSubmit !== undefined || !props.schema)) return;
 
-    // Set the processing flag before invoking the handler so a rapid second
-    // submit cannot slip past the guard while the first is still awaited.
+    const submitProps = fieldsToProps(formState.fields) as FieldValues;
+    const submittedFieldValues = fieldsToValueSnapshot(formState.fields);
+
+    // Set the processing flag before invoking schema validation or the submit
+    // handler so a rapid second submit cannot slip past the guard while async
+    // work is still awaited.
     formStateMutations.setIsProcessing(true);
     formStateMutations.setErrors([]);
     try {
-      const result = onSubmitFn(submitProps, buttonName);
+      // A thrown/rejected validate() call is a genuine error (network failure,
+      // schema bug), not stale data, so it always propagates to the outer catch
+      // below rather than being discarded when field values have since changed.
+      const schemaResult = props.schema
+        ? await validateWithSchema<FieldValues, SubmitValues>(props.schema, submitProps, formState.fields)
+        : ({
+            valid: true,
+            value: submitProps as unknown as SubmitValues
+          } as const);
+
+      if (props.schema && haveFieldValuesChangedSinceSnapshot(formState.fields, submittedFieldValues)) {
+        return;
+      }
+
+      if (!schemaResult.valid) {
+        applySchemaValidationFailure(formState.fields, formStateMutations, schemaResult);
+        return;
+      }
+
+      if (!onSubmitFn) return;
+
+      const result = onSubmitFn(schemaResult.value, buttonName);
       if (result?.then) {
         await result;
       }

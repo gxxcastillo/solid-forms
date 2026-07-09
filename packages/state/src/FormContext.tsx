@@ -5,7 +5,7 @@ import { type FieldValueMapping, type FormStore } from './types';
 
 export const FormContext = createFormContext();
 
-export type FormContextProviderProps<M extends FieldValueMapping> = {
+export type FormContextProviderProps<M extends object = FieldValueMapping> = {
   store?: FormStore<M>;
   children: JSX.Element;
 };
@@ -14,11 +14,13 @@ export function createFormContext() {
   return createContext([]);
 }
 
-export function useFormContext<M extends FieldValueMapping>() {
+export function useFormContext<M extends object = FieldValueMapping>() {
   return useContext(FormContext) as unknown as FormStore<M>;
 }
 
-export function FormContextProvider<M extends FieldValueMapping>(props: FormContextProviderProps<M>) {
+export function FormContextProvider<M extends object = FieldValueMapping>(
+  props: FormContextProviderProps<M>
+) {
   const Context = FormContext as unknown as Context<FormStore<M>>;
   const store: FormStore<M> = props.store ? props.store : createFormStore<M>();
   return <Context.Provider value={store}>{children(() => props.children)()}</Context.Provider>;

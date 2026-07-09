@@ -2,7 +2,13 @@ import { mergeProps } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import type { StringKeyOf } from 'type-fest';
 
-import { type BaseFormState, type FieldValueMapping, type FormField, type FormStore } from './types';
+import {
+  type BaseFormState,
+  type FieldValueFor,
+  type FieldValueMapping,
+  type FormField,
+  type FormStore
+} from './types';
 
 function arraysEqual<T>(a: T[], b: T[]): boolean {
   return a.length === b.length && a.every((v, i) => v === b[i]);
@@ -21,7 +27,7 @@ export const initialFormState = {
 // the object it's given and mutates it in place — without a copy, two calls with
 // the same `state` reference would share reactive state. The nested `fields`
 // objects and the `errors` array are cloned too; a plain spread would share them.
-function cloneBackingState<M extends FieldValueMapping>(state?: BaseFormState<M>): BaseFormState<M> {
+function cloneBackingState<M extends object>(state?: BaseFormState<M>): BaseFormState<M> {
   const source = state ?? initialFormState;
   return {
     ...source,
@@ -30,7 +36,7 @@ function cloneBackingState<M extends FieldValueMapping>(state?: BaseFormState<M>
   };
 }
 
-export function createFormState<M extends FieldValueMapping>(state?: BaseFormState<M>) {
+export function createFormState<M extends object = FieldValueMapping>(state?: BaseFormState<M>) {
   const [formState, setFormState] = createStore<BaseFormState<M>>(cloneBackingState(state));
   const getters = {
     get haveValuesChanged() {
@@ -70,7 +76,9 @@ export function createFormState<M extends FieldValueMapping>(state?: BaseFormSta
   return [formState, getters, setFormState] as const;
 }
 
-export function createFormStore<M extends FieldValueMapping>(state?: BaseFormState<M>): FormStore<M> {
+export function createFormStore<M extends object = FieldValueMapping>(
+  state?: BaseFormState<M>
+): FormStore<M> {
   const [formState, getters, setFormState] = createFormState<M>(state);
 
   type FName = StringKeyOf<M>;
@@ -81,7 +89,7 @@ export function createFormStore<M extends FieldValueMapping>(state?: BaseFormSta
     {
       initializeField: <N extends StringKeyOf<M>>(
         name: N,
-        value?: M[N],
+        value?: FieldValueFor<M, N>,
         errors: FErrors = [],
         label?: string
       ) => {
@@ -111,7 +119,7 @@ export function createFormStore<M extends FieldValueMapping>(state?: BaseFormSta
       removeField: <N extends FName>(name: N) =>
         setFormState('fields', (fields) => fields.filter((f) => f.name !== name)),
 
-      setFieldValue: <N extends FName>(name: N, value?: M[N], errors?: FErrors) => {
+      setFieldValue: <N extends FName>(name: N, value?: FieldValueFor<M, N>, errors?: FErrors) => {
         // Resolve the field once: this runs on every keystroke, so a single O(n)
         // lookup beats the five separate `.find()` scans the getters would do.
         const field = getters.getField(name);

@@ -10,21 +10,32 @@ import {
   type BaseFormOnSubmit,
   type RequestProps,
   type Response,
-  type ResponseMapping
+  type ResponseMapping,
+  type StandardSchemaV1
 } from '../types';
 import styles from './BaseForm.module.css';
 import { createBaseFormOnSubmitHandler } from './helpers';
 
-export type BaseFormProps<P extends RequestProps, R extends Response | ResponseMapping<P>> = {
+export type BaseFormPropsWithSubmit<
+  FieldValues extends RequestProps,
+  SubmitValues extends RequestProps = FieldValues,
+  R extends Response | ResponseMapping<SubmitValues> = SubmitValues
+> = {
   className?: string;
   fullWidthButtons?: boolean;
   align?: 'center' | 'left';
   isLoading?: boolean;
   isProcessing?: boolean;
   errors?: ErrorMessages;
-  onSubmit?: BaseFormOnSubmit<P, R>;
+  schema?: StandardSchemaV1<FieldValues, SubmitValues>;
+  onSubmit?: BaseFormOnSubmit<SubmitValues, R>;
   children: JSX.Element;
 };
+
+export type BaseFormProps<
+  P extends RequestProps,
+  R extends Response | ResponseMapping<P> = P
+> = BaseFormPropsWithSubmit<P, P, R>;
 
 export const baseFormDefaultProps = {
   align: 'left',
@@ -65,16 +76,22 @@ export function classifyBaseFormChildren(childrenArray: JSX.Element[]) {
   return { bodyChildren, footerLinks, formButtons };
 }
 
-export function BaseForm<P extends RequestProps, R extends Response | ResponseMapping<P>>(
-  initialProps: BaseFormProps<P, R>
-) {
+export function BaseForm<
+  FieldValues extends RequestProps,
+  SubmitValues extends RequestProps = FieldValues,
+  R extends Response | ResponseMapping<SubmitValues> = SubmitValues
+>(initialProps: BaseFormPropsWithSubmit<FieldValues, SubmitValues, R>) {
   const props = mergeProps(baseFormDefaultProps, initialProps);
-  const [formState, formStateMutations] = useFormContext();
+  const [formState, formStateMutations] = useFormContext<FieldValues>();
 
   const resolvedChildren = children(() => props.children);
   const formChildren = createMemo(() => classifyBaseFormChildren(resolvedChildren.toArray()));
   const formErrors = createMemo(() => [...(props.errors ?? []), ...formState.errors]);
-  const onSubmitHandler = createBaseFormOnSubmitHandler<P, R>(props, formState, formStateMutations);
+  const onSubmitHandler = createBaseFormOnSubmitHandler<FieldValues, SubmitValues, R>(
+    props,
+    formState,
+    formStateMutations
+  );
 
   // `sf-form` is a stable, un-hashed hook consumers/themes can target, the rest
   // are hashed module classes that own the layout.
@@ -97,9 +114,7 @@ export function BaseForm<P extends RequestProps, R extends Response | ResponseMa
         void onSubmitHandler(event);
       }}
     >
-      <For each={formChildren().bodyChildren}>
-        {({ child, wrap }) => (wrap ? <div>{child}</div> : child)}
-      </For>
+      <For each={formChildren().bodyChildren}>{({ child, wrap }) => (wrap ? <div>{child}</div> : child)}</For>
       <For each={formChildren().formButtons}>{(child) => <div>{child}</div>}</For>
       <For each={formChildren().footerLinks}>{(child) => <div>{child}</div>}</For>
       <For each={formErrors()}>{(child) => <div>{child}</div>}</For>

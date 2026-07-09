@@ -14,8 +14,8 @@ export type ConstraintName = keyof ValidationConstraints;
 export type Constraint = ValidationConstraints[ConstraintName];
 
 export type ConstraintConfig = {
-  validate: (v: FieldValue, c: Constraint | undefined, s: FormState) => boolean;
-  message: (n: string, c: Constraint, s: FormState) => string;
+  validate: <M extends object>(v: FieldValue, c: Constraint | undefined, s: FormState<M>) => boolean;
+  message: <M extends object>(n: string, c: Constraint, s: FormState<M>) => string;
 };
 
 export type ConstraintConfigs = {

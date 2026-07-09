@@ -1,7 +1,7 @@
 import { For, Show, createSignal, onCleanup, onMount } from 'solid-js';
 
 import { useForm } from '@gxxc/solid-forms';
-import { LoginFields, SignupFields, type LoginValues, type SignupValues } from '@gxxc/solid-forms-examples';
+import { LoginFields, type LoginValues, SignupFields, type SignupValues } from '@gxxc/solid-forms-examples';
 
 import { FormStateInspector } from './FormStateInspector';
 import styles from './ThemeShowcase.module.css';

@@ -43,7 +43,6 @@ Use `useForm` when you need typed values or reactive form state outside the form
 import { InputField, PasswordField, SubmitButton, useForm } from '@gxxc/solid-forms';
 
 interface LoginValues {
-  [key: string]: string;
   email: string;
   password: string;
 }
@@ -61,11 +60,14 @@ function TypedLoginForm() {
 }
 ```
 
+If you already have a Standard Schema-compatible schema, pass it to `Form` or `useForm({ schema })`
+to infer submit values from the schema instead of writing the values interface by hand.
+
 ## What Is Included
 
 - `Form` and `useForm` for form composition and typed submit handlers
 - `InputField`, `PasswordField`, `TextAreaField`, `CheckboxField`, and `SubmitButton`
-- Built-in validation constraints plus custom validators
+- Standard Schema validation, built-in constraints, and custom validators
 - Async submission state and form-level error rendering
 - `parse` and `format` hooks for non-string field values
 - Token-based styling with optional bundled themes: `minimal`, `midnight`, and `neobrutalist`

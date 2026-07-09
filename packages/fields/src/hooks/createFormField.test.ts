@@ -108,9 +108,11 @@ describe('createValueSetter', () => {
   it('calls a sync custom validator when built-in validation passes', () => {
     const state = makeState(undefined);
     const mutations = makeMutations();
-    const validator = vi.fn((_name: string, _val: unknown, _state: unknown, setErrors: (e: string[]) => void) => {
-      setErrors(['taken']);
-    });
+    const validator = vi.fn(
+      (_name: string, _val: unknown, _state: unknown, setErrors: (e: string[]) => void) => {
+        setErrors(['taken']);
+      }
+    );
     const setValue = createValueSetter(
       state,
       mutations,
@@ -148,11 +150,9 @@ describe('createValueSetter', () => {
     state.getFieldValue = () => current;
     const mutations = makeMutations();
     const pending: Array<(e: string[]) => void> = [];
-    const validator = vi.fn(
-      (_n: string, _v: unknown, _s: unknown, setErrors: (e: string[]) => void) => {
-        pending.push(setErrors);
-      }
-    );
+    const validator = vi.fn((_n: string, _v: unknown, _s: unknown, setErrors: (e: string[]) => void) => {
+      pending.push(setErrors);
+    });
     const setValue = createValueSetter(
       state,
       mutations,

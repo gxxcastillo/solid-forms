@@ -4,13 +4,14 @@ export type FieldName = string;
 
 export type DisplayValue = string | number | string[] | undefined;
 export type FieldValue = unknown;
+export type FieldValueFor<M extends object, N extends StringKeyOf<M>> = N extends keyof M ? M[N] : FieldValue;
 
 export type ErrorMessage = string;
 export type ErrorMessages = ErrorMessage[] | [];
 
-export type FormField<M extends FieldValueMapping, N extends StringKeyOf<M>> = {
+export type FormField<M extends object, N extends StringKeyOf<M>> = {
   name: N;
-  value: M[N] | undefined;
+  value: FieldValueFor<M, N> | undefined;
   errors: ErrorMessages;
   label?: string;
   hasBeenInitialized: boolean;
@@ -19,13 +20,13 @@ export type FormField<M extends FieldValueMapping, N extends StringKeyOf<M>> = {
   hasBeenValid: boolean;
 };
 
-export type FormFields<M extends FieldValueMapping> = FormField<M, StringKeyOf<M>>[];
+export type FormFields<M extends object> = FormField<M, StringKeyOf<M>>[];
 
 export type FieldValueMapping = Record<string, FieldValue | undefined>;
 
-export type FormStore<M extends FieldValueMapping> = readonly [FormState<M>, FormStateMutations<M>];
+export type FormStore<M extends object = FieldValueMapping> = readonly [FormState<M>, FormStateMutations<M>];
 
-export type BaseFormState<M extends FieldValueMapping = FieldValueMapping> = {
+export type BaseFormState<M extends object = FieldValueMapping> = {
   fields: FormFields<M>;
   errors: ErrorMessages;
   isReady: boolean;
@@ -37,15 +38,14 @@ export type BaseFormState<M extends FieldValueMapping = FieldValueMapping> = {
 // export type InferFieldValueMapping<S extends FormState> = S extends FormState<infer M> ? M : never;
 // export type InferBaseFormState<S extends FormState> = S extends FormState<infer M> ? BaseFormState<M> : never;
 
-export type FormState<M extends FieldValueMapping = FieldValueMapping> = BaseFormState<M> &
-  FormStateGetters<M>;
+export type FormState<M extends object = FieldValueMapping> = BaseFormState<M> & FormStateGetters<M>;
 
-export type FormStateGetters<M extends FieldValueMapping = FieldValueMapping> = {
+export type FormStateGetters<M extends object = FieldValueMapping> = {
   haveValuesChanged: boolean;
   isFormValid: boolean;
   isFieldValid: <N extends StringKeyOf<M>>(n: N) => boolean | undefined;
   getField: <N extends StringKeyOf<M>>(n: N) => FormField<M, N> | undefined;
-  getFieldValue: <N extends StringKeyOf<M>>(n: N) => M[N] | undefined;
+  getFieldValue: <N extends StringKeyOf<M>>(n: N) => FieldValueFor<M, N> | undefined;
   getFieldErrors: <N extends StringKeyOf<M>>(n: N) => ErrorMessages | undefined;
   hasFieldBeenInitialized: <N extends StringKeyOf<M>>(n: N) => boolean;
   hasFieldBeenValid: <N extends StringKeyOf<M>>(n: N) => boolean | undefined;
@@ -53,15 +53,19 @@ export type FormStateGetters<M extends FieldValueMapping = FieldValueMapping> = 
   hasFieldBlurred: <N extends StringKeyOf<M>>(n: N) => boolean | undefined;
 };
 
-export type FormStateMutations<M extends FieldValueMapping = FieldValueMapping> = {
+export type FormStateMutations<M extends object = FieldValueMapping> = {
   initializeField: <N extends StringKeyOf<M>>(
     name: N,
-    value?: M[N],
+    value?: FieldValueFor<M, N>,
     errors?: ErrorMessages,
     label?: string
   ) => void;
   removeField: <N extends StringKeyOf<M>>(name: N) => void;
-  setFieldValue: <N extends StringKeyOf<M>>(name: N, value?: M[N], errors?: ErrorMessages) => void;
+  setFieldValue: <N extends StringKeyOf<M>>(
+    name: N,
+    value?: FieldValueFor<M, N>,
+    errors?: ErrorMessages
+  ) => void;
   setFieldErrors: <N extends StringKeyOf<M>>(name: N, errors?: ErrorMessages) => void;
   setChangedField: <N extends StringKeyOf<M>>(name: N) => void;
   setBlurredField: <N extends StringKeyOf<M>>(name: N) => void;

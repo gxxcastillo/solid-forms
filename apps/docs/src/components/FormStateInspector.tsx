@@ -1,10 +1,10 @@
-import { For, Show, type JSX } from 'solid-js';
+import { For, type JSX, Show } from 'solid-js';
 
-import type { FieldValueMapping, FormState } from '@gxxc/solid-forms';
+import type { FormState } from '@gxxc/solid-forms';
 
 import styles from './FormStateInspector.module.css';
 
-interface FormStateInspectorProps<M extends FieldValueMapping> {
+interface FormStateInspectorProps<M extends object> {
   title?: string;
   state: FormState<M>;
 }
@@ -15,9 +15,7 @@ function formatValue(value: unknown): string {
   return JSON.stringify(value);
 }
 
-export function FormStateInspector<M extends FieldValueMapping>(
-  props: FormStateInspectorProps<M>
-): JSX.Element {
+export function FormStateInspector<M extends object>(props: FormStateInspectorProps<M>): JSX.Element {
   return (
     <div class={styles.panel}>
       <h3 class={styles.heading}>{props.title ?? 'Form state'}</h3>
@@ -32,10 +30,7 @@ export function FormStateInspector<M extends FieldValueMapping>(
         </Show>
       </div>
 
-      <Show
-        when={props.state.fields.length}
-        fallback={<p class={styles.empty}>No fields registered yet.</p>}
-      >
+      <Show when={props.state.fields.length} fallback={<p class={styles.empty}>No fields registered yet.</p>}>
         <dl class={styles.fields}>
           <For each={props.state.fields}>
             {(field) => (

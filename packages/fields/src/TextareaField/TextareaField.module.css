@@ -58,7 +58,9 @@
 
   &:focus {
     border-color: var(--sf-color-border-focus);
-    box-shadow: var(--sf-shadow-control), 0 0 0 var(--sf-focus-ring-width) var(--sf-color-focus-ring);
+    box-shadow:
+      var(--sf-shadow-control),
+      0 0 0 var(--sf-focus-ring-width) var(--sf-color-focus-ring);
     outline: 0;
   }
 
@@ -66,7 +68,9 @@
     border-color: var(--sf-color-danger);
 
     &:focus {
-      box-shadow: var(--sf-shadow-control), 0 0 0 var(--sf-focus-ring-width) var(--sf-color-danger);
+      box-shadow:
+        var(--sf-shadow-control),
+        0 0 0 var(--sf-focus-ring-width) var(--sf-color-danger);
     }
   }
 }

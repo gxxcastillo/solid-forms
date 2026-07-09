@@ -10,7 +10,6 @@ import {
 } from '@gxxc/solid-forms';
 
 export interface SignupValues {
-  [key: string]: string | boolean;
   email: string;
   username: string;
   password: string;

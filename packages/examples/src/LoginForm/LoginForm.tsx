@@ -1,7 +1,6 @@
 import { Form, InputField, PasswordField, SubmitButton, TextAreaField } from '@gxxc/solid-forms';
 
 export interface LoginValues {
-  [key: string]: string;
   email: string;
   password: string;
   message: string;

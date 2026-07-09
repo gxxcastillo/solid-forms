@@ -1,6 +1,11 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { createBaseFormOnSubmitHandler, fieldsToProps, getSubmitErrorMessage, resolveSubmitHandler } from './helpers';
+import {
+  createBaseFormOnSubmitHandler,
+  fieldsToProps,
+  getSubmitErrorMessage,
+  resolveSubmitHandler
+} from './helpers';
 
 function makeEvent(name = '') {
   return {
@@ -47,6 +52,17 @@ function makeMutations() {
   } as any;
 }
 
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  let reject!: (reason: unknown) => void;
+  const promise = new Promise<T>((res, rej) => {
+    resolve = res;
+    reject = rej;
+  });
+
+  return { promise, resolve, reject };
+}
+
 describe('fieldsToProps', () => {
   it('converts fields array to a name→value map', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -62,7 +78,17 @@ describe('createBaseFormOnSubmitHandler', () => {
   it('calls onSubmit with serialized field values', async () => {
     const onSubmit = vi.fn();
     const state = makeState({
-      fields: [{ name: 'email', value: 'test@example.com', errors: [], hasBeenInitialized: true, hasBeenBlurred: false, hasChanged: true, hasBeenValid: false }]
+      fields: [
+        {
+          name: 'email',
+          value: 'test@example.com',
+          errors: [],
+          hasBeenInitialized: true,
+          hasBeenBlurred: false,
+          hasChanged: true,
+          hasBeenValid: false
+        }
+      ]
     });
     const mutations = makeMutations();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -156,8 +182,24 @@ describe('createBaseFormOnSubmitHandler', () => {
     const state = makeState({
       isFormValid: false,
       fields: [
-        { name: 'email', value: '', errors: ['Required'], hasBeenInitialized: true, hasBeenBlurred: false, hasChanged: false, hasBeenValid: false },
-        { name: 'password', value: '', errors: ['Required'], hasBeenInitialized: true, hasBeenBlurred: false, hasChanged: false, hasBeenValid: false }
+        {
+          name: 'email',
+          value: '',
+          errors: ['Required'],
+          hasBeenInitialized: true,
+          hasBeenBlurred: false,
+          hasChanged: false,
+          hasBeenValid: false
+        },
+        {
+          name: 'password',
+          value: '',
+          errors: ['Required'],
+          hasBeenInitialized: true,
+          hasBeenBlurred: false,
+          hasChanged: false,
+          hasBeenValid: false
+        }
       ]
     });
     const mutations = makeMutations();
@@ -168,6 +210,260 @@ describe('createBaseFormOnSubmitHandler', () => {
 
     expect(onSubmit).not.toHaveBeenCalled();
     expect(mutations.setBlurredField.mock.calls).toEqual([['email'], ['password']]);
+  });
+
+  it('blocks submit and maps schema path issues onto fields', async () => {
+    const onSubmit = vi.fn();
+    const schema = {
+      '~standard': {
+        version: 1,
+        vendor: 'test',
+        validate: vi.fn().mockReturnValue({
+          issues: [{ message: 'Email is invalid', path: ['email'] }]
+        })
+      }
+    };
+    const state = makeState({
+      fields: [
+        {
+          name: 'email',
+          value: 'not-an-email',
+          errors: [],
+          hasBeenInitialized: true,
+          hasBeenBlurred: false,
+          hasChanged: true,
+          hasBeenValid: true
+        }
+      ]
+    });
+    const mutations = makeMutations();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const handler = createBaseFormOnSubmitHandler({ onSubmit, schema } as any, state, mutations);
+
+    await handler(makeEvent());
+
+    expect(schema['~standard'].validate).toHaveBeenCalledWith({ email: 'not-an-email' });
+    expect(onSubmit).not.toHaveBeenCalled();
+    expect(mutations.setFieldErrors).toHaveBeenCalledWith('email', ['Email is invalid']);
+    expect(mutations.setBlurredField).toHaveBeenCalledWith('email');
+    expect(mutations.setIsProcessing.mock.calls).toEqual([[true], [false]]);
+  });
+
+  it('surfaces pathless schema issues as form-level errors', async () => {
+    const onSubmit = vi.fn();
+    const schema = {
+      '~standard': {
+        version: 1,
+        vendor: 'test',
+        validate: vi.fn().mockReturnValue({
+          issues: [{ message: 'Form is invalid' }]
+        })
+      }
+    };
+    const state = makeState({
+      fields: [
+        {
+          name: 'email',
+          value: 'test@example.com',
+          errors: [],
+          hasBeenInitialized: true,
+          hasBeenBlurred: false,
+          hasChanged: true,
+          hasBeenValid: true
+        }
+      ]
+    });
+    const mutations = makeMutations();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const handler = createBaseFormOnSubmitHandler({ onSubmit, schema } as any, state, mutations);
+
+    await handler(makeEvent());
+
+    expect(onSubmit).not.toHaveBeenCalled();
+    expect(mutations.setErrors).toHaveBeenLastCalledWith(['Form is invalid']);
+    expect(mutations.setFieldErrors).toHaveBeenCalledWith('email', []);
+  });
+
+  it('passes the validated schema output to onSubmit', async () => {
+    const onSubmit = vi.fn();
+    const schema = {
+      '~standard': {
+        version: 1,
+        vendor: 'test',
+        validate: vi.fn().mockReturnValue({
+          value: { email: 'trimmed@example.com' }
+        })
+      }
+    };
+    const state = makeState({
+      fields: [
+        {
+          name: 'email',
+          value: ' trimmed@example.com ',
+          errors: [],
+          hasBeenInitialized: true,
+          hasBeenBlurred: false,
+          hasChanged: true,
+          hasBeenValid: true
+        }
+      ]
+    });
+    const mutations = makeMutations();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const handler = createBaseFormOnSubmitHandler({ onSubmit, schema } as any, state, mutations);
+
+    await handler(makeEvent());
+
+    expect(onSubmit).toHaveBeenCalledWith({ email: 'trimmed@example.com' }, '');
+  });
+
+  it('ignores stale async schema errors when field values change before validation resolves', async () => {
+    const onSubmit = vi.fn();
+    const pending = deferred<{ issues: Array<{ message: string; path: string[] }> }>();
+    const schema = {
+      '~standard': {
+        version: 1,
+        vendor: 'test',
+        validate: vi.fn().mockReturnValue(pending.promise)
+      }
+    };
+    const fields = [
+      {
+        name: 'email',
+        value: 'old@example.com',
+        errors: [],
+        hasBeenInitialized: true,
+        hasBeenBlurred: false,
+        hasChanged: true,
+        hasBeenValid: true
+      }
+    ];
+    const state = makeState({ fields });
+    const mutations = makeMutations();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const handler = createBaseFormOnSubmitHandler({ onSubmit, schema } as any, state, mutations);
+
+    const submitted = handler(makeEvent());
+    fields[0].value = 'new@example.com';
+    pending.resolve({ issues: [{ message: 'Email is invalid', path: ['email'] }] });
+    await submitted;
+
+    expect(onSubmit).not.toHaveBeenCalled();
+    expect(mutations.setFieldErrors).not.toHaveBeenCalled();
+    expect(mutations.setBlurredField).not.toHaveBeenCalled();
+    expect(mutations.setIsProcessing.mock.calls).toEqual([[true], [false]]);
+  });
+
+  it('does not submit stale async schema output when field values change before validation resolves', async () => {
+    const onSubmit = vi.fn();
+    const pending = deferred<{ value: { email: string } }>();
+    const schema = {
+      '~standard': {
+        version: 1,
+        vendor: 'test',
+        validate: vi.fn().mockReturnValue(pending.promise)
+      }
+    };
+    const fields = [
+      {
+        name: 'email',
+        value: 'old@example.com',
+        errors: [],
+        hasBeenInitialized: true,
+        hasBeenBlurred: false,
+        hasChanged: true,
+        hasBeenValid: true
+      }
+    ];
+    const state = makeState({ fields });
+    const mutations = makeMutations();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const handler = createBaseFormOnSubmitHandler({ onSubmit, schema } as any, state, mutations);
+
+    const submitted = handler(makeEvent());
+    fields[0].value = 'new@example.com';
+    pending.resolve({ value: { email: 'old@example.com' } });
+    await submitted;
+
+    expect(onSubmit).not.toHaveBeenCalled();
+    expect(mutations.setIsProcessing.mock.calls).toEqual([[true], [false]]);
+  });
+
+  it('surfaces a genuine async schema error even if field values changed while it was pending', async () => {
+    const onSubmit = vi.fn();
+    const pending = deferred<never>();
+    const schema = {
+      '~standard': {
+        version: 1,
+        vendor: 'test',
+        validate: vi.fn().mockReturnValue(pending.promise)
+      }
+    };
+    const fields = [
+      {
+        name: 'email',
+        value: 'old@example.com',
+        errors: [],
+        hasBeenInitialized: true,
+        hasBeenBlurred: false,
+        hasChanged: true,
+        hasBeenValid: true
+      }
+    ];
+    const state = makeState({ fields });
+    const mutations = makeMutations();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const handler = createBaseFormOnSubmitHandler({ onSubmit, schema } as any, state, mutations);
+
+    const submitted = handler(makeEvent());
+    fields[0].value = 'new@example.com';
+    pending.promise.catch(() => {});
+    pending.reject(new Error('validator unreachable'));
+    await submitted;
+
+    expect(onSubmit).not.toHaveBeenCalled();
+    expect(mutations.setErrors).toHaveBeenCalledWith(['validator unreachable']);
+    expect(mutations.setIsProcessing.mock.calls).toEqual([[true], [false]]);
+  });
+
+  it('does not validate or touch fields when a named submit handler is ambiguous, even with a schema present', async () => {
+    const saveDraft = vi.fn();
+    const publish = vi.fn();
+    const schema = {
+      '~standard': {
+        version: 1,
+        vendor: 'test',
+        validate: vi.fn()
+      }
+    };
+    const fields = [
+      {
+        name: 'title',
+        value: '',
+        errors: [],
+        hasBeenInitialized: true,
+        hasBeenBlurred: false,
+        hasChanged: false,
+        hasBeenValid: false
+      }
+    ];
+    const state = makeState({ fields });
+    const mutations = makeMutations();
+    const handler = createBaseFormOnSubmitHandler(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      { onSubmit: { saveDraft, publish }, schema } as any,
+      state,
+      mutations
+    );
+
+    // No submitter name (e.g. Enter key) with two handlers is ambiguous.
+    await handler(makeEvent());
+
+    expect(schema['~standard'].validate).not.toHaveBeenCalled();
+    expect(mutations.setIsProcessing).not.toHaveBeenCalled();
+    expect(mutations.setBlurredField).not.toHaveBeenCalled();
+    expect(saveDraft).not.toHaveBeenCalled();
+    expect(publish).not.toHaveBeenCalled();
   });
 
   it('sets and resets isProcessing for a sync submit handler', async () => {

@@ -1,4 +1,4 @@
-import type { CustomValidator, FormatFunction, FormFieldProps, ParseFunction } from '@gxxc/solid-forms';
+import type { CustomValidator, FormFieldProps, FormatFunction, ParseFunction } from '@gxxc/solid-forms';
 
 // Compile-only regression fixture: proves FormFieldProps/CustomValidator/
 // ParseFunction/FormatFunction resolve through the public `@gxxc/solid-forms`
@@ -6,7 +6,6 @@ import type { CustomValidator, FormatFunction, FormFieldProps, ParseFunction } f
 // import (strategic-backlog.md B2 — these were defined but never re-exported).
 
 export interface RatingFormValues {
-  [key: string]: number;
   rating: number;
 }
 

@@ -1,10 +1,38 @@
 ---
 title: Validation
-description: Use built-in constraints and custom validators.
+description: Use schema validation, built-in constraints, and custom validators.
 ---
 
-Constraints are declared as field props. Errors appear after the user has blurred a field or submitted
-the form.
+Use a Standard Schema-compatible schema when you want one source of truth for validation and submit
+value types. Schema issues with field paths are mapped back onto registered fields on submit.
+
+```tsx
+import { z } from 'zod';
+
+import { Form, InputField, PasswordField, SubmitButton } from '@gxxc/solid-forms';
+
+const loginSchema = z.object({
+  email: z.string().email('Enter a valid email'),
+  password: z.string().min(8, 'Password must be at least 8 characters')
+});
+
+<Form
+  schema={loginSchema}
+  onSubmit={(values) => {
+    values.email; // string
+    values.password; // string
+  }}
+>
+  <InputField name='email' label='Email' />
+  <PasswordField name='password' label='Password' />
+  <SubmitButton>Log in</SubmitButton>
+</Form>;
+```
+
+Use `useForm({ schema })` for the same inference when you need state outside the form tree.
+
+Field-level constraints are still available as field props. Errors appear after the user has blurred a
+field or submitted the form.
 
 ```tsx
 <InputField
@@ -21,15 +49,15 @@ the form.
 <InputField name='confirm' label='Confirm password' match='password' />
 ```
 
-| Constraint | Type | Description |
-| --- | --- | --- |
-| `required` | `boolean` | Field must have a non-empty value |
-| `minLength` | `number` | Minimum string length |
-| `maxLength` | `number` | Maximum string length |
-| `min` | `number` | Minimum numeric value, parsed with the field `parse` prop |
-| `max` | `number` | Maximum numeric value, parsed with the field `parse` prop |
-| `pattern` | `string \| RegExp` | Value must match the pattern |
-| `match` | `string` | Value must equal the named field's current value |
+| Constraint  | Type               | Description                                               |
+| ----------- | ------------------ | --------------------------------------------------------- |
+| `required`  | `boolean`          | Field must have a non-empty value                         |
+| `minLength` | `number`           | Minimum string length                                     |
+| `maxLength` | `number`           | Maximum string length                                     |
+| `min`       | `number`           | Minimum numeric value, parsed with the field `parse` prop |
+| `max`       | `number`           | Maximum numeric value, parsed with the field `parse` prop |
+| `pattern`   | `string \| RegExp` | Value must match the pattern                              |
+| `match`     | `string`           | Value must equal the named field's current value          |
 
 Set a constraint prop to `false` to disable that constraint entirely, for example
 `required={false}`.

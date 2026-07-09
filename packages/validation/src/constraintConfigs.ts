@@ -1,3 +1,7 @@
+import { type StringKeyOf } from 'type-fest';
+
+import { type FormState } from '@gxxc/solid-forms-state';
+
 import { type ConstraintConfigs, type ConstraintName } from './types';
 
 const PATTERN_CACHE_LIMIT = 100;
@@ -43,14 +47,16 @@ function toNumber(val: unknown): number | undefined {
 
 export const constraintConfigs: ConstraintConfigs = {
   match: {
-    validate: (val, matchFieldName, formState) => {
+    validate: <M extends object>(val: unknown, matchFieldName: unknown, formState: FormState<M>) => {
       if (typeof matchFieldName !== 'string') return true;
-      if (!formState.hasFieldBeenInitialized(matchFieldName)) return true;
-      return val === formState.getFieldValue(matchFieldName);
+      const name = matchFieldName as StringKeyOf<M>;
+      if (!formState.hasFieldBeenInitialized(name)) return true;
+      return val === formState.getFieldValue(name);
     },
-    message: (fieldName, matchFieldName, formState) => {
+    message: <M extends object>(fieldName: string, matchFieldName: unknown, formState: FormState<M>) => {
       const matchLabel =
-        (typeof matchFieldName === 'string' && formState.getField(matchFieldName)?.label) || matchFieldName;
+        (typeof matchFieldName === 'string' && formState.getField(matchFieldName as StringKeyOf<M>)?.label) ||
+        String(matchFieldName);
       return `"${fieldName}" does not match "${matchLabel}"`;
     }
   },

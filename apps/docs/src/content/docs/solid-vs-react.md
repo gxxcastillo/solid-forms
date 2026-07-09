@@ -41,9 +41,7 @@ dependency.
 ```tsx
 const form = useForm<LoginValues>();
 
-<Show when={!form.state.isFormValid}>
-  Please fix the highlighted fields.
-</Show>;
+<Show when={!form.state.isFormValid}>Please fix the highlighted fields.</Show>;
 ```
 
 There is no extra effect, selector, or memoized callback needed just to keep that UI current.

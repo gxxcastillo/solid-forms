@@ -23,18 +23,18 @@ are CSS-module generated, you should theme with tokens instead of targeting inte
 
 Three themes ship with the package:
 
-| Theme | Use case |
-| --- | --- |
-| `minimal` | Clean light UI with restrained borders and a blue accent |
-| `midnight` | Dark UI with slate surfaces and a sky-blue accent |
+| Theme          | Use case                                                   |
+| -------------- | ---------------------------------------------------------- |
+| `minimal`      | Clean light UI with restrained borders and a blue accent   |
+| `midnight`     | Dark UI with slate surfaces and a sky-blue accent          |
 | `neobrutalist` | Bold, high-contrast UI with thick borders and hard shadows |
 
 Import one or more themes and activate the one you want.
 
 ```ts
 import '@gxxc/solid-forms/styles.css';
-import '@gxxc/solid-forms/themes/minimal.css';
 import '@gxxc/solid-forms/themes/midnight.css';
+import '@gxxc/solid-forms/themes/minimal.css';
 import '@gxxc/solid-forms/themes/neobrutalist.css';
 ```
 
@@ -85,17 +85,17 @@ full structural stylesheet.
 
 All defaults live in `themes/base.css`.
 
-| Group | Tokens |
-| --- | --- |
-| Surfaces and text | `--sf-color-canvas`, `--sf-color-surface`, `--sf-color-surface-disabled`, `--sf-color-text`, `--sf-color-text-muted`, `--sf-color-label`, `--sf-color-placeholder` |
-| Borders and focus | `--sf-color-border`, `--sf-color-border-hover`, `--sf-color-border-focus`, `--sf-color-focus-ring` |
-| Primary action | `--sf-color-primary`, `--sf-color-primary-hover`, `--sf-color-primary-active`, `--sf-color-on-primary` |
-| Secondary action | `--sf-color-secondary`, `--sf-color-secondary-hover`, `--sf-color-secondary-border`, `--sf-color-on-secondary` |
-| Feedback and icons | `--sf-color-danger`, `--sf-color-icon`, `--sf-color-icon-muted` |
-| Typography | `--sf-font-family`, `--sf-font-family-mono`, `--sf-font-size`, `--sf-font-size-title`, `--sf-font-size-error`, `--sf-font-weight`, `--sf-font-weight-label`, `--sf-font-weight-button`, `--sf-letter-spacing`, `--sf-letter-spacing-password`, `--sf-text-transform-label`, `--sf-text-transform-button` |
-| Sizing and spacing | `--sf-control-height`, `--sf-control-padding-x`, `--sf-textarea-padding-y`, `--sf-textarea-min-height`, `--sf-field-gap`, `--sf-label-inset-x`, `--sf-checkbox-size` |
-| Borders and radii | `--sf-border-width`, `--sf-radius-control`, `--sf-radius-button`, `--sf-radius-checkbox` |
-| Effects | `--sf-focus-ring-width`, `--sf-shadow-control`, `--sf-shadow-button`, `--sf-transition-duration`, `--sf-transition-easing` |
+| Group              | Tokens                                                                                                                                                                                                                                                                                                   |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Surfaces and text  | `--sf-color-canvas`, `--sf-color-surface`, `--sf-color-surface-disabled`, `--sf-color-text`, `--sf-color-text-muted`, `--sf-color-label`, `--sf-color-placeholder`                                                                                                                                       |
+| Borders and focus  | `--sf-color-border`, `--sf-color-border-hover`, `--sf-color-border-focus`, `--sf-color-focus-ring`                                                                                                                                                                                                       |
+| Primary action     | `--sf-color-primary`, `--sf-color-primary-hover`, `--sf-color-primary-active`, `--sf-color-on-primary`                                                                                                                                                                                                   |
+| Secondary action   | `--sf-color-secondary`, `--sf-color-secondary-hover`, `--sf-color-secondary-border`, `--sf-color-on-secondary`                                                                                                                                                                                           |
+| Feedback and icons | `--sf-color-danger`, `--sf-color-icon`, `--sf-color-icon-muted`                                                                                                                                                                                                                                          |
+| Typography         | `--sf-font-family`, `--sf-font-family-mono`, `--sf-font-size`, `--sf-font-size-title`, `--sf-font-size-error`, `--sf-font-weight`, `--sf-font-weight-label`, `--sf-font-weight-button`, `--sf-letter-spacing`, `--sf-letter-spacing-password`, `--sf-text-transform-label`, `--sf-text-transform-button` |
+| Sizing and spacing | `--sf-control-height`, `--sf-control-padding-x`, `--sf-textarea-padding-y`, `--sf-textarea-min-height`, `--sf-field-gap`, `--sf-label-inset-x`, `--sf-checkbox-size`                                                                                                                                     |
+| Borders and radii  | `--sf-border-width`, `--sf-radius-control`, `--sf-radius-button`, `--sf-radius-checkbox`                                                                                                                                                                                                                 |
+| Effects            | `--sf-focus-ring-width`, `--sf-shadow-control`, `--sf-shadow-button`, `--sf-transition-duration`, `--sf-transition-easing`                                                                                                                                                                               |
 
 `--sf-shadow-control` and `--sf-shadow-button` are composed into focus rings, so custom values must be
 valid `box-shadow` values. Use `0 0 #0000` for no shadow.

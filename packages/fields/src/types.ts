@@ -5,6 +5,7 @@ import {
   type DisplayValue,
   type ErrorMessages,
   type FieldValue,
+  type FieldValueFor,
   type FieldValueMapping,
   type FormState
 } from '@gxxc/solid-forms-state';
@@ -14,10 +15,10 @@ export type RawFieldValue = boolean | string | undefined;
 
 export type ElementProps<T> = Omit<JSX.InputHTMLAttributes<T>, 'value' | 'name'>;
 
-export type CustomValidator<M extends FieldValueMapping, N extends StringKeyOf<M>> = (
+export type CustomValidator<M extends object, N extends StringKeyOf<M>> = (
   fieldName: N,
-  fieldValue: M[N],
-  formState: FormState,
+  fieldValue: FieldValueFor<M, N>,
+  formState: FormState<M>,
   setFieldErrors: (e: ErrorMessages) => void
 ) => void;
 
@@ -28,17 +29,17 @@ export type FormElement<G extends FormElementTag> = HTMLElementTagNameMap[G];
 
 export type BaseFormFieldProps<G extends FormElementTag> = Omit<JSX.HTMLElementTags[G], 'name' | 'label'>;
 
-export type FieldProps<M extends FieldValueMapping, N extends StringKeyOf<M>> = {
+export type FieldProps<M extends object, N extends StringKeyOf<M>> = {
   name: N;
   label?: string;
-  defaultValue?: M[N];
+  defaultValue?: FieldValueFor<M, N>;
   defaultChecked?: boolean;
   readonly?: boolean;
   disabled?: boolean;
   checked?: boolean;
 };
 
-export type FieldInternalProps<M extends FieldValueMapping, N extends StringKeyOf<M>> = {
+export type FieldInternalProps<M extends object, N extends StringKeyOf<M>> = {
   isInitialized?: boolean;
   isValid?: boolean;
   isControlled?: boolean;
@@ -47,16 +48,16 @@ export type FieldInternalProps<M extends FieldValueMapping, N extends StringKeyO
   errors?: ErrorMessages;
   match?: Omit<StringKeyOf<M>, N>;
   setValue?: (value?: FieldValue, initialize?: boolean) => void;
-  showIcon?: (value?: M[N], e?: ErrorMessages) => boolean;
+  showIcon?: (value?: FieldValueFor<M, N>, e?: ErrorMessages) => boolean;
   validator?: CustomValidator<M, N>;
-  parse?: ParseFunction<M[N]>;
-  format?: FormatFunction<M[N]>;
+  parse?: ParseFunction<FieldValueFor<M, N>>;
+  format?: FormatFunction<FieldValueFor<M, N>>;
 };
 
 export type FormFieldProps<
   G extends FormElementTag,
-  M extends FieldValueMapping,
-  N extends StringKeyOf<M>
+  M extends object = FieldValueMapping,
+  N extends StringKeyOf<M> = StringKeyOf<M>
 > = BaseFormFieldProps<G> & FieldProps<M, N> & FieldInternalProps<M, N> & ValidationConstraints;
 
 export type SetValue = (value: FieldValue, isInitialization?: boolean) => void;

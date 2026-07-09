@@ -1,25 +1,21 @@
 import { type StringKeyOf } from 'type-fest';
 
-import { type ErrorMessages, type FieldValueMapping, type FormState } from '@gxxc/solid-forms-state';
+import { type ErrorMessages, type FieldValueFor, type FormState } from '@gxxc/solid-forms-state';
 
 import { constraintConfigs } from './constraintConfigs';
 import { type ConstraintName, type ValidationConstraints } from './types';
 
-export interface ValidateFieldArgs<
-  M extends FieldValueMapping,
-  N extends StringKeyOf<M>,
-  C extends ConstraintName
-> {
+export interface ValidateFieldArgs<M extends object, N extends StringKeyOf<M>, C extends ConstraintName> {
   // Display text only (e.g. a field's configured `label`) — never used as a form key.
   fieldName: string;
-  fieldValue: M[N] | undefined;
+  fieldValue: FieldValueFor<M, N> | undefined;
   formState: FormState<M>;
   constraintName: C;
   constraint: ValidationConstraints[C];
 }
 
 export function validateAgainstConstraint<
-  M extends FieldValueMapping,
+  M extends object,
   N extends StringKeyOf<M>,
   C extends ConstraintName
 >({ fieldName, fieldValue, formState, constraintName, constraint }: ValidateFieldArgs<M, N, C>) {
@@ -28,9 +24,9 @@ export function validateAgainstConstraint<
   return isValid ? '' : validator.message(fieldName, constraint, formState);
 }
 
-export function validate<M extends FieldValueMapping, N extends StringKeyOf<M>>(
+export function validate<M extends object, N extends StringKeyOf<M>>(
   fieldName: N,
-  fieldValue: M[N] | undefined,
+  fieldValue: FieldValueFor<M, N> | undefined,
   constraints: ValidationConstraints,
   formState: FormState<M>,
   displayName: string = fieldName
