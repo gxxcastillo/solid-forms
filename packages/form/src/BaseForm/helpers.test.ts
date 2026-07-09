@@ -252,6 +252,44 @@ describe('createBaseFormOnSubmitHandler', () => {
     expect(mutations.setIsProcessing.mock.calls).toEqual([[true], [false]]);
   });
 
+  it('validates via schema and surfaces field errors even when onSubmit is not provided', async () => {
+    // A form can use `schema` purely to drive validation feedback without
+    // wiring up `onSubmit` yet (or ever) — resolveSubmitHandler returning
+    // undefined must not short-circuit schema validation, only invoking a
+    // handler afterward (see the ambiguous-named-handler case below).
+    const schema = {
+      '~standard': {
+        version: 1,
+        vendor: 'test',
+        validate: vi.fn().mockReturnValue({
+          issues: [{ message: 'Email is invalid', path: ['email'] }]
+        })
+      }
+    };
+    const state = makeState({
+      fields: [
+        {
+          name: 'email',
+          value: 'not-an-email',
+          errors: [],
+          hasBeenInitialized: true,
+          hasBeenBlurred: false,
+          hasChanged: true,
+          hasBeenValid: true
+        }
+      ]
+    });
+    const mutations = makeMutations();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const handler = createBaseFormOnSubmitHandler({ schema } as any, state, mutations);
+
+    await handler(makeEvent());
+
+    expect(schema['~standard'].validate).toHaveBeenCalledWith({ email: 'not-an-email' });
+    expect(mutations.setFieldErrors).toHaveBeenCalledWith('email', ['Email is invalid']);
+    expect(mutations.setIsProcessing.mock.calls).toEqual([[true], [false]]);
+  });
+
   it('surfaces pathless schema issues as form-level errors', async () => {
     const onSubmit = vi.fn();
     const schema = {
@@ -390,6 +428,92 @@ describe('createBaseFormOnSubmitHandler', () => {
 
     expect(onSubmit).not.toHaveBeenCalled();
     expect(mutations.setIsProcessing.mock.calls).toEqual([[true], [false]]);
+  });
+
+  it('does not submit stale async schema output when a field is reset to its own value while validation is pending', async () => {
+    // resetField/reset can revert a field to a value it already holds — its
+    // value is unchanged, but its generation still bumps and its
+    // errors/hasBeenValid are force-cleared out from under this validation.
+    // A value-only staleness check would miss this; generation must be
+    // compared too.
+    const onSubmit = vi.fn();
+    const pending = deferred<{ value: { email: string } }>();
+    const schema = {
+      '~standard': {
+        version: 1,
+        vendor: 'test',
+        validate: vi.fn().mockReturnValue(pending.promise)
+      }
+    };
+    const fields = [
+      {
+        name: 'email',
+        value: 'old@example.com',
+        errors: [],
+        hasBeenInitialized: true,
+        hasBeenBlurred: false,
+        hasChanged: true,
+        hasBeenValid: true,
+        generation: 1
+      }
+    ];
+    const state = makeState({ fields });
+    const mutations = makeMutations();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const handler = createBaseFormOnSubmitHandler({ onSubmit, schema } as any, state, mutations);
+
+    const submitted = handler(makeEvent());
+    fields[0].generation = 2;
+    pending.resolve({ value: { email: 'old@example.com' } });
+    await submitted;
+
+    expect(onSubmit).not.toHaveBeenCalled();
+    expect(mutations.setIsProcessing.mock.calls).toEqual([[true], [false]]);
+  });
+
+  it('still submits when an unrelated field mounts or unmounts while validation is pending', async () => {
+    const onSubmit = vi.fn();
+    const pending = deferred<{ value: { email: string } }>();
+    const schema = {
+      '~standard': {
+        version: 1,
+        vendor: 'test',
+        validate: vi.fn().mockReturnValue(pending.promise)
+      }
+    };
+    const fields = [
+      {
+        name: 'email',
+        value: 'a@example.com',
+        errors: [],
+        hasBeenInitialized: true,
+        hasBeenBlurred: false,
+        hasChanged: true,
+        hasBeenValid: true
+      }
+    ];
+    const state = makeState({ fields });
+    const mutations = makeMutations();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const handler = createBaseFormOnSubmitHandler({ onSubmit, schema } as any, state, mutations);
+
+    const submitted = handler(makeEvent());
+    // An unrelated conditionally-rendered field mounts while the async schema
+    // validation is in flight — the submitted email value never changed, so
+    // this must not be treated as stale.
+    fields.push({
+      name: 'newsletter',
+      value: 'yes',
+      errors: [],
+      hasBeenInitialized: true,
+      hasBeenBlurred: false,
+      hasChanged: false,
+      hasBeenValid: true
+    });
+    pending.resolve({ value: { email: 'a@example.com' } });
+    await submitted;
+
+    expect(onSubmit).toHaveBeenCalledWith({ email: 'a@example.com' }, '');
   });
 
   it('surfaces a genuine async schema error even if field values changed while it was pending', async () => {

@@ -271,13 +271,13 @@ importers:
 
   packages/validation:
     dependencies:
+      '@gxxc/solid-forms-state':
+        specifier: workspace:*
+        version: link:../state
       solid-js:
         specifier: ^1.8.20
         version: 1.9.14
     devDependencies:
-      '@gxxc/solid-forms-state':
-        specifier: workspace:*
-        version: link:../state
       type-fest:
         specifier: ^4.24.0
         version: 4.24.0

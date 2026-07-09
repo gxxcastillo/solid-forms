@@ -1,3 +1,5 @@
+import { batch } from 'solid-js';
+
 import { type FormFields, type FormState, type FormStateMutations } from '@gxxc/solid-forms-state';
 
 import {
@@ -6,8 +8,8 @@ import {
   type OnSubmitHandler,
   type OnSubmitHandlers,
   type RequestProps,
-  type Response,
-  type ResponseMapping
+  type SubmitResponse,
+  type SubmitResponseMapping
 } from '../types';
 import { type BaseFormPropsWithSubmit } from './BaseForm';
 import { applySchemaValidationFailure, validateWithSchema } from './schema';
@@ -16,15 +18,15 @@ export function isObject(o: unknown) {
   return o != null && typeof o === 'object';
 }
 
-export function isSubmitHandlerFn<P extends RequestProps, R extends Response>(
+export function isSubmitHandlerFn<P extends RequestProps, R extends SubmitResponse>(
   onSubmit: unknown
 ): onSubmit is OnSubmitHandler<P, R> {
   return typeof onSubmit === 'function';
 }
 
-export function isSubmitHandlersObject<P extends RequestProps, R extends Response | ResponseMapping<P>>(
+export function isSubmitHandlersObject<P extends RequestProps, R extends SubmitResponse | SubmitResponseMapping<P>>(
   onSubmit: BaseFormOnSubmit<P, R>
-): onSubmit is R extends ResponseMapping<P> ? OnSubmitHandlers<P, R> : never {
+): onSubmit is R extends SubmitResponseMapping<P> ? OnSubmitHandlers<P, R> : never {
   return isObject(onSubmit);
 }
 
@@ -35,22 +37,36 @@ export function fieldsToProps<M extends object>(formFields: FormFields<M>) {
   }, {}) as M;
 }
 
-export function fieldsToValueSnapshot<M extends object>(formFields: FormFields<M>) {
-  return new Map(formFields.map((field) => [field.name, field.value] as const));
+// Captured alongside fieldsToProps, at the same moment, so
+// haveFieldValuesChangedSinceSnapshot can detect a resetField/reset/setValues
+// call that bumps a field's generation without changing its value (e.g.
+// resetting a field back to a value it already held) — a value-only
+// comparison would miss that case even though the field's errors/hasBeenValid
+// were rewritten out from under the in-flight validation.
+export function fieldsToGenerationSnapshot<M extends object>(formFields: FormFields<M>) {
+  return formFields.reduce<Record<string, number>>((obj, field) => {
+    obj[field.name] = field.generation;
+    return obj;
+  }, {});
 }
 
+// Only compares fields the snapshot actually captured: a field mounting or
+// unmounting between the snapshot and this check doesn't make the snapshot
+// stale, since onSubmit/schema validation only ever sees the values captured
+// at snapshot time, not a live re-read of the form's current fields.
 export function haveFieldValuesChangedSinceSnapshot<M extends object>(
   formFields: FormFields<M>,
-  snapshot: ReadonlyMap<string, unknown>
+  snapshot: Readonly<Record<string, unknown>>,
+  generationSnapshot: Readonly<Record<string, number>>
 ) {
-  if (formFields.length !== snapshot.size) {
-    return true;
-  }
-
-  return formFields.some((field) => !snapshot.has(field.name) || snapshot.get(field.name) !== field.value);
+  return formFields.some(
+    (field) =>
+      Object.hasOwn(snapshot, field.name) &&
+      (snapshot[field.name] !== field.value || generationSnapshot[field.name] !== field.generation)
+  );
 }
 
-export function resolveSubmitHandler<P extends RequestProps, R extends Response | ResponseMapping<P>>(
+export function resolveSubmitHandler<P extends RequestProps, R extends SubmitResponse | SubmitResponseMapping<P>>(
   onSubmit: BaseFormOnSubmit<P, R> | undefined,
   buttonName: string | undefined
 ): OnSubmitHandler<P, R> | undefined {
@@ -72,10 +88,19 @@ export function getSubmitErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
+export function markAllFieldsBlurred<M extends object>(
+  fields: FormFields<M>,
+  mutations: FormStateMutations<M>
+) {
+  for (const field of fields) {
+    mutations.setBlurredField(field.name);
+  }
+}
+
 export function createBaseFormOnSubmitHandler<
   FieldValues extends RequestProps,
   SubmitValues extends RequestProps = FieldValues,
-  R extends Response | ResponseMapping<SubmitValues> = SubmitValues
+  R extends SubmitResponse | SubmitResponseMapping<SubmitValues> = SubmitValues
 >(
   props: BaseFormPropsWithSubmit<FieldValues, SubmitValues, R>,
   formState: FormState<FieldValues>,
@@ -93,9 +118,7 @@ export function createBaseFormOnSubmitHandler<
       // Nothing may have been touched yet (e.g. a pristine required field), so
       // an invalid submit attempt must mark every field blurred to make its
       // errors visible instead of silently doing nothing.
-      for (const field of formState.fields) {
-        formStateMutations.setBlurredField(field.name);
-      }
+      markAllFieldsBlurred(formState.fields, formStateMutations);
       return;
     }
 
@@ -108,7 +131,7 @@ export function createBaseFormOnSubmitHandler<
     if (!onSubmitFn && (props.onSubmit !== undefined || !props.schema)) return;
 
     const submitProps = fieldsToProps(formState.fields) as FieldValues;
-    const submittedFieldValues = fieldsToValueSnapshot(formState.fields);
+    const submitGenerations = fieldsToGenerationSnapshot(formState.fields);
 
     // Set the processing flag before invoking schema validation or the submit
     // handler so a rapid second submit cannot slip past the guard while async
@@ -126,12 +149,22 @@ export function createBaseFormOnSubmitHandler<
             value: submitProps as unknown as SubmitValues
           } as const);
 
-      if (props.schema && haveFieldValuesChangedSinceSnapshot(formState.fields, submittedFieldValues)) {
+      if (
+        props.schema &&
+        haveFieldValuesChangedSinceSnapshot(
+          formState.fields,
+          submitProps as unknown as Record<string, unknown>,
+          submitGenerations
+        )
+      ) {
         return;
       }
 
       if (!schemaResult.valid) {
-        applySchemaValidationFailure(formState.fields, formStateMutations, schemaResult);
+        batch(() => {
+          applySchemaValidationFailure(formState.fields, formStateMutations, schemaResult);
+          markAllFieldsBlurred(formState.fields, formStateMutations);
+        });
         return;
       }
 

@@ -1,7 +1,7 @@
 import { For, Show, createSignal, onCleanup, onMount } from 'solid-js';
 
-import { useForm } from '@gxxc/solid-forms';
-import { LoginFields, type LoginValues, SignupFields, type SignupValues } from '@gxxc/solid-forms-examples';
+import { FormContextProvider, useForm } from '@gxxc/solid-forms';
+import { LoginForm, type LoginValues, SignupForm, type SignupValues } from '@gxxc/solid-forms-examples';
 
 import { FormStateInspector } from './FormStateInspector';
 import styles from './ThemeShowcase.module.css';
@@ -91,9 +91,9 @@ export function ThemeShowcase() {
         <div class={styles.layout}>
           <div class={styles.card}>
             <h2 class={styles.cardTitle}>Create your account</h2>
-            <signupForm.Form onSubmit={onSignupSubmit}>
-              <SignupFields actionsClass={styles.buttonRow} />
-            </signupForm.Form>
+            <FormContextProvider store={signupForm.store}>
+              <SignupForm onSubmit={onSignupSubmit} actionsClass={styles.buttonRow} />
+            </FormContextProvider>
           </div>
 
           <FormStateInspector title='Signup form state' state={signupForm.state} />
@@ -104,9 +104,9 @@ export function ThemeShowcase() {
         <div class={styles.layout}>
           <div class={styles.card}>
             <h2 class={styles.cardTitle}>Log in</h2>
-            <loginForm.Form onSubmit={onLoginSubmit}>
-              <LoginFields />
-            </loginForm.Form>
+            <FormContextProvider store={loginForm.store}>
+              <LoginForm onSubmit={onLoginSubmit} />
+            </FormContextProvider>
           </div>
 
           <FormStateInspector title='Login form state' state={loginForm.state} />

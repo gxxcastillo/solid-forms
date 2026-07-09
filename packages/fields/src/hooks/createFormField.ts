@@ -97,22 +97,18 @@ export function createValueSetter<
     const newErrors = validate(name, value, validationConstraints, formState, props.label);
     const errorsForDisplay = newErrors.length > 0 ? newErrors : [];
 
-    if (isInitialization) {
-      formStateMutations.initializeField(name, value, errorsForDisplay, props.label);
-    } else {
-      formStateMutations.setFieldValue(name, value, errorsForDisplay);
-    }
-
-    // Captured after the mutation above (which, for an uninitialized field,
-    // is what actually assigns its generation from the store-wide counter) —
-    // capturing it before would read a field that doesn't exist yet, always
-    // falling back to 0 regardless of the real assigned value. The field's
-    // generation only changes via resetField/reset/setValues from here on
-    // (never via this field's own commit), so comparing it alongside the
-    // token tells apart "a newer commit of mine superseded this" from "an
-    // external reset overwrote the field out from under this pending
-    // validation."
-    const generation = formState.getField(name)?.generation ?? 0;
+    // Captured from the mutation's own return value (which, for an
+    // uninitialized field, is what actually assigns its generation from the
+    // store-wide counter) rather than a follow-up formState.getField(name)
+    // lookup — the mutation already resolved the field internally, so a
+    // second scan would just repeat that work. The field's generation only
+    // changes via resetField/reset/setValues from here on (never via this
+    // field's own commit), so comparing it alongside the token tells apart "a
+    // newer commit of mine superseded this" from "an external reset overwrote
+    // the field out from under this pending validation."
+    const generation = isInitialization
+      ? (formStateMutations.initializeField(name, value, errorsForDisplay, props.label) ?? 0)
+      : (formStateMutations.setFieldValue(name, value, errorsForDisplay) ?? 0);
 
     // Custom validators run after built-in constraints and only when no built-in errors exist.
     // Sync validators call setFieldErrors immediately; async validators call it when they resolve.
@@ -273,14 +269,34 @@ export function createFormField<
   // when a generation bump was one of theirs so we can follow up with a real
   // validation pass; a setValues-caused bump leaves `wasReset` false, since
   // setValues intentionally preserves whatever errors were already there.
-  createEffect(() => {
+  //
+  // resetField/reset also force hasBeenBlurred to false, so getDisplayableErrors
+  // (which only shows errors once a field hasBeenValid or hasBeenBlurred) would
+  // otherwise hide a real error revealed by the revalidation below until the
+  // user interacts with the field again — silently blocking submission with no
+  // visible reason. A reset is an explicit, visible change to the field's value
+  // (unlike a fresh mount, which is genuinely untouched), so treat it like a
+  // blur: mark the field blurred so any error the revalidation finds shows up
+  // immediately, even once an async custom validator resolves later.
+  //
+  // The baseline seeds from this field's generation at effect-creation time, so
+  // the effect's own first run never fires this: a field can arrive already
+  // initialized with wasReset already true (e.g. reset headlessly via the store
+  // before this component ever mounted), and without a baseline that inherited
+  // flag would trigger a revalidate+blur the user never asked for, showing the
+  // field as already invalid/touched on its very first paint. Only a generation
+  // bump that happens *after* this effect is watching reflects an actual reset
+  // of the mounted field, which is what should trigger the follow-up pass.
+  createEffect((prevGeneration: number | undefined) => {
     const fieldName = props.name as StringKeyOf<M>;
     const field = formState.getField(fieldName);
-    if (field?.generation === undefined) return;
-    if (untrack(() => field.wasReset)) {
+    if (field?.generation === undefined) return prevGeneration;
+    if (prevGeneration !== undefined && field.generation !== prevGeneration && untrack(() => field.wasReset)) {
       setValue.revalidate();
+      formStateMutations.setBlurredField(fieldName);
     }
-  });
+    return field.generation;
+  }, undefined);
 
   const formattedValue = createMemo(() => props.format(value()));
   const displayableErrors = createMemo(() => getDisplayableErrors(props.name, formState));

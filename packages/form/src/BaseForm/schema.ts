@@ -59,17 +59,10 @@ export async function validateWithSchema<
   FieldValues extends object,
   SubmitValues extends object = FieldValues
 >(
-  schema: StandardSchemaV1<FieldValues, SubmitValues> | undefined,
+  schema: StandardSchemaV1<FieldValues, SubmitValues>,
   values: FieldValues,
   fields: FormFields<FieldValues>
 ): Promise<SchemaValidationResult<SubmitValues>> {
-  if (!schema) {
-    return {
-      valid: true,
-      value: values as unknown as SubmitValues
-    };
-  }
-
   const result = await schema['~standard'].validate(values);
 
   if (result.issues) {
@@ -92,7 +85,6 @@ export function applySchemaValidationFailure<M extends object>(
 
     for (const field of fields) {
       mutations.setFieldErrors(field.name, failure.fieldErrors.get(field.name) ?? []);
-      mutations.setBlurredField(field.name);
     }
   });
 }

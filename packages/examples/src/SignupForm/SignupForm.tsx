@@ -1,13 +1,6 @@
 import { type JSX } from 'solid-js';
 
-import {
-  CheckboxField,
-  Form,
-  InputField,
-  PasswordField,
-  SubmitButton,
-  TextAreaField
-} from '@gxxc/solid-forms';
+import { SubmitButton, createForm } from '@gxxc/solid-forms';
 
 export interface SignupValues {
   email: string;
@@ -18,13 +11,12 @@ export interface SignupValues {
   terms: boolean;
 }
 
-export interface SignupFieldsProps {
+export interface SignupFormProps {
   actionsClass?: string;
-}
-
-export interface SignupFormProps extends SignupFieldsProps {
   onSubmit?: (values: SignupValues) => void | Promise<void>;
 }
+
+const { CheckboxField, Form, InputField, PasswordField, TextAreaField } = createForm<SignupValues>();
 
 function MailIcon(): JSX.Element {
   return (
@@ -35,9 +27,9 @@ function MailIcon(): JSX.Element {
   );
 }
 
-export function SignupFields(props: SignupFieldsProps) {
+export function SignupForm(props: SignupFormProps) {
   return (
-    <>
+    <Form onSubmit={props.onSubmit ?? (() => undefined)}>
       <InputField name='email' label='Email' leadingIcon={<MailIcon />} showLabel={() => true} required />
       <InputField name='username' label='Username' required minLength={3} />
       <PasswordField name='password' label='Password' required minLength={8} />
@@ -50,14 +42,6 @@ export function SignupFields(props: SignupFieldsProps) {
           Save draft
         </SubmitButton>
       </div>
-    </>
-  );
-}
-
-export function SignupForm(props: SignupFormProps) {
-  return (
-    <Form<SignupValues, void> onSubmit={props.onSubmit ?? (() => undefined)}>
-      <SignupFields actionsClass={props.actionsClass} />
     </Form>
   );
 }

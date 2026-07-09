@@ -1,4 +1,5 @@
 export * from './CheckboxField/CheckboxField';
+export * from './createFields';
 export * from './hooks';
 export * from './InputField/InputField';
 export * from './PasswordField/PasswordField';

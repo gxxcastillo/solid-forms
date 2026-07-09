@@ -11,10 +11,6 @@ import {
 } from '@gxxc/solid-forms-state';
 import { type ValidationConstraints } from '@gxxc/solid-forms-validation';
 
-export type RawFieldValue = boolean | string | undefined;
-
-export type ElementProps<T> = Omit<JSX.InputHTMLAttributes<T>, 'value' | 'name'>;
-
 export type CustomValidator<M extends object, N extends StringKeyOf<M>> = (
   fieldName: N,
   fieldValue: FieldValueFor<M, N>,
@@ -22,10 +18,7 @@ export type CustomValidator<M extends object, N extends StringKeyOf<M>> = (
   setFieldErrors: (e: ErrorMessages) => void
 ) => void;
 
-export type Constraint = boolean | number | string;
-
 export type FormElementTag = 'button' | 'input' | 'select' | 'textarea';
-export type FormElement<G extends FormElementTag> = HTMLElementTagNameMap[G];
 
 export type BaseFormFieldProps<G extends FormElementTag> = Omit<JSX.HTMLElementTags[G], 'name' | 'label'>;
 
@@ -46,7 +39,7 @@ export type FieldInternalProps<M extends object, N extends StringKeyOf<M>> = {
   isDisabled?: boolean;
   isSelectable?: boolean;
   errors?: ErrorMessages;
-  match?: Omit<StringKeyOf<M>, N>;
+  match?: Exclude<StringKeyOf<M>, N>;
   setValue?: (value?: FieldValue, initialize?: boolean) => void;
   showIcon?: (value?: FieldValueFor<M, N>, e?: ErrorMessages) => boolean;
   validator?: CustomValidator<M, N>;

@@ -65,19 +65,19 @@ export type ErrorResult = {
 
 export type RequestProps = object;
 
-export type Response = object | string | [] | null | void;
-export type ResponseMapping<P extends RequestProps> = Record<string, OnSubmitHandler<P, Response>>;
-export type OnSubmitHandler<P extends RequestProps, R extends Response = void> = (
+export type SubmitResponse = object | string | [] | null | void;
+export type SubmitResponseMapping<P extends RequestProps> = Record<string, OnSubmitHandler<P, SubmitResponse>>;
+export type OnSubmitHandler<P extends RequestProps, R extends SubmitResponse = void> = (
   props: P,
   buttonName: string
 ) => Promise<R> | void;
 
-export type OnSubmitHandlers<P extends RequestProps, M extends ResponseMapping<P>> = {
+export type OnSubmitHandlers<P extends RequestProps, M extends SubmitResponseMapping<P>> = {
   [K in keyof M]: M[K];
 };
 
-export type BaseFormOnSubmit<P extends RequestProps, R extends Response | ResponseMapping<P>> =
-  R extends ResponseMapping<P> ? OnSubmitHandlers<P, R> : OnSubmitHandler<P, R>;
+export type BaseFormOnSubmit<P extends RequestProps, R extends SubmitResponse | SubmitResponseMapping<P>> =
+  R extends SubmitResponseMapping<P> ? OnSubmitHandlers<P, R> : OnSubmitHandler<P, R>;
 
 export type BaseFormElementSubmitEvent = Event & { submitter: HTMLElement | null };
 export type BaseFormElementOnSubmitHandler = JSX.EventHandler<HTMLFormElement, BaseFormElementSubmitEvent>;

@@ -51,10 +51,6 @@ export type BaseFormState<M extends object = FieldValueMapping> = {
   isProcessing: boolean;
 };
 
-// @TODO Do I still need these?
-// export type InferFieldValueMapping<S extends FormState> = S extends FormState<infer M> ? M : never;
-// export type InferBaseFormState<S extends FormState> = S extends FormState<infer M> ? BaseFormState<M> : never;
-
 export type FormState<M extends object = FieldValueMapping> = BaseFormState<M> & FormStateGetters<M>;
 
 export type FormStateGetters<M extends object = FieldValueMapping> = {
@@ -71,18 +67,20 @@ export type FormStateGetters<M extends object = FieldValueMapping> = {
 };
 
 export type FormStateMutations<M extends object = FieldValueMapping> = {
+  /** Returns the field's resulting generation, so callers can capture a staleness baseline without a second lookup. */
   initializeField: <N extends StringKeyOf<M>>(
     name: N,
     value?: FieldValueFor<M, N>,
     errors?: ErrorMessages,
     label?: string
-  ) => void;
+  ) => number | undefined;
   removeField: <N extends StringKeyOf<M>>(name: N) => void;
+  /** Returns the field's resulting generation, so callers can capture a staleness baseline without a second lookup. */
   setFieldValue: <N extends StringKeyOf<M>>(
     name: N,
     value?: FieldValueFor<M, N>,
     errors?: ErrorMessages
-  ) => void;
+  ) => number;
   setFieldErrors: <N extends StringKeyOf<M>>(name: N, errors?: ErrorMessages) => void;
   setChangedField: <N extends StringKeyOf<M>>(name: N) => void;
   setBlurredField: <N extends StringKeyOf<M>>(name: N) => void;

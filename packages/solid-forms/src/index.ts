@@ -5,6 +5,7 @@ import '../themes/base.css';
 
 export * from '@gxxc/solid-forms-fields';
 export * from '@gxxc/solid-forms-form';
+export * from './createForm';
 
 // `useForm().state` is typed against these — without re-exporting them a
 // consumer can't name the type (e.g. to write their own `state: FormState<M>`
@@ -23,3 +24,12 @@ export type {
   FormStateMutations,
   FormStore
 } from '@gxxc/solid-forms-state';
+
+// Lets a self-contained <Form>-rendering component (one that always renders
+// its own <Form> and never accepts an external store) still expose live state
+// to an ancestor: wrap it in <FormContextProvider store={outer.store}>, fed by
+// the ancestor's own useForm(). The inner <Form> reuses the provided store
+// instead of creating its own (see useForm's existing-context check), so
+// `outer.state` reflects the same live values — no need for the component to
+// separately export its fields to be reusable under a different store.
+export { FormContextProvider, type FormContextProviderProps } from '@gxxc/solid-forms-state';

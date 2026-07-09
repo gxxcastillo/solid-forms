@@ -111,12 +111,17 @@ export function createFormStore<M extends object = FieldValueMapping>(
     wasReset: false
   });
 
-  const applyFieldValue = (
+  // Pure: computes the next value for a single field without touching the
+  // store, so bulk operations (setValues) can run one `fields.map()` pass
+  // instead of one O(n) store scan per field. Returns `field` itself
+  // (same reference) when nothing changes, so an unaffected field's slot in
+  // the mapped array is untouched and Solid doesn't notify its readers.
+  const computeFieldValueUpdate = (
     field: FormField<M, FName>,
     value: FieldValueFor<M, FName> | undefined,
     errors: FErrors | undefined,
     bumpGeneration: boolean
-  ) => {
+  ): FormField<M, FName> => {
     const currentValue = field.value;
     const currentErrors = field.errors ?? [];
     // When errors is not explicitly provided, preserve current errors rather than clearing them.
@@ -131,43 +136,65 @@ export function createFormStore<M extends object = FieldValueMapping>(
     // false without knowing whether the reverted value is actually valid, so
     // that recomputed hasBeenValid must still land even when nothing else changed.
     if (currentValue === value && arraysEqual(effectiveErrors, currentErrors) && nextHasBeenValid === prevHasBeenValid) {
-      return;
+      return field;
     }
 
     const prevHasChanged = field.hasChanged ?? false;
 
-    setFormState('fields', (f) => f.name === field.name, () => ({
+    return {
+      ...field,
       value,
       errors: effectiveErrors,
       hasBeenValid: nextHasBeenValid,
       hasChanged: prevHasChanged || currentValue !== value,
       ...(bumpGeneration ? { generation: nextGeneration++, wasReset: false } : {})
-    }));
+    };
   };
+
+  const applyFieldValue = (
+    field: FormField<M, FName>,
+    value: FieldValueFor<M, FName> | undefined,
+    errors: FErrors | undefined,
+    bumpGeneration: boolean
+  ) => {
+    const next = computeFieldValueUpdate(field, value, errors, bumpGeneration);
+    if (next === field) return next;
+
+    setFormState('fields', (f) => f.name === field.name, () => next);
+    return next;
+  };
+
+  // Pure counterpart to applyFieldReset, for the same reason as computeFieldValueUpdate above.
+  const computeFieldReset = (
+    field: FormField<M, FName>,
+    value: FieldValueFor<M, FName> | undefined,
+    initialValue: FieldValueFor<M, FName> | undefined
+  ): FormField<M, FName> => ({
+    ...field,
+    value,
+    initialValue,
+    errors: [],
+    hasChanged: false,
+    hasBeenBlurred: false,
+    // Real validity is unknown here (errors are force-cleared above without
+    // checking constraints), so this can't reuse the `value !== undefined &&
+    // !errors.length` pattern the way initializeField/setFieldValue's fresh
+    // branches do — that would wrongly claim a defined-but-invalid reverted
+    // value as "has been valid". Leave it false and let the follow-up
+    // revalidation pass (createFormField's wasReset-triggered effect, which
+    // re-applies real errors via applyFieldValue's OR-forward) promote it to
+    // true only once a real validation pass confirms it.
+    hasBeenValid: false,
+    generation: nextGeneration++,
+    wasReset: true
+  });
 
   const applyFieldReset = (
     name: FName,
     value: FieldValueFor<M, FName> | undefined,
     initialValue: FieldValueFor<M, FName> | undefined
   ) => {
-    setFormState('fields', (f) => f.name === name, () => ({
-      value,
-      initialValue,
-      errors: [],
-      hasChanged: false,
-      hasBeenBlurred: false,
-      // Real validity is unknown here (errors are force-cleared above without
-      // checking constraints), so this can't reuse the `value !== undefined &&
-      // !errors.length` pattern the way initializeField/setFieldValue's fresh
-      // branches do — that would wrongly claim a defined-but-invalid reverted
-      // value as "has been valid". Leave it false and let the follow-up
-      // revalidation pass (createFormField's wasReset-triggered effect, which
-      // re-applies real errors via applyFieldValue's OR-forward) promote it to
-      // true only once a real validation pass confirms it.
-      hasBeenValid: false,
-      generation: nextGeneration++,
-      wasReset: true
-    }));
+    setFormState('fields', (f) => f.name === name, (field) => computeFieldReset(field, value, initialValue));
   };
 
   return [
@@ -179,11 +206,14 @@ export function createFormStore<M extends object = FieldValueMapping>(
         errors: FErrors = [],
         label?: string
       ) => {
-        if (getters.hasFieldBeenInitialized(name) || !name) {
-          return;
+        const existing = getters.getField(name);
+        if (existing || !name) {
+          return existing?.generation;
         }
 
-        setFormState('fields', (fields) => [...fields, buildFreshField(name, value, errors, label)]);
+        const field = buildFreshField(name, value, errors, label);
+        setFormState('fields', (fields) => [...fields, field]);
+        return field.generation;
       },
 
       // A re-mounting field re-initializes fresh (see initializeField's
@@ -196,14 +226,17 @@ export function createFormStore<M extends object = FieldValueMapping>(
       setFieldValue: <N extends FName>(name: N, value?: FieldValueFor<M, N>, errors?: FErrors) => {
         // Resolve the field once: this runs on every keystroke, so a single O(n)
         // lookup beats the five separate `.find()` scans the getters would do.
+        // Returning the resulting generation lets callers (createFormField's
+        // commit()) skip a second lookup to capture their staleness baseline.
         const field = getters.getField(name);
 
         if (!field) {
-          setFormState('fields', (fields) => [...(fields || []), buildFreshField(name, value, errors ?? [])]);
-          return;
+          const fresh = buildFreshField(name, value, errors ?? []);
+          setFormState('fields', (fields) => [...(fields || []), fresh]);
+          return fresh.generation;
         }
 
-        applyFieldValue(field, value, errors, false);
+        return applyFieldValue(field, value, errors, false).generation;
       },
       setFieldErrors: <N extends FName>(name: N, errors?: FErrors) =>
         setFormState('fields', (f) => f.name === name, 'errors', errors ?? []),
@@ -223,28 +256,37 @@ export function createFormStore<M extends object = FieldValueMapping>(
         batch(() => {
           setFormState('errors', []);
 
-          for (const field of formState.fields) {
-            const name = field.name as FName;
-            const hasNewValue = !!toValues && Object.hasOwn(toValues, name);
-            const value = (
-              hasNewValue ? toValues![name as keyof typeof toValues] : field.initialValue
-            ) as FieldValueFor<M, FName>;
-            const initialValue = hasNewValue ? value : field.initialValue;
+          // A single fields.map() pass instead of one applyFieldReset (itself
+          // an O(n) store scan) per field, which would make this O(n²).
+          setFormState('fields', (fields) =>
+            fields.map((field) => {
+              const name = field.name as FName;
+              const hasNewValue = !!toValues && Object.hasOwn(toValues, name);
+              const value = (
+                hasNewValue ? toValues![name as keyof typeof toValues] : field.initialValue
+              ) as FieldValueFor<M, FName>;
+              const initialValue = hasNewValue ? value : field.initialValue;
 
-            applyFieldReset(name, value, initialValue);
-          }
+              return computeFieldReset(field, value, initialValue);
+            })
+          );
         });
       },
 
       setValues: (values: Partial<M>) => {
-        batch(() => {
-          for (const name of Object.keys(values) as FName[]) {
-            const field = getters.getField(name);
-            if (!field) continue;
+        // Single fields.map() pass for the same reason as reset() above.
+        setFormState('fields', (fields) =>
+          fields.map((field) => {
+            if (!Object.hasOwn(values, field.name)) return field;
 
-            applyFieldValue(field, values[name as keyof typeof values] as FieldValueFor<M, FName>, undefined, true);
-          }
-        });
+            return computeFieldValueUpdate(
+              field,
+              values[field.name as keyof typeof values] as FieldValueFor<M, FName>,
+              undefined,
+              true
+            );
+          })
+        );
       },
 
       setErrors: (errors: BaseFormState<M>['errors'] = []) => setFormState('errors', errors),

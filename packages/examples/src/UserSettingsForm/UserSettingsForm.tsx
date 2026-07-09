@@ -1,4 +1,4 @@
-import { Form, InputField, SubmitButton, TextAreaField } from '@gxxc/solid-forms';
+import { SubmitButton, createForm } from '@gxxc/solid-forms';
 
 export interface UserSettingsValues {
   username: string;
@@ -9,9 +9,11 @@ export interface UserSettingsFormProps {
   onSubmit?: (values: UserSettingsValues) => void | Promise<void>;
 }
 
+const { Form, InputField, TextAreaField } = createForm<UserSettingsValues>();
+
 export function UserSettingsForm(props: UserSettingsFormProps) {
   return (
-    <Form<UserSettingsValues, void> onSubmit={props.onSubmit ?? (() => undefined)}>
+    <Form onSubmit={props.onSubmit ?? (() => undefined)}>
       <InputField name='username' label='Username' />
       <TextAreaField name='bio' label='Bio' />
       <SubmitButton>Submit</SubmitButton>

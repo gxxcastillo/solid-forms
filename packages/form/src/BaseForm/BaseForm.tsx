@@ -9,9 +9,9 @@ import {
 import {
   type BaseFormOnSubmit,
   type RequestProps,
-  type Response,
-  type ResponseMapping,
-  type StandardSchemaV1
+  type StandardSchemaV1,
+  type SubmitResponse,
+  type SubmitResponseMapping
 } from '../types';
 import styles from './BaseForm.module.css';
 import { createBaseFormOnSubmitHandler } from './helpers';
@@ -19,7 +19,7 @@ import { createBaseFormOnSubmitHandler } from './helpers';
 export type BaseFormPropsWithSubmit<
   FieldValues extends RequestProps,
   SubmitValues extends RequestProps = FieldValues,
-  R extends Response | ResponseMapping<SubmitValues> = SubmitValues
+  R extends SubmitResponse | SubmitResponseMapping<SubmitValues> = SubmitValues
 > = {
   className?: string;
   fullWidthButtons?: boolean;
@@ -34,7 +34,7 @@ export type BaseFormPropsWithSubmit<
 
 export type BaseFormProps<
   P extends RequestProps,
-  R extends Response | ResponseMapping<P> = P
+  R extends SubmitResponse | SubmitResponseMapping<P> = P
 > = BaseFormPropsWithSubmit<P, P, R>;
 
 export const baseFormDefaultProps = {
@@ -79,7 +79,7 @@ export function classifyBaseFormChildren(childrenArray: JSX.Element[]) {
 export function BaseForm<
   FieldValues extends RequestProps,
   SubmitValues extends RequestProps = FieldValues,
-  R extends Response | ResponseMapping<SubmitValues> = SubmitValues
+  R extends SubmitResponse | SubmitResponseMapping<SubmitValues> = SubmitValues
 >(initialProps: BaseFormPropsWithSubmit<FieldValues, SubmitValues, R>) {
   const props = mergeProps(baseFormDefaultProps, initialProps);
   const [formState, formStateMutations] = useFormContext<FieldValues>();

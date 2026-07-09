@@ -144,6 +144,13 @@ describe('InputField', () => {
     // incorrectly true just because resetField force-cleared errors.
     expect(input.value).toBe('');
     expect(state.isFormValid).toBe(false);
+
+    // resetField is a visible, active change to the field (unlike a fresh
+    // mount), so the re-surfaced error must render immediately rather than
+    // waiting for a blur the user has no reason to trigger — otherwise the
+    // form silently blocks submission with no visible explanation.
+    expect(screen.getByRole('alert')).toHaveTextContent(/required/i);
+    expect(input).toHaveAttribute('aria-invalid', 'true');
   });
 
   it('immediately displays a new error introduced right after resetField reverts to a valid value', () => {
@@ -166,6 +173,27 @@ describe('InputField', () => {
     fireEvent.input(input, { target: { value: '' } });
 
     expect(screen.getByRole('alert')).toHaveTextContent(/required/i);
+  });
+
+  it('does not mark a field blurred or force an error display for a reset that happened before it ever mounted', () => {
+    const { store } = makeStore();
+    const [, mutations] = store;
+
+    // Headless: a field is registered and reset (e.g. a multi-step wizard
+    // pre-populating/resetting a later step) entirely before its component
+    // ever mounts, so `wasReset` is already true on the field's first render.
+    mutations.initializeField('username', '', []);
+    mutations.resetField('username');
+
+    render(() => (
+      <FormContextProvider store={store}>
+        <InputField<TestForm, 'username'> name='username' label='Username' required />
+      </FormContextProvider>
+    ));
+
+    const input = screen.getByRole('textbox');
+    expect(input).toHaveAttribute('aria-invalid', 'false');
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
 
   it('does not re-validate after setValues, preserving whatever errors were already there', () => {

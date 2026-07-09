@@ -50,6 +50,62 @@ A self-contained form that creates its own internal store.
 | `align`            | `'left' \| 'center'`                   | Button alignment, defaults to `'left'`                                                   |
 | `fullWidthButtons` | `boolean`                              | Stretch buttons to full width                                                            |
 
+## `createForm<M>()`
+
+`Form` and the field components are each generic over the form's value type (`M`), and field
+components are also generic over their own `name` (`N`) — but JSX can't carry a type parameter from
+`<Form<M>>` down into a sibling field's own generic inference, so every element is type-checked in
+isolation. Spelling out `<M, 'name'>` on `Form` and every field works (see `InputField` below) but
+gets repetitive for a component that only ever renders one form. Call `createForm<M>()` once instead
+to bind `M` for `Form` and all field components together:
+
+```tsx
+const { Form, InputField, PasswordField } = createForm<LoginValues>();
+
+<Form onSubmit={(values) => values.email}>
+  <InputField name='email' label='Email' required />
+  <PasswordField name='password' label='Password' required minLength={8} />
+</Form>;
+```
+
+`onSubmit`'s `values`, `name='bogus'`, and a self-referencing `match` are all checked against `M`,
+exactly as if you had written `<Form<LoginValues>>` and `<InputField<LoginValues, 'email'>>` at each
+call site. The returned components are the real `Form`/`InputField`/`PasswordField`/`TextAreaField`/
+`CheckboxField` — `createForm` only fixes `M` at the type level, it does not wrap or change their
+behavior.
+
+Pass a Standard Schema-compatible schema instead of a type argument to infer `M` from it, the same as
+`useForm({ schema })`:
+
+```tsx
+const { Form, InputField, PasswordField } = createForm({ schema: loginSchema });
+
+<Form onSubmit={(values) => values.email}>
+  <InputField name='email' label='Email' required />
+  <PasswordField name='password' label='Password' required />
+</Form>;
+```
+
+Fields are typed against the schema's *input* (what the DOM gives you); `onSubmit` receives the
+schema's *output*, which can differ for a transform/coercion schema. The schema also becomes `Form`'s
+default, so it does not need to be repeated as a `schema` prop — though an individual `<Form
+schema={other}>` call can still override it, same as `useForm`.
+
+If several field groups need to share one `Form`/store — a multi-step form, for example — call
+`createFields<M>()` instead to bind just the field components, and wire the shared store up with
+`useForm`/`FormContextProvider` (see below).
+
+## `createFields<M>()`
+
+The field-only half of `createForm<M>()`, for when the fields don't own their `Form`:
+
+```tsx
+const { InputField, PasswordField } = createFields<LoginValues>();
+
+<InputField name='email' label='Email' required />
+<PasswordField name='password' label='Password' required minLength={8} />
+```
+
 ## `InputField`
 
 Renders a labeled `<input type="text">`.

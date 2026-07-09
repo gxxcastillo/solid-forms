@@ -13,5 +13,7 @@ export type {
   StandardSchemaV1Props,
   StandardSchemaV1Result,
   StandardSchemaV1SuccessResult,
-  StandardSchemaV1Types
+  StandardSchemaV1Types,
+  SubmitResponse,
+  SubmitResponseMapping
 } from './types';
