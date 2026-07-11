@@ -11,6 +11,9 @@
   "references": [
     {
       "path": "../state"
+    },
+    {
+      "path": "../validation"
     }
   ]
 }

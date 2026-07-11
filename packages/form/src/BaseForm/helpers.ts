@@ -1,6 +1,7 @@
 import { batch } from 'solid-js';
 
 import { type FormFields, type FormState, type FormStateMutations } from '@gxxc/solid-forms-state';
+import { validateWithSchema } from '@gxxc/solid-forms-validation';
 
 import {
   type BaseFormElementSubmitEvent,
@@ -12,7 +13,7 @@ import {
   type SubmitResponseMapping
 } from '../types';
 import { type BaseFormPropsWithSubmit } from './BaseForm';
-import { applySchemaValidationFailure, validateWithSchema } from './schema';
+import { applySchemaValidationFailure } from './schema';
 
 export function isObject(o: unknown) {
   return o != null && typeof o === 'object';
@@ -88,15 +89,6 @@ export function getSubmitErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
-export function markAllFieldsBlurred<M extends object>(
-  fields: FormFields<M>,
-  mutations: FormStateMutations<M>
-) {
-  for (const field of fields) {
-    mutations.setBlurredField(field.name);
-  }
-}
-
 export function createBaseFormOnSubmitHandler<
   FieldValues extends RequestProps,
   SubmitValues extends RequestProps = FieldValues,
@@ -118,7 +110,7 @@ export function createBaseFormOnSubmitHandler<
       // Nothing may have been touched yet (e.g. a pristine required field), so
       // an invalid submit attempt must mark every field blurred to make its
       // errors visible instead of silently doing nothing.
-      markAllFieldsBlurred(formState.fields, formStateMutations);
+      formStateMutations.setBlurredFields();
       return;
     }
 
@@ -163,7 +155,7 @@ export function createBaseFormOnSubmitHandler<
       if (!schemaResult.valid) {
         batch(() => {
           applySchemaValidationFailure(formState.fields, formStateMutations, schemaResult);
-          markAllFieldsBlurred(formState.fields, formStateMutations);
+          formStateMutations.setBlurredFields();
         });
         return;
       }

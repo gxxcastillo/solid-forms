@@ -42,8 +42,10 @@ function makeMutations() {
     removeField: vi.fn(),
     setFieldValue: vi.fn(),
     setFieldErrors: vi.fn(),
+    setFieldsErrors: vi.fn(),
     setChangedField: vi.fn(),
     setBlurredField: vi.fn(),
+    setBlurredFields: vi.fn(),
     resetField: vi.fn(),
     reset: vi.fn(),
     setValues: vi.fn(),
@@ -212,7 +214,7 @@ describe('createBaseFormOnSubmitHandler', () => {
     await handler(makeEvent());
 
     expect(onSubmit).not.toHaveBeenCalled();
-    expect(mutations.setBlurredField.mock.calls).toEqual([['email'], ['password']]);
+    expect(mutations.setBlurredFields).toHaveBeenCalledOnce();
   });
 
   it('blocks submit and maps schema path issues onto fields', async () => {
@@ -247,8 +249,8 @@ describe('createBaseFormOnSubmitHandler', () => {
 
     expect(schema['~standard'].validate).toHaveBeenCalledWith({ email: 'not-an-email' });
     expect(onSubmit).not.toHaveBeenCalled();
-    expect(mutations.setFieldErrors).toHaveBeenCalledWith('email', ['Email is invalid']);
-    expect(mutations.setBlurredField).toHaveBeenCalledWith('email');
+    expect(mutations.setFieldsErrors).toHaveBeenCalledWith(new Map([['email', ['Email is invalid']]]));
+    expect(mutations.setBlurredFields).toHaveBeenCalledOnce();
     expect(mutations.setIsProcessing.mock.calls).toEqual([[true], [false]]);
   });
 
@@ -286,7 +288,7 @@ describe('createBaseFormOnSubmitHandler', () => {
     await handler(makeEvent());
 
     expect(schema['~standard'].validate).toHaveBeenCalledWith({ email: 'not-an-email' });
-    expect(mutations.setFieldErrors).toHaveBeenCalledWith('email', ['Email is invalid']);
+    expect(mutations.setFieldsErrors).toHaveBeenCalledWith(new Map([['email', ['Email is invalid']]]));
     expect(mutations.setIsProcessing.mock.calls).toEqual([[true], [false]]);
   });
 
@@ -322,7 +324,7 @@ describe('createBaseFormOnSubmitHandler', () => {
 
     expect(onSubmit).not.toHaveBeenCalled();
     expect(mutations.setErrors).toHaveBeenLastCalledWith(['Form is invalid']);
-    expect(mutations.setFieldErrors).toHaveBeenCalledWith('email', []);
+    expect(mutations.setFieldsErrors).toHaveBeenCalledWith(new Map());
   });
 
   it('passes the validated schema output to onSubmit', async () => {
@@ -390,8 +392,8 @@ describe('createBaseFormOnSubmitHandler', () => {
     await submitted;
 
     expect(onSubmit).not.toHaveBeenCalled();
-    expect(mutations.setFieldErrors).not.toHaveBeenCalled();
-    expect(mutations.setBlurredField).not.toHaveBeenCalled();
+    expect(mutations.setFieldsErrors).not.toHaveBeenCalled();
+    expect(mutations.setBlurredFields).not.toHaveBeenCalled();
     expect(mutations.setIsProcessing.mock.calls).toEqual([[true], [false]]);
   });
 
@@ -588,7 +590,7 @@ describe('createBaseFormOnSubmitHandler', () => {
 
     expect(schema['~standard'].validate).not.toHaveBeenCalled();
     expect(mutations.setIsProcessing).not.toHaveBeenCalled();
-    expect(mutations.setBlurredField).not.toHaveBeenCalled();
+    expect(mutations.setBlurredFields).not.toHaveBeenCalled();
     expect(saveDraft).not.toHaveBeenCalled();
     expect(publish).not.toHaveBeenCalled();
   });

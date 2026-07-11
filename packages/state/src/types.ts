@@ -82,8 +82,16 @@ export type FormStateMutations<M extends object = FieldValueMapping> = {
     errors?: ErrorMessages
   ) => number;
   setFieldErrors: <N extends StringKeyOf<M>>(name: N, errors?: ErrorMessages) => void;
+  /**
+   * Bulk-sets errors per field name in one pass, same as calling
+   * `setFieldErrors` for each key — fields with no entry in the map are
+   * cleared to `[]`. Keys for fields that are not currently registered are ignored.
+   */
+  setFieldsErrors: (errorsByField: ReadonlyMap<string, ErrorMessages>) => void;
   setChangedField: <N extends StringKeyOf<M>>(name: N) => void;
   setBlurredField: <N extends StringKeyOf<M>>(name: N) => void;
+  /** Marks every registered field as blurred in one pass, same as calling `setBlurredField` for each one. */
+  setBlurredFields: () => void;
   /** Reverts one field to its initial value and clears its errors. No-op for an unregistered field. */
   resetField: <N extends StringKeyOf<M>>(name: N) => void;
   /**

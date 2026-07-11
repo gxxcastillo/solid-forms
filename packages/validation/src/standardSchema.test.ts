@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { groupSchemaIssuesByField, schemaIssuePathToFieldName } from './schema';
+import { groupSchemaIssuesByField, schemaIssuePathToFieldName } from './standardSchema';
 
 describe('schemaIssuePathToFieldName', () => {
   it('joins property keys and path segment objects with dots', () => {

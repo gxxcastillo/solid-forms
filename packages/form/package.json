@@ -14,7 +14,8 @@
     "dist"
   ],
   "dependencies": {
-    "@gxxc/solid-forms-state": "workspace:*"
+    "@gxxc/solid-forms-state": "workspace:*",
+    "@gxxc/solid-forms-validation": "workspace:*"
   },
   "devDependencies": {
     "typescript": "5.4.2",

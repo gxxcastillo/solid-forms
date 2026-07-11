@@ -199,6 +199,9 @@ importers:
       '@gxxc/solid-forms-state':
         specifier: workspace:*
         version: link:../state
+      '@gxxc/solid-forms-validation':
+        specifier: workspace:*
+        version: link:../validation
       solid-js:
         specifier: ^1.8.20
         version: 1.9.14

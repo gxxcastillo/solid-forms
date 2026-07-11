@@ -240,10 +240,21 @@ export function createFormStore<M extends object = FieldValueMapping>(
       },
       setFieldErrors: <N extends FName>(name: N, errors?: FErrors) =>
         setFormState('fields', (f) => f.name === name, 'errors', errors ?? []),
+      setFieldsErrors: (errorsByField: ReadonlyMap<string, FErrors>) =>
+        setFormState('fields', (fields) =>
+          fields.map((field) => {
+            const errors = errorsByField.get(field.name) ?? [];
+            return arraysEqual(field.errors ?? [], errors) ? field : { ...field, errors };
+          })
+        ),
       setChangedField: <N extends FName>(name: N) =>
         setFormState('fields', (f) => f.name === name, 'hasChanged', true),
       setBlurredField: <N extends FName>(name: N) =>
         setFormState('fields', (f) => f.name === name, 'hasBeenBlurred', true),
+      setBlurredFields: () =>
+        setFormState('fields', (fields) =>
+          fields.map((field) => (field.hasBeenBlurred ? field : { ...field, hasBeenBlurred: true }))
+        ),
 
       resetField: <N extends FName>(name: N) => {
         const field = getters.getField(name);
