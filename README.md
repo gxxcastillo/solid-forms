@@ -10,10 +10,21 @@ Typed, reactive forms for SolidJS.
 
 ### Setup
 
-Requires Node 22 and pnpm 9. With [nvm](https://github.com/nvm-sh/nvm):
+Requires Node 22.12.0 and pnpm 9.7.0.
+
+Recommended with [mise](https://mise.jdx.dev/):
+
+```bash
+mise install
+corepack enable
+pnpm install
+```
+
+The repo also keeps `.nvmrc` for compatibility:
 
 ```bash
 nvm use          # reads .nvmrc → Node 22.12.0
+corepack enable
 pnpm install
 ```
 
