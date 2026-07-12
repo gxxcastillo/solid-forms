@@ -31,11 +31,29 @@ export function isSubmitHandlersObject<P extends RequestProps, R extends SubmitR
   return isObject(onSubmit);
 }
 
+function setOwnEnumerableProperty(target: Record<string, unknown>, name: string, value: unknown) {
+  Object.defineProperty(target, name, {
+    configurable: true,
+    enumerable: true,
+    value,
+    writable: true
+  });
+}
+
 export function fieldsToProps<M extends object>(formFields: FormFields<M>) {
   return formFields.reduce<Record<string, unknown>>((obj, field) => {
-    obj[field.name] = field.value;
+    setOwnEnumerableProperty(obj, field.name, field.value);
     return obj;
   }, {}) as M;
+}
+
+// Captured separately from fieldsToProps so the staleness check can compare
+// exactly the same value snapshot even if fieldsToProps changes shape later.
+export function fieldsToValueSnapshot<M extends object>(formFields: FormFields<M>) {
+  return formFields.reduce<Record<string, unknown>>((obj, field) => {
+    setOwnEnumerableProperty(obj, field.name, field.value);
+    return obj;
+  }, {});
 }
 
 // Captured alongside fieldsToProps, at the same moment, so
@@ -46,7 +64,12 @@ export function fieldsToProps<M extends object>(formFields: FormFields<M>) {
 // were rewritten out from under the in-flight validation.
 export function fieldsToGenerationSnapshot<M extends object>(formFields: FormFields<M>) {
   return formFields.reduce<Record<string, number>>((obj, field) => {
-    obj[field.name] = field.generation;
+    Object.defineProperty(obj, field.name, {
+      configurable: true,
+      enumerable: true,
+      value: field.generation,
+      writable: true
+    });
     return obj;
   }, {});
 }
@@ -123,6 +146,7 @@ export function createBaseFormOnSubmitHandler<
     if (!onSubmitFn && (props.onSubmit !== undefined || !props.schema)) return;
 
     const submitProps = fieldsToProps(formState.fields) as FieldValues;
+    const submitValueSnapshot = fieldsToValueSnapshot(formState.fields);
     const submitGenerations = fieldsToGenerationSnapshot(formState.fields);
 
     // Set the processing flag before invoking schema validation or the submit
@@ -143,11 +167,7 @@ export function createBaseFormOnSubmitHandler<
 
       if (
         props.schema &&
-        haveFieldValuesChangedSinceSnapshot(
-          formState.fields,
-          submitProps as unknown as Record<string, unknown>,
-          submitGenerations
-        )
+        haveFieldValuesChangedSinceSnapshot(formState.fields, submitValueSnapshot, submitGenerations)
       ) {
         return;
       }

@@ -4,10 +4,18 @@ import { describe, expect, it } from 'vitest';
 import { createFormStore } from './FormState';
 
 type TestFields = { username: string; password: string };
+type DottedTestFields = { 'user.email': string };
 
 function makeStore(state?: Parameters<typeof createFormStore<TestFields>>[0]) {
   return createRoot((dispose) => {
     const store = createFormStore<TestFields>(state);
+    return { store, dispose };
+  });
+}
+
+function makeDottedStore(state?: Parameters<typeof createFormStore<DottedTestFields>>[0]) {
+  return createRoot((dispose) => {
+    const store = createFormStore<DottedTestFields>(state);
     return { store, dispose };
   });
 }
@@ -574,6 +582,33 @@ describe('setValues', () => {
     expect(state.getField('username')?.wasReset).toBe(false);
     dispose();
   });
+
+  it('sets a value at a dotted array-path field name from a nested source object', () => {
+    // The public name/value types stay flat (StringKeyOf<M>) for now — the
+    // casts just exercise the runtime path-lookup that a future FieldArray
+    // API would build on, per fieldPaths.getValueAtFieldPath.
+    const { store, dispose } = makeStore();
+    const [state, mutations] = store;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (mutations.initializeField as any)('items.0.title', 'draft', []);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    mutations.setValues({ items: [{ title: 'final' }] } as any);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    expect((state.getFieldValue as any)('items.0.title')).toBe('final');
+    dispose();
+  });
+
+  it('sets exact dotted field keys before falling back to nested path lookup', () => {
+    const { store, dispose } = makeDottedStore();
+    const [state, mutations] = store;
+    mutations.initializeField('user.email', 'old', []);
+    mutations.setValues({
+      'user.email': 'literal',
+      user: { email: 'nested' }
+    } as unknown as Partial<DottedTestFields>);
+    expect(state.getFieldValue('user.email')).toBe('literal');
+    dispose();
+  });
 });
 
 describe('reset', () => {
@@ -670,6 +705,33 @@ describe('reset', () => {
     mutations.reset();
     expect(state.getField('username')?.wasReset).toBe(true);
     expect(state.getField('password')?.wasReset).toBe(true);
+    dispose();
+  });
+
+  it('rebaselines a dotted array-path field name from a nested toValues object', () => {
+    const { store, dispose } = makeStore();
+    const [state, mutations] = store;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (mutations.initializeField as any)('items.0.title', undefined, []);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    mutations.reset({ items: [{ title: 'loaded' }] } as any);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    expect((state.getFieldValue as any)('items.0.title')).toBe('loaded');
+    dispose();
+  });
+
+  it('rebaselines exact dotted field keys before falling back to nested path lookup', () => {
+    const { store, dispose } = makeDottedStore();
+    const [state, mutations] = store;
+    mutations.initializeField('user.email', 'old', []);
+    mutations.reset({
+      'user.email': 'literal',
+      user: { email: 'nested' }
+    } as unknown as Partial<DottedTestFields>);
+    expect(state.getFieldValue('user.email')).toBe('literal');
+    mutations.setFieldValue('user.email', 'edited');
+    mutations.resetField('user.email');
+    expect(state.getFieldValue('user.email')).toBe('literal');
     dispose();
   });
 });

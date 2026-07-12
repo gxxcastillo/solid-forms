@@ -2,6 +2,7 @@ import { batch, mergeProps } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import type { StringKeyOf } from 'type-fest';
 
+import { getValueAtFieldPath } from './fieldPaths';
 import {
   type BaseFormState,
   type FieldValueFor,
@@ -271,12 +272,9 @@ export function createFormStore<M extends object = FieldValueMapping>(
           // an O(n) store scan) per field, which would make this O(n²).
           setFormState('fields', (fields) =>
             fields.map((field) => {
-              const name = field.name as FName;
-              const hasNewValue = !!toValues && Object.hasOwn(toValues, name);
-              const value = (
-                hasNewValue ? toValues![name as keyof typeof toValues] : field.initialValue
-              ) as FieldValueFor<M, FName>;
-              const initialValue = hasNewValue ? value : field.initialValue;
+              const lookup = toValues ? getValueAtFieldPath(toValues, field.name) : { found: false, value: undefined };
+              const value = (lookup.found ? lookup.value : field.initialValue) as FieldValueFor<M, FName>;
+              const initialValue = lookup.found ? value : field.initialValue;
 
               return computeFieldReset(field, value, initialValue);
             })
@@ -288,14 +286,10 @@ export function createFormStore<M extends object = FieldValueMapping>(
         // Single fields.map() pass for the same reason as reset() above.
         setFormState('fields', (fields) =>
           fields.map((field) => {
-            if (!Object.hasOwn(values, field.name)) return field;
+            const lookup = getValueAtFieldPath(values, field.name);
+            if (!lookup.found) return field;
 
-            return computeFieldValueUpdate(
-              field,
-              values[field.name as keyof typeof values] as FieldValueFor<M, FName>,
-              undefined,
-              true
-            );
+            return computeFieldValueUpdate(field, lookup.value as FieldValueFor<M, FName>, undefined, true);
           })
         );
       },

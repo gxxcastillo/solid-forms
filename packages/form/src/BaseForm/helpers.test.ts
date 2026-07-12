@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import {
   createBaseFormOnSubmitHandler,
   fieldsToProps,
+  fieldsToValueSnapshot,
   getSubmitErrorMessage,
   resolveSubmitHandler
 } from './helpers';
@@ -76,6 +77,55 @@ describe('fieldsToProps', () => {
       { name: 'age', value: 30 }
     ];
     expect(fieldsToProps(fields)).toEqual({ email: 'a@b.com', age: 30 });
+  });
+
+  it('preserves dotted field names as exact keys', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const fields: any[] = [
+      { name: 'items.0.title', value: 'a' },
+      { name: 'user.email', value: 'b' },
+      { name: 'email', value: 'a@b.com' }
+    ];
+    expect(fieldsToProps(fields)).toEqual({
+      'items.0.title': 'a',
+      'user.email': 'b',
+      email: 'a@b.com'
+    });
+  });
+
+  it('defines prototype-looking field names without mutating object prototypes', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const fields: any[] = [
+      { name: '__proto__', value: { safe: true } },
+      { name: '__proto__.polluted', value: true }
+    ];
+    const props = fieldsToProps(fields) as Record<string, unknown>;
+
+    expect(Object.hasOwn(props, '__proto__')).toBe(true);
+    expect(Object.getPrototypeOf(props)).toBe(Object.prototype);
+    expect(({} as { polluted?: boolean }).polluted).toBeUndefined();
+    expect(props['__proto__.polluted']).toBe(true);
+  });
+});
+
+describe('fieldsToValueSnapshot', () => {
+  it('keeps a flat name→value map for dotted field names', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const fields: any[] = [
+      { name: 'items.0.title', value: 'a' },
+      { name: 'email', value: 'a@b.com' }
+    ];
+    expect(fieldsToValueSnapshot(fields)).toEqual({ 'items.0.title': 'a', email: 'a@b.com' });
+  });
+
+  it('keeps prototype-looking field names as own snapshot keys', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const fields: any[] = [{ name: '__proto__', value: 'literal' }];
+    const snapshot = fieldsToValueSnapshot(fields);
+
+    expect(Object.hasOwn(snapshot, '__proto__')).toBe(true);
+    expect(Object.getPrototypeOf(snapshot)).toBe(Object.prototype);
+    expect(snapshot['__proto__']).toBe('literal');
   });
 });
 
