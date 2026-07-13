@@ -1,0 +1,12 @@
+/* `.form` (BaseForm.module.css) only lays out its own *direct* children via
+   flex/gap — a field array's per-row grouping element sits between <form>
+   and that row's fields, so without its own copy of that layout, a row's
+   fields fall back to plain block stacking with no gap at all. Using the
+   tighter --sf-field-array-row-gap (rather than reusing --sf-field-gap)
+   makes a row's own fields read as one group via proximity, distinct from
+   the wider gap .form itself puts between one row and the next. */
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sf-field-array-row-gap);
+}

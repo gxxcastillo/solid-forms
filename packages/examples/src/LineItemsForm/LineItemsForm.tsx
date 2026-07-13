@@ -1,6 +1,4 @@
-import { For } from 'solid-js';
-
-import { Form, InputField, SubmitButton, useFieldArray } from '@gxxc/solid-forms';
+import { type FieldArrayHelpers, FieldArray, Form, SubmitButton } from '@gxxc/solid-forms';
 
 export interface LineItem {
   description: string;
@@ -17,49 +15,39 @@ export interface LineItemsFormProps {
 
 const emptyItem: LineItem = { description: '', quantity: '1' };
 
-// useFieldArray reads the form's context (useFormContext), so it must be
-// called from a component rendered *inside* <Form>, same as any InputField
-// — not from LineItemsForm itself, which renders <Form> as its own child
-// and would call useFieldArray before that context exists.
+// FieldArray reads the form's context (useFormContext) internally, so it
+// must be rendered from a component *inside* <Form> — not from
+// LineItemsForm itself, which renders <Form> as its own child and would
+// mount FieldArray before that context exists.
 function LineItemFields() {
-  const [items, itemsArray] = useFieldArray<LineItem>('items', [emptyItem]);
+  let itemsArray!: FieldArrayHelpers<LineItem>;
 
   return (
     <>
-      <For each={items()}>
-        {(item, index) => (
-          <div>
-            <InputField
-              name={`items.${index()}.description`}
-              label='Description'
-              defaultValue={item.defaultValue.description}
-              required
-            />
-            <InputField
-              name={`items.${index()}.quantity`}
-              label='Quantity'
-              defaultValue={item.defaultValue.quantity}
-              required
-            />
-            <button type='button' onClick={() => itemsArray.remove(index())}>
+      <FieldArray<LineItem> name='items' defaultValue={[emptyItem]} helpersRef={(helpers) => (itemsArray = helpers)}>
+        {(fields, item, remove) => (
+          <>
+            <fields.InputField name='description' label='Description' defaultValue={item.description} required />
+            <fields.InputField name='quantity' label='Quantity' defaultValue={item.quantity} required />
+            <SubmitButton variant='approve' isDisabled={false} onClick={remove}>
               Remove
-            </button>
-          </div>
+            </SubmitButton>
+          </>
         )}
-      </For>
-      <button type='button' onClick={() => itemsArray.append({ ...emptyItem })}>
+      </FieldArray>
+      <SubmitButton variant='approve' isDisabled={false} onClick={() => itemsArray.append({ ...emptyItem })}>
         Add line item
-      </button>
+      </SubmitButton>
     </>
   );
 }
 
 export function LineItemsForm(props: LineItemsFormProps) {
   return (
-    // Field names inside LineItemFields are plain dotted strings
-    // (`items.${index()}.description`), not typed against LineItemsValues —
-    // deep-path field-name typing for arrays/nested objects is a known,
-    // still-open gap (see strategic-backlog.md T2), so onSubmit's real
+    // Field names inside FieldArray's children are typed against LineItem
+    // per row, not against LineItemsValues as a whole — deep-path field-name
+    // typing for the *form's* own onSubmit shape (items: LineItem[]) is a
+    // known, still-open gap (see strategic-backlog.md T2), so onSubmit's real
     // runtime shape ({ items: [...] }, built by fieldsToProps' nested
     // submit-value construction) has to be asserted here rather than inferred.
     <Form onSubmit={(props.onSubmit ?? (() => undefined)) as (values: object) => void}>

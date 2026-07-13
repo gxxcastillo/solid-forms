@@ -1,4 +1,4 @@
-import { createRoot } from 'solid-js';
+import { createRoot, createSignal } from 'solid-js';
 import { describe, expect, it } from 'vitest';
 
 import { FormContextProvider, type FormStore, createFormStore } from '@gxxc/solid-forms-state';
@@ -125,6 +125,17 @@ describe('useFieldArray', () => {
     expect(state.getFieldValue('items.0.title')).toBe('c');
     expect(state.getFieldValue('items.1.title')).toBe('b');
     expect(state.getFieldValue('items.2.title')).toBe('a');
+    dispose();
+  });
+
+  it('pathAt derives a row\'s base path from the array\'s own name and a reactive index', () => {
+    const { helpers, dispose } = setup([{ title: 'a' }, { title: 'b' }]);
+    const [index, setIndex] = createSignal(0);
+    const path = helpers.pathAt(index);
+
+    expect(path()).toBe('items.0');
+    setIndex(1);
+    expect(path()).toBe('items.1');
     dispose();
   });
 

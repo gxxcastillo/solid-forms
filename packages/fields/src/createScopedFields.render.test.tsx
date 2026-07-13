@@ -1,0 +1,198 @@
+import { cleanup, fireEvent, render, screen } from '@solidjs/testing-library';
+import { For } from 'solid-js';
+import { afterEach, describe, expect, it } from 'vitest';
+
+import { FormContextProvider, type FormStore, createFormStore } from '@gxxc/solid-forms-state';
+
+import inputStyles from './InputField/InputField.module.css';
+import { createScopedFields } from './createScopedFields';
+import { useFieldArray } from './hooks/useFieldArray';
+
+type Row = { password: string; confirm: string };
+type TestFields = Record<string, unknown>;
+
+function Rows() {
+  const [items] = useFieldArray<Row>('rows', [
+    { password: '', confirm: '' },
+    { password: '', confirm: '' }
+  ]);
+
+  return (
+    <For each={items()}>
+      {(item, index) => {
+        const fields = createScopedFields<Row>(() => `rows.${index()}`);
+        return (
+          <div>
+            <fields.PasswordField
+              name='password'
+              label='Password'
+              defaultValue={item.defaultValue.password}
+              data-testid={`password-${index()}`}
+            />
+            <fields.PasswordField
+              name='confirm'
+              label='Confirm'
+              match='password'
+              defaultValue={item.defaultValue.confirm}
+              data-testid={`confirm-${index()}`}
+            />
+          </div>
+        );
+      }}
+    </For>
+  );
+}
+
+function RowsWithCustomValidator() {
+  const [items] = useFieldArray<Row>('rows', [
+    { password: '', confirm: '' },
+    { password: '', confirm: '' }
+  ]);
+
+  return (
+    <For each={items()}>
+      {(item, index) => {
+        const fields = createScopedFields<Row>(() => `rows.${index()}`);
+        return (
+          <div>
+            <fields.PasswordField
+              name='password'
+              label='Password'
+              defaultValue={item.defaultValue.password}
+              data-testid={`custom-password-${index()}`}
+            />
+            <fields.PasswordField
+              name='confirm'
+              label='Confirm'
+              defaultValue={item.defaultValue.confirm}
+              validator={(name, value, formState, setErrors) => {
+                setErrors(value === formState.getFieldValue('password') ? [] : [`${name} mismatch`]);
+              }}
+              data-testid={`custom-confirm-${index()}`}
+            />
+          </div>
+        );
+      }}
+    </For>
+  );
+}
+
+function RowsWithDisplayCallbacks() {
+  const [items] = useFieldArray<Row>('rows', [
+    { password: '', confirm: '' },
+    { password: '', confirm: '' }
+  ]);
+
+  return (
+    <For each={items()}>
+      {(item, index) => {
+        const fields = createScopedFields<Row>(() => `rows.${index()}`);
+        const shouldShow = (_value: unknown, formState?: { getFieldValue: (name: 'password') => unknown }) =>
+          formState?.getFieldValue('password') === 'show';
+
+        return (
+          <div>
+            <fields.PasswordField
+              name='password'
+              label='Password'
+              defaultValue={item.defaultValue.password}
+              data-testid={`display-password-${index()}`}
+            />
+            <fields.PasswordField
+              name='confirm'
+              label='Confirm'
+              defaultValue={item.defaultValue.confirm}
+              showLabel={shouldShow}
+              showIcon={shouldShow}
+              icon={<span data-testid={`display-icon-${index()}`}>ready</span>}
+              data-testid={`display-confirm-${index()}`}
+            />
+          </div>
+        );
+      }}
+    </For>
+  );
+}
+
+describe('createScopedFields + useFieldArray integration', () => {
+  afterEach(cleanup);
+
+  it("registers each row's fields under its own scoped path", () => {
+    const store = createFormStore<TestFields>() as FormStore<TestFields>;
+    render(() => (
+      <FormContextProvider store={store}>
+        <Rows />
+      </FormContextProvider>
+    ));
+
+    const [state] = store;
+    expect(state.hasFieldBeenInitialized('rows.0.password')).toBe(true);
+    expect(state.hasFieldBeenInitialized('rows.0.confirm')).toBe(true);
+    expect(state.hasFieldBeenInitialized('rows.1.password')).toBe(true);
+    expect(state.hasFieldBeenInitialized('rows.1.confirm')).toBe(true);
+  });
+
+  it('resolves `match` against the same row, not a sibling row or the top-level form', () => {
+    const store = createFormStore<TestFields>() as FormStore<TestFields>;
+    render(() => (
+      <FormContextProvider store={store}>
+        <Rows />
+      </FormContextProvider>
+    ));
+
+    const [state] = store;
+
+    // Row 0: mismatched password/confirm -> match error on row 0's confirm.
+    fireEvent.input(screen.getByTestId('password-0'), { target: { value: 'row0-pass' } });
+    fireEvent.input(screen.getByTestId('confirm-0'), { target: { value: 'row0-mismatch' } });
+    expect(state.getFieldErrors('rows.0.confirm')).toContain('"Confirm" does not match "Password"');
+
+    // Row 1's password happens to equal row 0's confirm entry. If `match`
+    // were still bound to the unscoped `password` (or resolved against row
+    // 0 instead of row 1), row 1's confirm would spuriously validate here.
+    fireEvent.input(screen.getByTestId('password-1'), { target: { value: 'row0-mismatch' } });
+    fireEvent.input(screen.getByTestId('confirm-1'), { target: { value: 'row0-mismatch' } });
+    expect(state.getFieldErrors('rows.1.confirm')).toEqual([]);
+
+    // Fixing row 0's confirm to actually match row 0's password clears its
+    // own error without touching row 1.
+    fireEvent.input(screen.getByTestId('confirm-0'), { target: { value: 'row0-pass' } });
+    expect(state.getFieldErrors('rows.0.confirm')).toEqual([]);
+    expect(state.getFieldErrors('rows.1.confirm')).toEqual([]);
+  });
+
+  it('passes custom validators a row-local form state', () => {
+    const store = createFormStore<TestFields>() as FormStore<TestFields>;
+    render(() => (
+      <FormContextProvider store={store}>
+        <RowsWithCustomValidator />
+      </FormContextProvider>
+    ));
+
+    const [state] = store;
+
+    fireEvent.input(screen.getByTestId('custom-password-0'), { target: { value: 'row0-pass' } });
+    fireEvent.input(screen.getByTestId('custom-confirm-0'), { target: { value: 'row0-mismatch' } });
+    expect(state.getFieldErrors('rows.0.confirm')).toEqual(['confirm mismatch']);
+
+    fireEvent.input(screen.getByTestId('custom-password-1'), { target: { value: 'row0-mismatch' } });
+    fireEvent.input(screen.getByTestId('custom-confirm-1'), { target: { value: 'row0-mismatch' } });
+    expect(state.getFieldErrors('rows.1.confirm')).toEqual([]);
+  });
+
+  it('passes display callbacks a row-local form state', () => {
+    const store = createFormStore<TestFields>() as FormStore<TestFields>;
+    render(() => (
+      <FormContextProvider store={store}>
+        <RowsWithDisplayCallbacks />
+      </FormContextProvider>
+    ));
+
+    fireEvent.input(screen.getByTestId('display-password-1'), { target: { value: 'show' } });
+
+    expect(document.querySelector('label[for="rows.0.confirm"]')).toHaveClass(inputStyles.screenReaderOnly);
+    expect(document.querySelector('label[for="rows.1.confirm"]')).toHaveClass(inputStyles.label);
+    expect(screen.queryByTestId('display-icon-0')).not.toBeInTheDocument();
+    expect(screen.getByTestId('display-icon-1')).toHaveTextContent('ready');
+  });
+});

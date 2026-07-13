@@ -71,6 +71,10 @@
   --sf-textarea-padding-y: 0.625rem;
   --sf-textarea-min-height: 6rem;
   --sf-field-gap: 1.15rem;
+  /* Tighter than --sf-field-gap on purpose: a FieldArray row's own fields
+     should read as one group via proximity, distinct from the (wider)
+     --sf-field-gap separating one row from the next. */
+  --sf-field-array-row-gap: calc(var(--sf-field-gap) * 0.5);
   --sf-label-inset-x: 0.9rem;
   --sf-checkbox-size: 1.15rem;
 

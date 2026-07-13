@@ -1,4 +1,4 @@
-import { For, type JSX, Show } from 'solid-js';
+import { For, type JSX, Show, createMemo } from 'solid-js';
 
 import type { FormState } from '@gxxc/solid-forms';
 
@@ -15,7 +15,33 @@ function formatValue(value: unknown): string {
   return JSON.stringify(value);
 }
 
+// Fields registered by a FieldArray row share a `<name>.<index>.` prefix
+// (e.g. items.0.description, items.0.quantity) — grouping on that prefix
+// lets the inspector box a row's fields together instead of listing every
+// field as its own unrelated entry, same as any other field.
+function fieldGroupKey(name: string): string {
+  return name.match(/^(.+\.\d+)\./)?.[1] ?? name;
+}
+
 export function FormStateInspector<M extends object>(props: FormStateInspectorProps<M>): JSX.Element {
+  const groups = createMemo(() => {
+    const order: string[] = [];
+    const byKey = new Map<string, typeof props.state.fields>();
+
+    for (const field of props.state.fields) {
+      const key = fieldGroupKey(field.name);
+      const existing = byKey.get(key);
+      if (existing) {
+        existing.push(field);
+      } else {
+        byKey.set(key, [field]);
+        order.push(key);
+      }
+    }
+
+    return order.map((key) => ({ key, fields: byKey.get(key)! }));
+  });
+
   return (
     <div class={styles.panel}>
       <h3 class={styles.heading}>{props.title ?? 'Form state'}</h3>
@@ -32,23 +58,29 @@ export function FormStateInspector<M extends object>(props: FormStateInspectorPr
 
       <Show when={props.state.fields.length} fallback={<p class={styles.empty}>No fields registered yet.</p>}>
         <dl class={styles.fields}>
-          <For each={props.state.fields}>
-            {(field) => (
-              <div class={styles.field}>
-                <dt class={styles.fieldName}>{field.label ?? field.name}</dt>
-                <dd class={styles.fieldValue}>{formatValue(field.value)}</dd>
-                <dd class={styles.fieldMeta}>
-                  <span class={field.hasChanged ? styles.tagOn : styles.tagOff}>changed</span>
-                  <span class={field.hasBeenBlurred ? styles.tagOn : styles.tagOff}>blurred</span>
-                  <span class={field.errors.length ? styles.tagOff : styles.tagOn}>valid</span>
-                </dd>
-                <Show when={(field.hasBeenValid || field.hasBeenBlurred) && field.errors.length}>
-                  <dd class={styles.fieldErrors}>
-                    <ul class={styles.errors}>
-                      <For each={field.errors}>{(err) => <li>{err}</li>}</For>
-                    </ul>
-                  </dd>
-                </Show>
+          <For each={groups()}>
+            {(group) => (
+              <div class={styles.fieldGroup}>
+                <For each={group.fields}>
+                  {(field) => (
+                    <div class={styles.fieldEntry}>
+                      <dt class={styles.fieldName}>{field.label ?? field.name}</dt>
+                      <dd class={styles.fieldValue}>{formatValue(field.value)}</dd>
+                      <dd class={styles.fieldMeta}>
+                        <span class={field.hasChanged ? styles.tagOn : styles.tagOff}>changed</span>
+                        <span class={field.hasBeenBlurred ? styles.tagOn : styles.tagOff}>blurred</span>
+                        <span class={field.errors.length ? styles.tagOff : styles.tagOn}>valid</span>
+                      </dd>
+                      <Show when={(field.hasBeenValid || field.hasBeenBlurred) && field.errors.length}>
+                        <dd class={styles.fieldErrors}>
+                          <ul class={styles.errors}>
+                            <For each={field.errors}>{(err) => <li>{err}</li>}</For>
+                          </ul>
+                        </dd>
+                      </Show>
+                    </div>
+                  )}
+                </For>
               </div>
             )}
           </For>

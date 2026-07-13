@@ -21,6 +21,11 @@ export type FieldArrayHelpers<T> = {
   remove: (index: number) => void;
   move: (from: number, to: number) => void;
   swap: (a: number, b: number) => void;
+  // Derives a row's own field-name base path from its (reactive) index, so a
+  // caller addressing that row's fields never re-types this array's own
+  // `name` — the one thing that has to already match between useFieldArray's
+  // own `name` argument and every field underneath a given row.
+  pathAt: (index: Accessor<number>) => Accessor<string>;
 };
 
 function moveIndex(index: number, from: number, to: number): number {
@@ -109,7 +114,9 @@ export function useFieldArray<T = unknown>(
           return next;
         });
       });
-    }
+    },
+
+    pathAt: (index) => () => `${name}.${index()}`
   };
 
   return [items, helpers];

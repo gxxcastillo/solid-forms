@@ -41,7 +41,6 @@ export type FieldInternalProps<M extends object, N extends StringKeyOf<M>> = {
   errors?: ErrorMessages;
   match?: Exclude<StringKeyOf<M>, N>;
   setValue?: (value?: FieldValue, initialize?: boolean) => void;
-  showIcon?: (value?: FieldValueFor<M, N>, e?: ErrorMessages) => boolean;
   validator?: CustomValidator<M, N>;
   parse?: ParseFunction<FieldValueFor<M, N>>;
   format?: FormatFunction<FieldValueFor<M, N>>;
