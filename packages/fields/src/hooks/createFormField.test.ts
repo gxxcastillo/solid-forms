@@ -260,6 +260,52 @@ describe('createValueSetter', () => {
     expect(mutations.setFieldValue).not.toHaveBeenCalled();
   });
 
+  it('writes to the current name after props.name changes post-mount, not a mount-time snapshot', () => {
+    // Simulates what a useFieldArray row experiences when an earlier item is
+    // removed and remapFieldNames re-addresses this row's underlying field —
+    // the row's own component instance survives (reindex-free identity), so
+    // its props.name prop changes without a remount.
+    const state = makeState('a');
+    const mutations = makeMutations();
+    const props: { name: string; parse: (v: unknown) => unknown } = {
+      name: 'items.1.title',
+      parse: (v: unknown) => v
+    };
+    const setValue = createValueSetter(state, mutations, {}, props as never);
+
+    setValue('first');
+    expect(mutations.setFieldValue).toHaveBeenLastCalledWith('items.1.title', 'first', []);
+
+    props.name = 'items.0.title';
+    setValue('second');
+    expect(mutations.setFieldValue).toHaveBeenLastCalledWith('items.0.title', 'second', []);
+  });
+
+  it('reattaches an in-flight async validator result under the field\'s current name after a shift', () => {
+    // remapFieldNames preserves a field's generation across a rename, so the
+    // existing staleness guard (formState.getField(name)?.generation) should
+    // still find the same record and apply the result once resolved — proven
+    // here against a fixed generation with props.name changed mid-flight.
+    const state = makeState();
+    state.getField = () => ({ generation: 0 }) as never;
+    const mutations = makeMutations();
+    let pendingSetErrors!: (e: string[]) => void;
+    const props: { name: string; parse: (v: unknown) => unknown; validator: unknown } = {
+      name: 'items.1.title',
+      parse: (v: unknown) => v,
+      validator: vi.fn((_n: string, _v: unknown, _s: unknown, setErrors: (e: string[]) => void) => {
+        pendingSetErrors = setErrors;
+      })
+    };
+    const setValue = createValueSetter(state, mutations, {}, props as never);
+
+    setValue('draft');
+    props.name = 'items.0.title';
+    pendingSetErrors(['taken']);
+
+    expect(mutations.setFieldErrors).toHaveBeenCalledWith('items.0.title', ['taken']);
+  });
+
   it('reads the current value when invoked instead of using a mount-time snapshot', () => {
     let currentValue = false;
     const state = makeState();

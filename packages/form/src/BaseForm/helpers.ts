@@ -1,6 +1,11 @@
 import { batch } from 'solid-js';
 
-import { type FormFields, type FormState, type FormStateMutations } from '@gxxc/solid-forms-state';
+import {
+  buildObjectFromFieldEntries,
+  type FormFields,
+  type FormState,
+  type FormStateMutations
+} from '@gxxc/solid-forms-state';
 import { validateWithSchema } from '@gxxc/solid-forms-validation';
 
 import {
@@ -41,10 +46,7 @@ function setOwnEnumerableProperty(target: Record<string, unknown>, name: string,
 }
 
 export function fieldsToProps<M extends object>(formFields: FormFields<M>) {
-  return formFields.reduce<Record<string, unknown>>((obj, field) => {
-    setOwnEnumerableProperty(obj, field.name, field.value);
-    return obj;
-  }, {}) as M;
+  return buildObjectFromFieldEntries(formFields.map((field) => [field.name, field.value])) as M;
 }
 
 // Captured separately from fieldsToProps so the staleness check can compare

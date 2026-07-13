@@ -85,7 +85,12 @@ export function createValueSetter<
   validationConstraints: C,
   props: FormFieldProps<G, M, N>
 ) {
-  const name = props.name as N;
+  // Read live at each use site below (never captured to a local `name`
+  // const) so a field whose `name` prop changes after mount — e.g. a
+  // useFieldArray row re-addressed by remapFieldNames after an earlier item
+  // shifts its index — keeps writing to wherever it currently lives, instead
+  // of a stale mount-time snapshot. Every existing (non-array) field usage
+  // passes a static string literal for `name`, so this is a no-op for them.
 
   // Sequencing token: every commit bumps it, and an async custom validator only
   // applies its result while its captured token is still current. This stops a
@@ -94,7 +99,7 @@ export function createValueSetter<
 
   function commit(value: FieldValueFor<M, N>, isInitialization: boolean) {
     const token = ++validationToken;
-    const newErrors = validate(name, value, validationConstraints, formState, props.label);
+    const newErrors = validate(props.name, value, validationConstraints, formState, props.label);
     const errorsForDisplay = newErrors.length > 0 ? newErrors : [];
 
     // Captured from the mutation's own return value (which, for an
@@ -107,16 +112,22 @@ export function createValueSetter<
     // newer commit of mine superseded this" from "an external reset overwrote
     // the field out from under this pending validation."
     const generation = isInitialization
-      ? (formStateMutations.initializeField(name, value, errorsForDisplay, props.label) ?? 0)
-      : (formStateMutations.setFieldValue(name, value, errorsForDisplay) ?? 0);
+      ? (formStateMutations.initializeField(props.name, value, errorsForDisplay, props.label) ?? 0)
+      : (formStateMutations.setFieldValue(props.name, value, errorsForDisplay) ?? 0);
 
     // Custom validators run after built-in constraints and only when no built-in errors exist.
     // Sync validators call setFieldErrors immediately; async validators call it when they resolve.
     if (newErrors.length === 0 && props.validator) {
-      props.validator(name, value, formState, (errors) => {
+      props.validator(props.name, value, formState, (errors) => {
         if (token !== validationToken) return;
-        if ((formState.getField(name)?.generation ?? 0) !== generation) return;
-        formStateMutations.setFieldErrors(name, errors);
+        // Reads props.name live too: for a field re-addressed by a
+        // useFieldArray shift while this validation was in flight, this
+        // still finds the same record (remapFieldNames preserves identity
+        // and doesn't bump generation) and correctly reattaches the result;
+        // for a field that was actually removed, props.name is frozen at
+        // whatever it was at disposal and getField correctly finds nothing.
+        if ((formState.getField(props.name)?.generation ?? 0) !== generation) return;
+        formStateMutations.setFieldErrors(props.name, errors);
       });
     }
   }
@@ -124,7 +135,7 @@ export function createValueSetter<
   const setValue = Object.assign(
     function setValue(val?: FieldValue, isInitialization = false) {
       let value: FieldValueFor<M, N>;
-      const currentValue = formState.getFieldValue(name);
+      const currentValue = formState.getFieldValue(props.name);
 
       if ((props.disabled || props.readonly) && !isInitialization) {
         return;
@@ -154,8 +165,8 @@ export function createValueSetter<
       // Used to refresh a cross-field constraint (e.g. `match`) when the field it
       // depends on changes, since that change does not flow through this setValue.
       revalidate() {
-        if (!formState.hasFieldBeenInitialized(name)) return;
-        commit(formState.getFieldValue(name) as FieldValueFor<M, N>, false);
+        if (!formState.hasFieldBeenInitialized(props.name)) return;
+        commit(formState.getFieldValue(props.name) as FieldValueFor<M, N>, false);
       }
     }
   );
@@ -224,10 +235,22 @@ export function createFormField<
   const onInput = createOnInput<G, M, N>(setValue, props);
   const onBlur = createOnBlur<G, M, N>(setValue, props, formStateMutations.setBlurredField);
 
-  // Without this, a conditionally-rendered field leaves a stale entry in the
-  // store that keeps counting toward isFormValid/haveValuesChanged/submitted
-  // values after it unmounts (see strategic-backlog.md B1).
-  onCleanup(() => formStateMutations.removeField(props.name));
+  // Tracked by the generation-watching effect below and read only here, at
+  // unmount. Without it, removeField(props.name) at cleanup time would
+  // delete whatever field currently sits at that name — usually still this
+  // one, but not always: a useFieldArray remove()/insert()/move() can
+  // rename a *different*, surviving field into this exact name (proactively,
+  // before this component's own disposal runs) as part of reindexing after
+  // an earlier item shifts. Passing the generation this component last saw
+  // for its own field lets removeField no-op instead of deleting that
+  // unrelated field out from under its new owner.
+  let lastKnownGeneration: number | undefined;
+
+  // Without this cleanup, a conditionally-rendered field leaves a stale
+  // entry in the store that keeps counting toward
+  // isFormValid/haveValuesChanged/submitted values after it unmounts (see
+  // strategic-backlog.md B1).
+  onCleanup(() => formStateMutations.removeField(props.name, lastKnownGeneration));
 
   if (props.isControlled && !isInitialized()) {
     setValue(
@@ -291,6 +314,7 @@ export function createFormField<
     const fieldName = props.name as StringKeyOf<M>;
     const field = formState.getField(fieldName);
     if (field?.generation === undefined) return prevGeneration;
+    lastKnownGeneration = field.generation;
     if (prevGeneration !== undefined && field.generation !== prevGeneration && untrack(() => field.wasReset)) {
       setValue.revalidate();
       formStateMutations.setBlurredField(fieldName);

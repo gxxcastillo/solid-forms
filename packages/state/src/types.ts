@@ -74,7 +74,17 @@ export type FormStateMutations<M extends object = FieldValueMapping> = {
     errors?: ErrorMessages,
     label?: string
   ) => number | undefined;
-  removeField: <N extends StringKeyOf<M>>(name: N) => void;
+  /**
+   * Removes the field at `name`. If `expectedGeneration` is passed and the
+   * field currently at `name` has a *different* generation, this is a no-op
+   * instead — the field this caller originally owned was renamed away (e.g.
+   * by `remapFieldNames`, as `useFieldArray` does on remove/insert/move),
+   * and a different field's data has since moved into this name. Without
+   * this guard, a disposing component's own unmount cleanup (which always
+   * targets whatever name it was last rendered with) could delete the
+   * unrelated field that now lives there instead of correctly no-op'ing.
+   */
+  removeField: <N extends StringKeyOf<M>>(name: N, expectedGeneration?: number) => void;
   /** Returns the field's resulting generation, so callers can capture a staleness baseline without a second lookup. */
   setFieldValue: <N extends StringKeyOf<M>>(
     name: N,
@@ -92,6 +102,16 @@ export type FormStateMutations<M extends object = FieldValueMapping> = {
   setBlurredField: <N extends StringKeyOf<M>>(name: N) => void;
   /** Marks every registered field as blurred in one pass, same as calling `setBlurredField` for each one. */
   setBlurredFields: () => void;
+  /**
+   * Renames or removes registered fields in one pass, per a caller-supplied
+   * `remap` function evaluated against each field's current name: `null`
+   * removes the field, the same name is a no-op, anything else renames it
+   * in place (preserving its value/errors/history). Used by `useFieldArray`
+   * to re-address a shifted item's fields (e.g. `items.1.title` ->
+   * `items.0.title`) without losing the field's live state. Throws if
+   * `remap` produces a duplicate name across two different fields.
+   */
+  remapFieldNames: (remap: (name: string) => string | null) => void;
   /** Reverts one field to its initial value and clears its errors. No-op for an unregistered field. */
   resetField: <N extends StringKeyOf<M>>(name: N) => void;
   /**

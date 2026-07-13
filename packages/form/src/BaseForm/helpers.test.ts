@@ -79,16 +79,17 @@ describe('fieldsToProps', () => {
     expect(fieldsToProps(fields)).toEqual({ email: 'a@b.com', age: 30 });
   });
 
-  it('preserves dotted field names as exact keys', () => {
+  it('nests dotted and array-index field names into a real nested object', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const fields: any[] = [
       { name: 'items.0.title', value: 'a' },
-      { name: 'user.email', value: 'b' },
+      { name: 'items.1.title', value: 'b' },
+      { name: 'user.email', value: 'c' },
       { name: 'email', value: 'a@b.com' }
     ];
     expect(fieldsToProps(fields)).toEqual({
-      'items.0.title': 'a',
-      'user.email': 'b',
+      items: [{ title: 'a' }, { title: 'b' }],
+      user: { email: 'c' },
       email: 'a@b.com'
     });
   });

@@ -221,8 +221,12 @@ export function createFormStore<M extends object = FieldValueMapping>(
       // hasFieldBeenInitialized guard) rather than preserving the removed
       // field's prior value — this matches how a never-before-seen field
       // behaves today.
-      removeField: <N extends FName>(name: N) =>
-        setFormState('fields', (fields) => fields.filter((f) => f.name !== name)),
+      removeField: <N extends FName>(name: N, expectedGeneration?: number) =>
+        setFormState('fields', (fields) =>
+          fields.filter(
+            (f) => !(f.name === name && (expectedGeneration === undefined || f.generation === expectedGeneration))
+          )
+        ),
 
       setFieldValue: <N extends FName>(name: N, value?: FieldValueFor<M, N>, errors?: FErrors) => {
         // Resolve the field once: this runs on every keystroke, so a single O(n)
@@ -256,6 +260,29 @@ export function createFormStore<M extends object = FieldValueMapping>(
         setFormState('fields', (fields) =>
           fields.map((field) => (field.hasBeenBlurred ? field : { ...field, hasBeenBlurred: true }))
         ),
+
+      remapFieldNames: (remap: (name: string) => string | null) => {
+        setFormState('fields', (fields) => {
+          const next: typeof fields = [];
+          const seenNames = new Set<string>();
+
+          for (const field of fields) {
+            const nextName = remap(field.name);
+            if (nextName === null) continue;
+
+            if (seenNames.has(nextName)) {
+              throw new Error(
+                `remapFieldNames: remap produced a duplicate field name "${nextName}" — this is a bug in the caller's remap function, not a normal user error.`
+              );
+            }
+            seenNames.add(nextName);
+
+            next.push(nextName === field.name ? field : { ...field, name: nextName as FName });
+          }
+
+          return next;
+        });
+      },
 
       resetField: <N extends FName>(name: N) => {
         const field = getters.getField(name);

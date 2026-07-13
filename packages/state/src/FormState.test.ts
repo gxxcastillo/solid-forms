@@ -337,6 +337,71 @@ describe('setBlurredField', () => {
   });
 });
 
+describe('remapFieldNames', () => {
+  it('renames a field, preserving its value/errors/history', () => {
+    const { store, dispose } = makeStore();
+    const [state, mutations] = store;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (mutations.initializeField as any)('items.1.title', 'draft', ['Required']);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (mutations.setChangedField as any)('items.1.title');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (mutations.setBlurredField as any)('items.1.title');
+
+    mutations.remapFieldNames((name) => (name === 'items.1.title' ? 'items.0.title' : name));
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    expect((state.getField as any)('items.1.title')).toBeUndefined();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const renamed = (state.getField as any)('items.0.title');
+    expect(renamed?.value).toBe('draft');
+    expect(renamed?.errors).toEqual(['Required']);
+    expect(renamed?.hasChanged).toBe(true);
+    expect(renamed?.hasBeenBlurred).toBe(true);
+    dispose();
+  });
+
+  it('removes a field when remap returns null', () => {
+    const { store, dispose } = makeStore();
+    const [state, mutations] = store;
+    mutations.initializeField('username', 'alice', []);
+    mutations.remapFieldNames((name) => (name === 'username' ? null : name));
+    expect(state.getField('username')).toBeUndefined();
+    dispose();
+  });
+
+  it('is a no-op (preserves object identity) for a field mapped to its own name', () => {
+    const { store, dispose } = makeStore();
+    const [state, mutations] = store;
+    mutations.initializeField('username', 'alice', []);
+    const before = state.getField('username');
+    mutations.remapFieldNames((name) => name);
+    const after = state.getField('username');
+    expect(after).toBe(before);
+    dispose();
+  });
+
+  it('leaves fields the remap does not target untouched', () => {
+    const { store, dispose } = makeStore();
+    const [state, mutations] = store;
+    mutations.initializeField('username', 'alice', []);
+    mutations.initializeField('password', 'secret', []);
+    mutations.remapFieldNames((name) => (name === 'password' ? null : name));
+    expect(state.getField('username')?.value).toBe('alice');
+    expect(state.getField('password')).toBeUndefined();
+    dispose();
+  });
+
+  it('throws if remap produces a duplicate field name', () => {
+    const { store, dispose } = makeStore();
+    const [, mutations] = store;
+    mutations.initializeField('username', 'alice', []);
+    mutations.initializeField('password', 'secret', []);
+    expect(() => mutations.remapFieldNames(() => 'username')).toThrow(/duplicate field name/);
+    dispose();
+  });
+});
+
 describe('removeField', () => {
   it('removes a registered field', () => {
     const { store, dispose } = makeStore();
@@ -385,6 +450,45 @@ describe('removeField', () => {
     mutations.removeField('username');
     expect(state.getField('username')).toBeUndefined();
     expect(state.getField('password')?.value).toBe('secret');
+    dispose();
+  });
+
+  it('removes the field when expectedGeneration matches its current generation', () => {
+    const { store, dispose } = makeStore();
+    const [state, mutations] = store;
+    const generation = mutations.initializeField('username', 'alice', []);
+    mutations.removeField('username', generation);
+    expect(state.getField('username')).toBeUndefined();
+    dispose();
+  });
+
+  it('no-ops when expectedGeneration does not match — the name now belongs to a different field', () => {
+    // Simulates useFieldArray's remove(): a disposing component's own
+    // unmount cleanup targets a name that remapFieldNames has since renamed
+    // a *different*, surviving field into. Deleting by name alone would
+    // wipe that survivor's data instead of correctly no-op'ing.
+    const { store, dispose } = makeStore();
+    const [state, mutations] = store;
+    const staleGeneration = mutations.initializeField('username', 'alice', []);
+    mutations.removeField('username'); // the original field is gone
+    mutations.initializeField('username', 'bob', []); // a different field moves into the same name
+
+    mutations.removeField('username', staleGeneration);
+
+    expect(state.getFieldValue('username')).toBe('bob');
+    dispose();
+  });
+
+  it('still removes when expectedGeneration is omitted, regardless of which field currently occupies the name', () => {
+    const { store, dispose } = makeStore();
+    const [state, mutations] = store;
+    mutations.initializeField('username', 'alice', []);
+    mutations.removeField('username');
+    mutations.initializeField('username', 'bob', []);
+
+    mutations.removeField('username');
+
+    expect(state.getField('username')).toBeUndefined();
     dispose();
   });
 });

@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildObjectFromFieldEntries, getValueAtFieldPath, splitFieldPath } from './fieldPaths';
+import {
+  buildObjectFromFieldEntries,
+  getValueAtFieldPath,
+  shiftFieldArrayIndex,
+  splitFieldPath
+} from './fieldPaths';
 
 describe('splitFieldPath', () => {
   it('splits on dots', () => {
@@ -117,5 +122,45 @@ describe('buildObjectFromFieldEntries', () => {
     expect(Object.hasOwn(result, '__proto__')).toBe(true);
     expect(Object.getPrototypeOf(result)).toBe(Object.prototype);
     expect(result['__proto__']).toBe(value);
+  });
+});
+
+describe('shiftFieldArrayIndex', () => {
+  it('shifts a matching index down (remove-below case)', () => {
+    expect(shiftFieldArrayIndex('items.2.title', 'items', (i) => i - 1)).toBe('items.1.title');
+  });
+
+  it('shifts a matching index up (insert-below case)', () => {
+    expect(shiftFieldArrayIndex('items.2.title', 'items', (i) => i + 1)).toBe('items.3.title');
+  });
+
+  it('preserves a nested sub-path under the shifted item', () => {
+    expect(shiftFieldArrayIndex('items.2.tags.0', 'items', (i) => i - 1)).toBe('items.1.tags.0');
+  });
+
+  it('shifts a bare index with no trailing sub-path', () => {
+    expect(shiftFieldArrayIndex('items.2', 'items', (i) => i - 1)).toBe('items.1');
+  });
+
+  it('returns null (remove) when shift returns null', () => {
+    expect(shiftFieldArrayIndex('items.0.title', 'items', () => null)).toBeNull();
+  });
+
+  it('leaves a name that does not belong to this array unchanged', () => {
+    expect(shiftFieldArrayIndex('email', 'items', (i) => i - 1)).toBe('email');
+    expect(shiftFieldArrayIndex('otherArray.0.title', 'items', (i) => i - 1)).toBe('otherArray.0.title');
+  });
+
+  it('does not confuse a field that merely starts with the array name', () => {
+    expect(shiftFieldArrayIndex('itemsCount', 'items', (i) => i - 1)).toBe('itemsCount');
+  });
+
+  it('regex-escapes the array name so a literal dot cannot misfire on an unrelated field', () => {
+    expect(shiftFieldArrayIndex('axb.0', 'a.b', (i) => i - 1)).toBe('axb.0');
+    expect(shiftFieldArrayIndex('a.b.0.title', 'a.b', (i) => i + 1)).toBe('a.b.1.title');
+  });
+
+  it('does not shift an index belonging to a different array with a shared prefix', () => {
+    expect(shiftFieldArrayIndex('itemsArchive.0.title', 'items', (i) => i - 1)).toBe('itemsArchive.0.title');
   });
 });

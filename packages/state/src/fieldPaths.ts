@@ -93,3 +93,30 @@ export function buildObjectFromFieldEntries(
 
   return root;
 }
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+// Re-addresses one field array's items after an add/remove/move/insert/swap:
+// given a field's current name and the array's own field name, checks
+// whether the name is `${arrayName}.<index>` (optionally followed by more
+// path, e.g. `items.2.tags.0`), and if so re-splices in `shift(index)` in
+// place of the index. `shift` returning `null` signals the field should be
+// removed (its item was deleted); a name that isn't part of this array at
+// all (no match) passes through unchanged. `arrayName` is regex-escaped
+// before matching so a nested array's own name (e.g. `"a.b"`) can't
+// accidentally match an unrelated field like `"axb.0"`.
+export function shiftFieldArrayIndex(
+  name: string,
+  arrayName: string,
+  shift: (index: number) => number | null
+): string | null {
+  const match = name.match(new RegExp(`^${escapeRegExp(arrayName)}\\.(\\d+)(\\..*)?$`));
+  if (!match) return name;
+
+  const nextIndex = shift(Number(match[1]));
+  if (nextIndex === null) return null;
+
+  return `${arrayName}.${nextIndex}${match[2] ?? ''}`;
+}
