@@ -10,6 +10,22 @@ import { useFieldArray } from './hooks/useFieldArray';
 
 type Row = { password: string; confirm: string };
 type TestFields = Record<string, unknown>;
+type FormStateSnapshot = {
+  alreadyScopedPasswordName?: string;
+  confirmErrors?: string[];
+  fieldNames: string[];
+  haveValuesChanged: boolean;
+  isFormValid: boolean;
+  missingFieldName?: string;
+  passwordBlurred?: boolean;
+  passwordChanged?: boolean;
+  passwordFieldName?: string;
+  passwordInitialized: boolean;
+  passwordValid?: boolean;
+  passwordValue: unknown;
+  value: unknown;
+  wasPasswordValid?: boolean;
+};
 
 function Rows() {
   const [items] = useFieldArray<Row>('rows', [
@@ -114,6 +130,59 @@ function RowsWithDisplayCallbacks() {
   );
 }
 
+function RowsWithFormStateInspector(props: { onSnapshot: (snapshot: FormStateSnapshot) => void }) {
+  const [items] = useFieldArray<Row>('rows', [
+    { password: '', confirm: '' },
+    { password: '', confirm: '' }
+  ]);
+
+  return (
+    <For each={items()}>
+      {(item, index) => {
+        const basePath = () => `rows.${index()}`;
+        const fields = createScopedFields<Row>(basePath);
+
+        return (
+          <div>
+            <fields.PasswordField
+              name='password'
+              label='Password'
+              defaultValue={item.defaultValue.password}
+              data-testid={`inspector-password-${index()}`}
+            />
+            <fields.PasswordField
+              name='confirm'
+              label='Confirm'
+              defaultValue={item.defaultValue.confirm}
+              validator={(_name, value, formState, setErrors) => {
+                props.onSnapshot({
+                  alreadyScopedPasswordName: formState.getField(`${basePath()}.password` as never)?.name,
+                  confirmErrors: formState.getFieldErrors('confirm'),
+                  fieldNames: formState.fields.map((field) => field.name),
+                  haveValuesChanged: formState.haveValuesChanged,
+                  isFormValid: formState.isFormValid,
+                  missingFieldName: formState.getField('missing' as never)?.name,
+                  passwordBlurred: formState.hasFieldBlurred('password'),
+                  passwordChanged: formState.hasFieldChanged('password'),
+                  passwordFieldName: formState.getField('password')?.name,
+                  passwordInitialized: formState.hasFieldBeenInitialized('password'),
+                  passwordValid: formState.isFieldValid('password'),
+                  passwordValue: formState.getFieldValue('password'),
+                  value,
+                  wasPasswordValid: formState.hasFieldBeenValid('password')
+                });
+
+                setErrors(value === formState.getFieldValue('password') ? [] : ['mismatch']);
+              }}
+              data-testid={`inspector-confirm-${index()}`}
+            />
+          </div>
+        );
+      }}
+    </For>
+  );
+}
+
 describe('createScopedFields + useFieldArray integration', () => {
   afterEach(cleanup);
 
@@ -194,5 +263,36 @@ describe('createScopedFields + useFieldArray integration', () => {
     expect(document.querySelector('label[for="rows.1.confirm"]')).toHaveClass(inputStyles.label);
     expect(screen.queryByTestId('display-icon-0')).not.toBeInTheDocument();
     expect(screen.getByTestId('display-icon-1')).toHaveTextContent('ready');
+  });
+
+  it('passes validators a complete row-local form state facade', () => {
+    const snapshots: FormStateSnapshot[] = [];
+    const store = createFormStore<TestFields>() as FormStore<TestFields>;
+    render(() => (
+      <FormContextProvider store={store}>
+        <RowsWithFormStateInspector onSnapshot={(snapshot) => snapshots.push(snapshot)} />
+      </FormContextProvider>
+    ));
+
+    fireEvent.input(screen.getByTestId('inspector-password-0'), { target: { value: 'row0-pass' } });
+    fireEvent.blur(screen.getByTestId('inspector-password-0'));
+    fireEvent.input(screen.getByTestId('inspector-confirm-0'), { target: { value: 'row0-mismatch' } });
+
+    const mismatchSnapshot = snapshots.find((snapshot) => snapshot.value === 'row0-mismatch');
+    expect(mismatchSnapshot).toMatchObject({
+      alreadyScopedPasswordName: 'password',
+      confirmErrors: [],
+      fieldNames: ['password', 'confirm'],
+      haveValuesChanged: true,
+      isFormValid: true,
+      passwordBlurred: true,
+      passwordChanged: true,
+      passwordFieldName: 'password',
+      passwordInitialized: true,
+      passwordValid: true,
+      passwordValue: 'row0-pass',
+      wasPasswordValid: true
+    });
+    expect(mismatchSnapshot?.missingFieldName).toBeUndefined();
   });
 });

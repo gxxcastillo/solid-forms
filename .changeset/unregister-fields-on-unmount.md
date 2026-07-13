@@ -2,4 +2,8 @@
 '@gxxc/solid-forms': minor
 ---
 
-Fields now unregister from form state when they unmount, instead of leaving a stale entry behind. Previously a conditionally-rendered field (an accordion section, a wizard step, a toggled block) kept counting toward `isFormValid`, `haveValuesChanged`, and the submitted values forever, even after it left the DOM. A field that re-mounts starts fresh, matching how a never-before-seen field already behaved. Adds a `removeField` mutation to `FormStateMutations`.
+Fields now unregister from form state when they unmount instead of leaving stale entries behind.
+
+Conditionally rendered fields, wizard steps, and accordion sections no longer keep counting toward `isFormValid`, `haveValuesChanged`, or submitted values after they leave the DOM. Re-mounted fields start fresh, matching fields that have never mounted before.
+
+Adds a `removeField` mutation to `FormStateMutations`.

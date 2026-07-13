@@ -4,6 +4,11 @@
 
 Add Standard Schema validation support to `Form` and `useForm`.
 
-Pass `schema` to `<Form schema={schema}>` or `useForm({ schema })` to validate submitted field values with any Standard Schema-compatible library. Field-path issues are mapped back to registered fields, pathless or unregistered issues surface as form-level errors, and successful schema output is passed to `onSubmit`.
+Pass `schema` to `<Form schema={schema}>` or `useForm({ schema })` to validate submitted values with any Standard Schema-compatible library.
 
-Schema-backed forms infer field state from schema input and submit values from schema output, so transform/coercion schemas keep pre-submit state and `onSubmit` correctly typed. Consumers no longer need to hand-write a form values generic or add an index signature just to satisfy the library. Explicit form value interfaces without index signatures are also accepted across the form, field, validation, and state APIs.
+- Field-path issues are mapped back to registered fields.
+- Pathless or unregistered issues surface as form-level errors.
+- Successful schema output is passed to `onSubmit`.
+- Schema-backed forms infer field state from schema input and submit values from schema output, so transform/coercion schemas stay correctly typed.
+
+Plain form value interfaces no longer need index signatures just to satisfy the library.

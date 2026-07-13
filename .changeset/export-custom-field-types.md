@@ -2,4 +2,10 @@
 '@gxxc/solid-forms': minor
 ---
 
-Export `FormFieldProps`, `CustomValidator`, `ParseFunction`, and `FormatFunction` (plus the rest of the field-composition types) from the package. These were used throughout the field components' own typings and the custom-fields docs already told users to `import type { FormFieldProps } from '@gxxc/solid-forms'`, but nothing re-exported them, so that import — and any hand-written custom field wrapping `createFormField` — failed to resolve.
+Export field-composition types from the public package, including `FormFieldProps`, `CustomValidator`, `ParseFunction`, and `FormatFunction`.
+
+These types are needed for custom field components and now resolve from the documented import path:
+
+```ts
+import type { FormFieldProps } from '@gxxc/solid-forms';
+```
