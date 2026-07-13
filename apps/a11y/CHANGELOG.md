@@ -1,6 +1,6 @@
-# @gxxc/solid-forms-examples
+# a11y
 
-## 0.0.3
+## 0.0.1
 
 ### Patch Changes
 
@@ -20,17 +20,4 @@
 - Updated dependencies [909fbde]
 - Updated dependencies [7b14a95]
   - @gxxc/solid-forms@0.2.0
-
-## 0.0.2
-
-### Patch Changes
-
-- Updated dependencies
-  - @gxxc/solid-forms@0.1.1
-
-## 0.0.1
-
-### Patch Changes
-
-- Updated dependencies
-  - @gxxc/solid-forms@0.1.0
+  - @gxxc/solid-forms-examples@0.0.3
