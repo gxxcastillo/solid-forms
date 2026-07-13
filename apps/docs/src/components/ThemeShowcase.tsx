@@ -1,7 +1,16 @@
 import { For, Show, createSignal, onCleanup, onMount } from 'solid-js';
 
 import { FormContextProvider, useForm } from '@gxxc/solid-forms';
-import { LoginForm, type LoginValues, SignupForm, type SignupValues } from '@gxxc/solid-forms-examples';
+import {
+  LineItemsForm,
+  type LineItemsValues,
+  LoginForm,
+  type LoginValues,
+  SignupForm,
+  type SignupValues,
+  UserSettingsForm,
+  type UserSettingsValues
+} from '@gxxc/solid-forms-examples';
 
 import { FormStateInspector } from './FormStateInspector';
 import styles from './ThemeShowcase.module.css';
@@ -14,7 +23,9 @@ const THEMES = [
 
 const SECTIONS = [
   { id: 'signup', label: 'Signup' },
-  { id: 'login', label: 'Login' }
+  { id: 'login', label: 'Login' },
+  { id: 'settings', label: 'User settings' },
+  { id: 'lineItems', label: 'Line items' }
 ] as const;
 
 type SectionId = (typeof SECTIONS)[number]['id'];
@@ -30,12 +41,22 @@ export function ThemeShowcase() {
 
   const signupForm = useForm<SignupValues, void>();
   const loginForm = useForm<LoginValues, void>();
+  const settingsForm = useForm<UserSettingsValues, void>();
+  const lineItemsForm = useForm<LineItemsValues, void>();
 
   function onSignupSubmit() {
     // The live state inspector is the visible feedback for this demo.
   }
 
   function onLoginSubmit() {
+    // The live state inspector is the visible feedback for this demo.
+  }
+
+  function onSettingsSubmit() {
+    // The live state inspector is the visible feedback for this demo.
+  }
+
+  function onLineItemsSubmit() {
     // The live state inspector is the visible feedback for this demo.
   }
 
@@ -110,6 +131,32 @@ export function ThemeShowcase() {
           </div>
 
           <FormStateInspector title='Login form state' state={loginForm.state} />
+        </div>
+      </Show>
+
+      <Show when={section() === 'settings'}>
+        <div class={styles.layout}>
+          <div class={styles.card}>
+            <h2 class={styles.cardTitle}>User settings</h2>
+            <FormContextProvider store={settingsForm.store}>
+              <UserSettingsForm onSubmit={onSettingsSubmit} />
+            </FormContextProvider>
+          </div>
+
+          <FormStateInspector title='User settings form state' state={settingsForm.state} />
+        </div>
+      </Show>
+
+      <Show when={section() === 'lineItems'}>
+        <div class={styles.layout}>
+          <div class={styles.card}>
+            <h2 class={styles.cardTitle}>Line items</h2>
+            <FormContextProvider store={lineItemsForm.store}>
+              <LineItemsForm onSubmit={onLineItemsSubmit} />
+            </FormContextProvider>
+          </div>
+
+          <FormStateInspector title='Line items form state' state={lineItemsForm.state} />
         </div>
       </Show>
     </section>
